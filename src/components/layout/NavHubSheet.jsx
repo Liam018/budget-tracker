@@ -5,12 +5,16 @@ import { useAuth } from "../../hooks/useAuth"
 import { useConfirm } from "../../hooks/useConfirm"
 import { toast } from "../ui"
 import { QUICK_ACTIONS, MENU_NAV_ITEMS } from "../../constants/navigation"
+import { useScrollLock } from "../../hooks/useScrollLock"
 
 export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { signOut } = useAuth()
   const confirm = useConfirm()
+
+  // Prevent background scroll while hub sheet is open
+  useScrollLock(isOpen)
 
   async function handleSignOutClick() {
     onClose()

@@ -16,9 +16,10 @@ export default function ProtectedRoute() {
   }
 
   if (!user) {
-    // All intentional sign-outs navigate to /welcome directly from the sign-out handler.
-    // If we reach here, the session was lost unexpectedly (token expired, network, etc.)
-    return <Navigate to="/welcome?reason=session_expired" replace />
+    // Only show "session expired" toast if this browser previously had an active session.
+    // First-time visitors and users on a new browser/device get a clean redirect.
+    const hadSession = localStorage.getItem("bgt-was-authenticated") === "1"
+    return <Navigate to={hadSession ? "/welcome?reason=session_expired" : "/welcome"} replace />
   }
 
   return <Outlet />

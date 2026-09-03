@@ -4,6 +4,7 @@ import { MorphIcon } from "morphicons/react"
 import { Search, Check, X } from "lucide"
 import { SUPPORTED_CURRENCIES } from "../../services/currencyService"
 import { CountryFlag } from "../ui"
+import { useScrollLock } from "../../hooks/useScrollLock"
 
 /**
  * CurrencyPickerSheet — Adaptive Currency Picker.
@@ -28,6 +29,9 @@ export default function CurrencyPickerSheet({
 
   const dragControls = useDragControls()
   const inputRef = useRef(null)
+
+  // Prevent background scroll while picker is open
+  useScrollLock(isOpen)
 
   // Track responsive viewport state
   const [isMobile, setIsMobile] = useState(() =>

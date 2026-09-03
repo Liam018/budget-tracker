@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { Trash2, AlertTriangle, AlertCircle, HelpCircle, X } from "lucide-react"
+import { useScrollLock } from "../../hooks/useScrollLock"
 
 /**
  * ConfirmModal — Tactile Neumorphic Confirmation Dialog.
@@ -21,6 +22,9 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }) {
+  // Prevent background scroll while modal is open
+  useScrollLock(isOpen)
+
   // Handle keyboard shortcuts (Escape to cancel, Enter to confirm)
   useEffect(() => {
     if (!isOpen) return

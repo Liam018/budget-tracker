@@ -24,6 +24,8 @@ export function AuthProvider({ children }) {
         const currentUser = session?.user ?? null
         setUser(currentUser)
         if (currentUser) {
+          // Mark that this browser has had an active session
+          localStorage.setItem("bgt-was-authenticated", "1")
           await fetchProfile(currentUser.id)
         } else {
           setProfile(null)
@@ -54,6 +56,8 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
+    // Clear the flag so manual sign-out won't show a "session expired" toast
+    localStorage.removeItem("bgt-was-authenticated")
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }
