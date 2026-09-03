@@ -3,11 +3,14 @@ import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import { Wallet as WalletIcon, User as UserIcon, LogOut as LogOutIcon } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
+import { useConfirm } from "../../hooks/useConfirm"
+import { toast } from "../ui"
 import { SIDEBAR_NAV_ITEMS } from "../../constants/navigation"
 
 export default function Sidebar() {
   const { user, profile, signOut } = useAuth()
   const navigate = useNavigate()
+  const confirm = useConfirm()
 
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "User"
   const initials = displayName
@@ -18,8 +21,18 @@ export default function Sidebar() {
     .toUpperCase()
 
   async function handleSignOut() {
+    const ok = await confirm({
+      title: "Sign Out?",
+      description: "Are you sure you want to sign out of your account?",
+      confirmText: "Sign Out",
+      cancelText: "Stay",
+      variant: "warning",
+    })
+    if (!ok) return
+
     try {
       await signOut()
+      toast.success("Signed out successfully")
       navigate("/welcome", { replace: true })
     } catch {
       // swallow — user is already signed out or network error

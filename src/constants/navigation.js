@@ -16,6 +16,7 @@ import {
   Repeat2,
   Bell,
   BellRing,
+  Coins,
 } from "lucide"
 
 import {
@@ -28,6 +29,7 @@ import {
   RefreshCcw as RefreshCcwIcon,
   Bell as BellIcon,
   User as UserIcon,
+  Coins as CoinsIcon,
 } from "lucide-react"
 
 /**
@@ -74,7 +76,7 @@ export const MENU_NAV_ITEMS = [
   { label: "Categories",    icon: TagIcon,         to: "/categories",    desc: "Manage tags & types" },
   { label: "Reports",       icon: BarChart2Icon,   to: "/reports",       desc: "Analytics & trends" },
   { label: "Recurring",     icon: RefreshCcwIcon,  to: "/recurring",     desc: "Subscriptions & bills" },
-  { label: "Notifications", icon: BellIcon,        to: "/notifications", desc: "Alerts & reminders" },
+  { label: "Converter",     icon: CoinsIcon,       to: "/converter",     desc: "Live exchange rates" },
   { label: "My Profile",    icon: UserIcon,        to: "/profile",       desc: "Account & security" },
 ]
 
@@ -89,5 +91,5 @@ export const SIDEBAR_NAV_ITEMS = [
   { label: "Categories",    icon: Tag,               activeIcon: Layers,           to: "/categories" },
   { label: "Reports",       icon: BarChart2,         activeIcon: TrendingUpLucide, to: "/reports" },
   { label: "Recurring",     icon: RefreshCcw,        activeIcon: Repeat2,          to: "/recurring" },
-  { label: "Notifications", icon: Bell,              activeIcon: BellRing,         to: "/notifications" },
+  { label: "Converter",     icon: Coins,             activeIcon: ArrowLeftRight,   to: "/converter" },
 ]

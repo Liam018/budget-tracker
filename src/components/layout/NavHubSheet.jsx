@@ -1,14 +1,37 @@
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
-import { X } from "lucide-react"
+import { X, LogOut } from "lucide-react"
+import { useAuth } from "../../hooks/useAuth"
+import { useConfirm } from "../../hooks/useConfirm"
+import { toast } from "../ui"
 import { QUICK_ACTIONS, MENU_NAV_ITEMS } from "../../constants/navigation"
 
-/**
- * NavHubSheet — Floating Quick Action & Navigation Hub Card.
- * Connected to the central 52px button via curved concave fillets.
- */
 export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { signOut } = useAuth()
+  const confirm = useConfirm()
+
+  async function handleSignOutClick() {
+    onClose()
+    const ok = await confirm({
+      title: "Sign Out?",
+      description: "Are you sure you want to sign out of your account?",
+      confirmText: "Sign Out",
+      cancelText: "Stay",
+      variant: "warning",
+    })
+
+    if (!ok) return
+
+    try {
+      await signOut()
+      toast.success("Signed out successfully")
+      navigate("/welcome", { replace: true })
+    } catch {
+      // ignore
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -190,6 +213,41 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
                   </motion.button>
                 )
               })}
+
+              {/* ── 6th Item: Sign Out button ── */}
+              <motion.button
+                variants={{
+                  hidden: { opacity: 0, y: 12, scale: 0.94 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: { type: "spring", stiffness: 450, damping: 24 },
+                  },
+                  exit: {
+                    opacity: 0,
+                    y: 6,
+                    scale: 0.96,
+                    transition: { duration: 0.1, ease: "easeIn" },
+                  },
+                }}
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={handleSignOutClick}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all cursor-pointer text-rose-600 hover:text-rose-700"
+                style={{
+                  background: "var(--neu-bg)",
+                  boxShadow: "var(--neu-raised-sm)",
+                }}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-rose-500/10 text-rose-600">
+                  <LogOut size={16} strokeWidth={2} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold truncate leading-tight">Sign Out</p>
+                  <p className="text-[10px] text-neutral-400 truncate leading-tight mt-0.5">End session</p>
+                </div>
+              </motion.button>
             </div>
           </div>
 

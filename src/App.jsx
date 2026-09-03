@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext"
+import { ConfirmProvider } from "./context/ConfirmContext"
 import ProtectedRoute from "./components/layout/ProtectedRoute"
 import AppLayout from "./components/layout/AppLayout"
+import { Toaster } from "./components/ui"
 
 // Auth & Onboarding pages
 import WelcomePage from "./pages/WelcomePage"
@@ -19,37 +21,42 @@ import ReportsPage from "./pages/ReportsPage"
 import RecurringPage from "./pages/RecurringPage"
 import NotificationsPage from "./pages/NotificationsPage"
 import ProfilePage from "./pages/ProfilePage"
+import CurrencyPage from "./pages/CurrencyPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public & Onboarding routes */}
-          <Route path="/welcome" element={<WelcomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <ConfirmProvider>
+          <Routes>
+            {/* Public & Onboarding routes */}
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-          {/* Protected routes — wrapped inside AppLayout (sidebar + header + bottom nav) */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<AppLayout />}>
-              <Route path="/"              element={<DashboardPage />} />
-              <Route path="/transactions"  element={<TransactionsPage />} />
-              <Route path="/budgets"       element={<BudgetsPage />} />
-              <Route path="/categories"    element={<CategoriesPage />} />
-              <Route path="/accounts"      element={<AccountsPage />} />
-              <Route path="/reports"       element={<ReportsPage />} />
-              <Route path="/recurring"     element={<RecurringPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/profile"       element={<ProfilePage />} />
+            {/* Protected routes — wrapped inside AppLayout (sidebar + header + bottom nav) */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppLayout />}>
+                <Route path="/"              element={<DashboardPage />} />
+                <Route path="/transactions"  element={<TransactionsPage />} />
+                <Route path="/budgets"       element={<BudgetsPage />} />
+                <Route path="/categories"    element={<CategoriesPage />} />
+                <Route path="/accounts"      element={<AccountsPage />} />
+                <Route path="/reports"       element={<ReportsPage />} />
+                <Route path="/recurring"     element={<RecurringPage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/converter"     element={<CurrencyPage />} />
+                <Route path="/profile"       element={<ProfilePage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Catch-all */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            {/* Catch-all */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+          <Toaster />
+        </ConfirmProvider>
       </AuthProvider>
     </BrowserRouter>
   )

@@ -6,6 +6,22 @@ input[type="password"]::-ms-clear {
   display: none;
 }
 
+/* Hide scrollbars cross-browser while retaining smooth scrolling */
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
 
 /*
    Base background:  #edf0f7
@@ -45,10 +61,10 @@ input[type="password"]::-ms-clear {
   --color-transfer: #3b82f6;
   --color-warning: #f59e0b;
 
-  /* Neumorphic surface */
+  /* Neumorphic surface - this where you can adjust the colors if needed */ 
   --neu-bg: #edf0f7;
-  --neu-dark: #c8ccd8;
-  --neu-light: #ffffff;
+  --neu-dark: rgba(200, 204, 216, 0.4);
+  --neu-light: rgba(255, 255, 255, 0.8);
 }
 
 /* ─── Base ───────────────────────────────────────────────────────── */

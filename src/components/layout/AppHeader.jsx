@@ -15,6 +15,7 @@ const PAGE_TITLES = {
   "/reports":       { title: "Reports",        sub: "Financial insights & analytics" },
   "/recurring":     { title: "Recurring",      sub: "Subscriptions & scheduled bills" },
   "/notifications": { title: "Notifications",  sub: "Recent alerts & updates" },
+  "/converter":     { title: "Currency Converter", sub: "Live exchange rates & forex calculator" },
   "/profile":       { title: "Profile",        sub: "Account settings & security" },
 }
 
@@ -145,12 +146,12 @@ export default function AppHeader() {
                 Personal
               </span>
             </div>
-            <ChevronDown
+            {/* <ChevronDown
               size={14}
               className={`hidden md:block transition-colors ${
                 isProfileActive ? "text-brand-500" : "text-neutral-400"
               }`}
-            />
+            /> */}
           </motion.button>
         </div>
       </header>
