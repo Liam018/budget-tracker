@@ -23,9 +23,9 @@ export default function ProfileCard({
       }}
     >
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left">
-        {/* Avatar */}
+        {/* Avatar matching AppHeader design */}
         <div
-          className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-xl sm:text-2xl font-black text-white shadow-md shrink-0"
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold text-white shadow-sm sm:shadow-md shrink-0 select-none"
           style={{
             background: "linear-gradient(145deg, #6366f1, #4338ca)",
           }}

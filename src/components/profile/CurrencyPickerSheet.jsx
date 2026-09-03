@@ -69,7 +69,7 @@ export default function CurrencyPickerSheet({
   )
 
   function handleDragEnd(event, info) {
-    if (info.offset.y > 75 || info.velocity.y > 250) {
+    if (info.offset.y > 50 || info.velocity.y > 180) {
       onClose()
     }
   }
@@ -80,14 +80,15 @@ export default function CurrencyPickerSheet({
         drag: "y",
         dragControls: dragControls,
         dragListener: false,
+        dragDirectionLock: true,
         dragConstraints: { top: 0, bottom: 0 },
-        dragElastic: { top: 0, bottom: 0.6 },
+        dragElastic: { top: 0.02, bottom: 0.65 },
         dragSnapToOrigin: true,
         onDragEnd: handleDragEnd,
         initial: { y: "100%" },
         animate: { y: 0 },
         exit: { y: "100%" },
-        transition: { type: "spring", stiffness: 400, damping: 34 },
+        transition: { type: "spring", stiffness: 420, damping: 32, mass: 0.8 },
       }
     : {
         drag: false,
@@ -131,16 +132,18 @@ export default function CurrencyPickerSheet({
               boxShadow: isMobile
                 ? "0 -10px 25px -5px rgba(0, 0, 0, 0.12)"
                 : "var(--neu-raised)",
+              willChange: isMobile ? "transform" : "auto",
             }}
           >
             {/* Mobile Pull Handle Pill (Hidden on desktop) */}
             {isMobile && (
               <div
                 onPointerDown={(e) => dragControls.start(e)}
-                className="pt-3.5 pb-2 shrink-0 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
+                className="pt-3 pb-2.5 shrink-0 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
+                aria-label="Drag down to close"
               >
                 <div
-                  className="w-12 h-1.5 rounded-full"
+                  className="w-14 h-1.5 rounded-full transition-transform duration-150 active:scale-95"
                   style={{
                     background: "var(--neu-bg)",
                     boxShadow: "var(--neu-inset-sm)",
@@ -149,14 +152,14 @@ export default function CurrencyPickerSheet({
               </div>
             )}
 
-            {/* Header */}
+            {/* Header (also swipe-enabled if dragging on title/empty space) */}
             <div
               onPointerDown={(e) => {
-                if (isMobile && e.target.tagName !== "INPUT") {
+                if (isMobile && e.target.tagName !== "INPUT" && !e.target.closest("button")) {
                   dragControls.start(e)
                 }
               }}
-              className="px-5 pt-3 pb-3 shrink-0"
+              className={`px-5 pt-1 pb-3 shrink-0 ${isMobile ? "touch-none" : ""}`}
             >
               <div className="flex items-center justify-between">
                 <div>

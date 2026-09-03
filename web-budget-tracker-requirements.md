@@ -9,6 +9,8 @@ Allow users to manage their income, expenses, budgets, and financial progress th
 
 **Tech Stack:** React + Vite + Tailwind CSS ✅
 
+**PWA Support:** Vite PWA (Service Worker, Web App Manifest, Standalone Mode, Android & iOS Home Screen) ✅
+
 **Currency:** Philippine Peso (₱ PHP) ✅
 
 **Design Approach:** Mobile-first, fully responsive (desktop, tablet, and mobile) ✅
@@ -39,15 +41,17 @@ The MVP should contain the following core modules:
 
 1. Authentication ✅
 2. App Shell & Responsive Navigation (Floating Neumorphic Sidebar + Stadium Bottom Nav with Morphicons) ✅
-3. Accounts / Wallets ⏳ *(NEXT)*
-4. Categories
-5. Transactions *(with Mobile Quick Add FAB Bottom Sheet)*
-6. Budget Management
-7. Dashboard
-8. Reports & Analytics
-9. Recurring Transactions
-10. Notifications & Mobile More Navigation Sheet
-11. Security / Row Level Security / Rate Limiting (Auth Endpoints ✅)
+3. Dedicated Currency Converter & Live Exchange Rates Carousel (`/converter`) ✅
+4. Progressive Web App (Android & iOS PWA with bloub app icon) ✅
+5. Accounts / Wallets ⏳ *(NEXT)*
+6. Categories
+7. Transactions *(with Mobile Quick Add FAB Bottom Sheet)*
+8. Budget Management
+9. Dashboard
+10. Reports & Analytics
+11. Recurring Transactions
+12. Notifications & Web Push (In-App Notification Center + PWA Web Push for Android & iOS 16.4+ via VAPID & Supabase Edge Functions)
+13. Security / Row Level Security / Rate Limiting (Auth Endpoints ✅)
 
 ---
 
@@ -355,27 +359,48 @@ The system can automatically generate or remind users about recurring transactio
 
 ---
 
-# 11. Notifications
+# 11. Notifications & Web Push Alerts
 
-The notification system can alert users about important financial events.
+The notification system alerts users about critical financial events, budget milestones, and upcoming bills through two primary channels:
+1. **In-App Notification Center** (`/notifications` view + sticky header bell badge)
+2. **PWA Web Push Notifications** (Delivered directly to the user's Android / iOS lock screen or desktop notification tray even when the browser or PWA is closed)
 
 ### Example Notifications
 
 ```text
-⚠️ You've used 85% of your Food budget.
+⚠️ You've used 85% of your Food budget (₱6,800 / ₱8,000).
 
-🔴 Your Transportation budget has been exceeded.
+🔴 Alert: Your Transportation budget has been exceeded!
 
-💰 Your salary is expected tomorrow.
+💰 Salary reminder: Expected tomorrow (₱35,000).
 
-📅 Your ₱1,500 Internet bill is due tomorrow.
+📅 Bill due: Your ₱1,500 PLDT Internet bill is due in 24 hours.
+
+📊 Weekly Digest: You spent ₱4,250 this week across 8 transactions.
 ```
 
-Potential notification channels:
+### PWA Web Push Notification Architecture
 
-- In-app notifications
-- Browser notifications
-- Email notifications
+| Component | Responsibility |
+|---|---|
+| **Frontend PWA Hook (`useWebPush`)** | Prompts for permission via `Notification.requestPermission()`, creates subscription via `registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey })`. |
+| **VAPID Keys** | Standard public/private VAPID keypair identifying the application server to push services (Apple Push Notification service and Google FCM). |
+| **Supabase `push_subscriptions` Table** | Stores user device subscriptions (`user_id`, `endpoint`, `p256dh`, `auth`, `user_agent`, `created_at`) with RLS protection. |
+| **Service Worker Push Event (`sw.js`)** | Listens for `self.addEventListener('push')` to display native OS notification tiles with app icon (`bloub-cercle-fier-violet.png`), vibration pattern, and deep link URL. |
+| **Service Worker Click Event** | Listens for `self.addEventListener('notificationclick')` to bring the PWA to focus and route directly to the relevant view (e.g. `/budgets` or `/transactions`). |
+| **Backend Trigger (Supabase Edge Function)** | Automated cron or Postgres database webhook (`pg_net`) triggered when a transaction exceeds 85% or 100% budget, or when a recurring bill reaches its due date. |
+
+### Device Support Matrix
+
+* **Android (Chrome, Brave, Samsung Internet)**: Full background Web Push support once permission is granted.
+* **iOS / iPadOS (Safari)**: Full Web Push support (iOS 16.4+) once the user has added the PWA to their Home Screen.
+* **Desktop (Chrome, Edge, Safari, Firefox)**: Native OS desktop push notifications.
+
+### In-App Notification Center Features
+- Notification bell with unread counter in header.
+- Filter by: All, Budgets, Bills, System.
+- "Mark all as read" and swipe-to-dismiss actions.
+- Real-time notification updates via Supabase Realtime subscriptions.
 
 ---
 
