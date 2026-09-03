@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useDeferredValue, useRef } from "react"
 import { motion, AnimatePresence, useDragControls } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import { Search, Check, X } from "lucide"
@@ -9,6 +9,9 @@ import { CountryFlag } from "../ui"
  * CurrencyPickerSheet — Adaptive Currency Picker.
  * - Mobile: Thumb-friendly bottom sheet with native swipe-down dismiss.
  * - Desktop: Centered Neumorphic dialog with scale spring physics & Escape listener.
+ *
+ * Search is debounced (300ms) so filtering only runs after the user pauses typing.
+ * Results animate in/out with staggered spring physics via AnimatePresence + layout.
  */
 export default function CurrencyPickerSheet({
   isOpen,
@@ -18,7 +21,13 @@ export default function CurrencyPickerSheet({
   isUpdating,
 }) {
   const [searchQuery, setSearchQuery] = useState("")
+  // deferredQuery lags behind searchQuery by ~300ms — React processes
+  // the urgent keystroke paint first, then re-renders the heavy list.
+  const deferredQuery = useDeferredValue(searchQuery)
+  const isStale = searchQuery !== deferredQuery
+
   const dragControls = useDragControls()
+  const inputRef = useRef(null)
 
   // Track responsive viewport state
   const [isMobile, setIsMobile] = useState(() =>
@@ -37,18 +46,22 @@ export default function CurrencyPickerSheet({
   useEffect(() => {
     if (!isOpen) return
     function handleKeyDown(e) {
-      if (e.key === "Escape") {
-        onClose()
-      }
+      if (e.key === "Escape") onClose()
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen, onClose])
 
+  // Reset search when sheet opens/closes
+  useEffect(() => {
+    if (!isOpen) setSearchQuery("")
+  }, [isOpen])
+
+  // Filtered list only updates when deferredQuery changes (debounced)
   const filteredCurrencies = SUPPORTED_CURRENCIES.filter(
     (c) =>
-      c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.name.toLowerCase().includes(searchQuery.toLowerCase())
+      c.code.toLowerCase().includes(deferredQuery.toLowerCase()) ||
+      c.name.toLowerCase().includes(deferredQuery.toLowerCase())
   )
 
   function handleDragEnd(event, info) {
@@ -169,12 +182,13 @@ export default function CurrencyPickerSheet({
                 )}
               </div>
 
-              {/* Search Bar with Inset Dish */}
+              {/* Search Bar with Inset Dish + stale blur indicator */}
               <div
-                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl mt-3.5"
+                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl mt-3.5 transition-opacity duration-150"
                 style={{
                   background: "var(--neu-bg)",
                   boxShadow: "var(--neu-inset-sm)",
+                  opacity: isStale ? 0.7 : 1,
                 }}
               >
                 <MorphIcon
@@ -184,6 +198,7 @@ export default function CurrencyPickerSheet({
                   strokeWidth={2.2}
                 />
                 <input
+                  ref={inputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -191,6 +206,26 @@ export default function CurrencyPickerSheet({
                   className="w-full bg-transparent text-xs font-semibold text-neutral-800 outline-none placeholder:text-neutral-400"
                   autoFocus
                 />
+                {/* Clear button — only shows when there is text */}
+                <AnimatePresence>
+                  {searchQuery && (
+                    <motion.button
+                      key="clear"
+                      initial={{ opacity: 0, scale: 0.7 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.7 }}
+                      transition={{ duration: 0.15 }}
+                      onClick={() => {
+                        setSearchQuery("")
+                        inputRef.current?.focus()
+                      }}
+                      className="shrink-0 text-neutral-400 hover:text-neutral-600 cursor-pointer transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <MorphIcon icon={X} size={14} strokeWidth={2.4} />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -203,67 +238,86 @@ export default function CurrencyPickerSheet({
                   : "1rem",
               }}
             >
-              {filteredCurrencies.map((c) => {
-                const isSelected = c.code === currentCurrencyCode
-                return (
-                  <motion.button
-                    key={c.code}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{
-                      scale: 0.98,
-                      boxShadow: "var(--neu-pressed)",
-                    }}
-                    onClick={() => onSelectCurrency(c.code)}
-                    disabled={isUpdating}
-                    className={`w-full flex items-center justify-between p-3.5 rounded-2xl transition-all cursor-pointer text-left select-none ${
-                      isSelected
-                        ? "text-brand-600 font-bold"
-                        : "text-neutral-700 hover:text-neutral-900"
-                    }`}
-                    style={{
-                      background: "var(--neu-bg)",
-                      boxShadow: isSelected
-                        ? "var(--neu-inset-sm)"
-                        : "var(--neu-raised-sm)",
-                    }}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {filteredCurrencies.map((c, index) => {
+                  const isSelected = c.code === currentCurrencyCode
+                  return (
+                    <motion.button
+                      key={c.code}
+                      layout
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{
+                        layout: { type: "spring", stiffness: 400, damping: 32 },
+                        opacity: { duration: 0.15 },
+                        y: { duration: 0.18, delay: Math.min(index * 0.018, 0.12) },
+                      }}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{
+                        scale: 0.98,
+                        boxShadow: "var(--neu-pressed)",
+                      }}
+                      onClick={() => onSelectCurrency(c.code)}
+                      disabled={isUpdating}
+                      className={`w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors cursor-pointer text-left select-none ${
+                        isSelected
+                          ? "text-brand-600 font-bold"
+                          : "text-neutral-700 hover:text-neutral-900"
+                      }`}
+                      style={{
+                        background: "var(--neu-bg)",
+                        boxShadow: isSelected
+                          ? "var(--neu-inset-sm)"
+                          : "var(--neu-raised-sm)",
+                      }}
+                    >
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <CountryFlag code={c.code} size="lg" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold leading-tight truncate">
+                            {c.code} — {c.name}
+                          </p>
+                          <p className="text-[11px] text-neutral-400 leading-tight mt-0.5">
+                            Symbol: {c.symbol}
+                          </p>
+                        </div>
+                      </div>
+
+                      {isSelected ? (
+                        <div className="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <MorphIcon
+                            icon={Check}
+                            size={14}
+                            strokeWidth={2.8}
+                            className="text-white"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-xs font-bold text-neutral-400 pr-1 shrink-0">
+                          {c.symbol}
+                        </span>
+                      )}
+                    </motion.button>
+                  )
+                })}
+
+                {/* Empty State */}
+                {filteredCurrencies.length === 0 && (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-center py-12"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <CountryFlag code={c.code} size="lg" />
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold leading-tight truncate">
-                          {c.code} — {c.name}
-                        </p>
-                        <p className="text-[11px] text-neutral-400 leading-tight mt-0.5">
-                          Symbol: {c.symbol}
-                        </p>
-                      </div>
-                    </div>
-
-                    {isSelected ? (
-                      <div className="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                        <MorphIcon
-                          icon={Check}
-                          size={14}
-                          strokeWidth={2.8}
-                          className="text-white"
-                        />
-                      </div>
-                    ) : (
-                      <span className="text-xs font-bold text-neutral-400 pr-1 shrink-0">
-                        {c.symbol}
-                      </span>
-                    )}
-                  </motion.button>
-                )
-              })}
-
-              {filteredCurrencies.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-xs font-medium text-neutral-400">
-                    No currencies found matching "{searchQuery}"
-                  </p>
-                </div>
-              )}
+                    <p className="text-xs font-medium text-neutral-400">
+                      No currencies found matching &ldquo;{deferredQuery}&rdquo;
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </div>

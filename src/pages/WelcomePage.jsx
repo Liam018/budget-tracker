@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import { Link, Navigate } from "react-router-dom"
+import { Link, Navigate, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
 import {
   Wallet,
@@ -11,17 +11,32 @@ import {
 } from "lucide-react"
 import { useAuth } from "../hooks/useAuth"
 import { welcomeSlides } from "../constants/welcomeSlides"
+import { toast } from "../components/ui"
 
 const SLIDE_DURATION = 4000 // 4 seconds per slide
 
 export default function WelcomePage() {
   const { user, loading } = useAuth()
+  const location = useLocation()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [progress, setProgress] = useState(0) // 0 to 100%
   const [isPaused, setIsPaused] = useState(false)
   // Guard ref: prevents React Strict Mode's double-invocation of state updaters
   // from calling setCurrentSlide twice at the slide boundary (which skips a slide)
   const isAdvancingRef = useRef(false)
+
+  // Show session-expired toast if redirected from a protected route
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get("reason") === "session_expired") {
+      toast.warning("Session expired", {
+        description: "You were signed out automatically. Please log in again.",
+        duration: 6000,
+      })
+      // Clean the URL so the toast doesn't show again on manual refresh
+      window.history.replaceState({}, "", "/welcome")
+    }
+  }, [])
 
   // Reset the guard whenever the slide actually changes
   useEffect(() => {

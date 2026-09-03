@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Link, useNavigate, Navigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useNavigate, Navigate, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
 import { Mail, Lock, Wallet, AlertCircle, Clock, ShieldAlert, ArrowLeft, Sparkles } from "lucide-react"
 import { MorphIcon } from "morphicons/react"
@@ -9,6 +9,7 @@ import { useAuth } from "../hooks/useAuth"
 import { authValidators, validateField, required, email as emailRule } from "../lib/validators"
 import { sanitizeEmail } from "../lib/sanitizer"
 import { useRateLimiter } from "../hooks/useRateLimiter"
+import { toast } from "../components/ui"
 
 function FieldError({ message }) {
   return (
@@ -38,6 +39,19 @@ const fieldRules = {
 export default function LoginPage() {
   const { signIn, user, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Show session-expired toast if redirected from a protected route via /login?reason=session_expired
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get("reason") === "session_expired") {
+      toast.warning("Session expired", {
+        description: "You were signed out automatically. Please log in again.",
+        duration: 6000,
+      })
+      window.history.replaceState({}, "", "/login")
+    }
+  }, [])
 
   const [form, setForm] = useState({ email: "", password: "" })
   const [errors, setErrors] = useState({})

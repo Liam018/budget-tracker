@@ -82,7 +82,7 @@ export default function ProfileCard({
             >
               <MorphIcon icon={Coins} size={14} strokeWidth={2} className="text-brand-600" />
               Change Currency
-              <MorphIcon icon={ChevronDown} size={13} strokeWidth={2} className="text-brand-600" />
+              {/* <MorphIcon icon={ChevronDown} size={13} strokeWidth={2} className="text-brand-600" /> */}
             </motion.button>
           </div>
         </div>

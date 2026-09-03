@@ -15,6 +15,12 @@ export default function ProtectedRoute() {
     )
   }
 
-  return user ? <Outlet /> : <Navigate to="/welcome" replace />
+  if (!user) {
+    // All intentional sign-outs navigate to /welcome directly from the sign-out handler.
+    // If we reach here, the session was lost unexpectedly (token expired, network, etc.)
+    return <Navigate to="/welcome?reason=session_expired" replace />
+  }
+
+  return <Outlet />
 }
 
