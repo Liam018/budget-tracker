@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import {
@@ -6,13 +7,21 @@ import {
   Check,
   ArrowRightLeft,
   ArrowLeftRight,
+  ChevronDown,
 } from "lucide"
 import { SUPPORTED_CURRENCIES } from "../../services/currencyService"
+import { CountryFlag } from "../ui"
+import { CurrencyPickerSheet } from "../profile"
+import { NEU } from "../../lib/neu"
+import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 import LiveRatesCarousel from "./LiveRatesCarousel"
+import ConversionResultCard from "./ConversionResultCard"
+import CurrencyQuickAmounts from "./CurrencyQuickAmounts"
 
 /**
  * CurrencyConverterCard — Real-time interactive forex converter with
- * vector-morphing swap & refresh controls, and embedded global rates carousel.
+ * vector-morphing swap & refresh controls, neumorphic currency pill selectors,
+ * and an embedded global rates carousel.
  */
 export default function CurrencyConverterCard({
   ratesData,
@@ -21,6 +30,8 @@ export default function CurrencyConverterCard({
   isSwapped,
   convertAmount,
   setConvertAmount,
+  addAmount,
+  clearAmount,
   fromCurrency,
   setFromCurrency,
   toCurrency,
@@ -29,9 +40,18 @@ export default function CurrencyConverterCard({
   onSwap,
   convertedValue,
   singleUnitRate,
+  inverseRate,
+  marketStatus,
   toCurrencyObj,
   currentCurrencyCode,
 }) {
+  // Which picker sheet is open: "from" | "to" | null
+  const [openPicker, setOpenPicker] = useState(null)
+
+  const fromCurrencyObj =
+    SUPPORTED_CURRENCIES.find((c) => c.code === fromCurrency) ||
+    SUPPORTED_CURRENCIES[0]
+
   return (
     <div
       className="rounded-2xl sm:rounded-3xl p-4 sm:p-7"
@@ -58,9 +78,17 @@ export default function CurrencyConverterCard({
             />
           </div>
           <div className="min-w-0">
-            <h3 className="text-xs sm:text-base font-extrabold text-neutral-800 tracking-tight leading-tight truncate sm:whitespace-normal">
-              Currency Converter & Live Rates
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs sm:text-base font-extrabold text-neutral-800 tracking-tight leading-tight truncate sm:whitespace-normal">
+                Currency Converter &amp; Live Rates
+              </h3>
+              {marketStatus?.isLive && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live
+                </span>
+              )}
+            </div>
             <p className="text-[10px] sm:text-xs text-neutral-500 font-medium leading-tight truncate sm:whitespace-normal mt-0.5">
               Live exchange rates via Currency API
             </p>
@@ -69,18 +97,15 @@ export default function CurrencyConverterCard({
 
         {/* Refresh Button (Morphs from RefreshCw into Check on success) */}
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{
-            scale: 0.94,
-            boxShadow: "var(--neu-pressed)",
-          }}
+          whileHover={isRefreshed ? {} : neuButtonHover}
+          whileTap={neuButtonTap}
           onClick={onRefresh}
           disabled={isLoadingRates}
           title="Refresh exchange rates"
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-500 hover:text-brand-600 transition-all cursor-pointer select-none shrink-0"
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-500 hover:text-brand-600 transition-[transform,color] cursor-pointer select-none shrink-0"
           style={{
-            background: "var(--neu-bg)",
-            boxShadow: isRefreshed ? "var(--neu-inset-sm)" : "var(--neu-raised-sm)",
+            background: NEU.bg,
+            boxShadow: isRefreshed ? NEU.insetSm : NEU.raisedSm,
           }}
         >
           <MorphIcon
@@ -100,142 +125,183 @@ export default function CurrencyConverterCard({
       </div>
 
       {/* ── Converter Calculator Grid ── */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-3 items-center">
-        {/* Amount Input */}
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-3 items-start">
+
+        {/* ── From: Amount Input + Currency Pill ── */}
         <div className="md:col-span-3">
           <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
             Amount to Convert
           </label>
           <div
-            className="flex items-center px-3.5 py-2.5 rounded-2xl gap-2"
+            className="flex items-center px-3.5 h-[52px] rounded-2xl gap-2"
             style={{
               background: "var(--neu-bg)",
               boxShadow: "var(--neu-inset-sm)",
             }}
           >
+            {/* Numeric amount input */}
             <input
               type="number"
               min="0"
               step="any"
               value={convertAmount}
               onChange={(e) => setConvertAmount(e.target.value)}
-              className="w-full bg-transparent text-sm font-extrabold text-neutral-800 outline-none"
+              className="w-full bg-transparent text-sm font-extrabold text-neutral-800 outline-none min-w-0"
               placeholder="0.00"
             />
-            <select
-              value={fromCurrency}
-              onChange={(e) => setFromCurrency(e.target.value)}
-              className="bg-transparent text-xs font-bold text-neutral-600 outline-none cursor-pointer pr-1"
+
+            {/* From Currency Pill — opens picker sheet */}
+            <motion.button
+              whileHover={neuButtonHover}
+              whileTap={neuButtonTap}
+              onClick={() => setOpenPicker("from")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer select-none transition-[transform]"
+              style={{
+                background: NEU.bg,
+                boxShadow: NEU.raisedSm,
+              }}
+              aria-label={`From currency: ${fromCurrency}`}
             >
-              {SUPPORTED_CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code} className="text-neutral-800">
-                  {c.code} ({c.symbol})
-                </option>
-              ))}
-            </select>
+              <CountryFlag code={fromCurrency} size="sm" />
+              <span className="text-xs font-bold text-neutral-700">{fromCurrency}</span>
+              <MorphIcon
+                icon={ChevronDown}
+                size={11}
+                strokeWidth={2.6}
+                className="text-neutral-400"
+              />
+            </motion.button>
+          </div>
+
+          {/* Quick Amount Presets */}
+          {addAmount && clearAmount && (
+            <CurrencyQuickAmounts
+              onAddAmount={addAmount}
+              onClearAmount={clearAmount}
+              currentAmount={convertAmount}
+            />
+          )}
+        </div>
+
+        {/* Swap Button (Morphs between ArrowRightLeft and ArrowLeftRight) */}
+        <div className="flex flex-col items-center justify-start md:col-span-1">
+          <div
+            className="hidden md:block text-[11px] font-bold uppercase tracking-wider mb-1.5 opacity-0 select-none pointer-events-none"
+            aria-hidden="true"
+          >
+            &nbsp;
+          </div>
+          <div className="h-[52px] flex items-center justify-center">
+            <motion.button
+              whileHover={neuButtonHover}
+              whileTap={neuButtonTap}
+              onClick={onSwap}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-brand-600 cursor-pointer transition-[transform] select-none"
+              style={{
+                background: NEU.bg,
+                boxShadow: NEU.raisedSm,
+              }}
+              aria-label="Swap currencies"
+            >
+              <div className="flex items-center justify-center rotate-90 md:rotate-0 transition-transform duration-300">
+                <MorphIcon
+                  icon={isSwapped ? ArrowLeftRight : ArrowRightLeft}
+                  size={16}
+                  strokeWidth={2.4}
+                  spring="bouncy"
+                  className="text-brand-600"
+                />
+              </div>
+            </motion.button>
           </div>
         </div>
 
-        {/* Swap Button (Morphs between ArrowRightLeft and ArrowLeftRight, vertical on smaller screens) */}
-        <div className="flex justify-center md:col-span-1 pt-1 md:pt-5">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{
-              scale: 0.94,
-              boxShadow: "var(--neu-pressed)",
-            }}
-            onClick={onSwap}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-brand-600 cursor-pointer transition-all select-none"
-            style={{
-              background: "var(--neu-bg)",
-              boxShadow: "var(--neu-raised-sm)",
-            }}
-            aria-label="Swap currencies"
-          >
-            <div className="flex items-center justify-center rotate-90 md:rotate-0 transition-transform duration-300">
-              <MorphIcon
-                icon={isSwapped ? ArrowLeftRight : ArrowRightLeft}
-                size={16}
-                strokeWidth={2.4}
-                spring="bouncy"
-                className="text-brand-600"
-              />
-            </div>
-          </motion.button>
-        </div>
-
-        {/* Target Currency Selector */}
+        {/* ── Target Currency Selector Pill ── */}
         <div className="md:col-span-3">
           <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
             Target Currency
           </label>
-          <div
-            className="flex items-center px-3.5 py-2.5 rounded-2xl"
+          <motion.button
+            whileHover={{ y: -1 }}
+            whileTap={{ y: 1, boxShadow: NEU.pressed }}
+            onClick={() => setOpenPicker("to")}
+            className="w-full flex items-center gap-3 px-3.5 h-[52px] rounded-2xl cursor-pointer select-none transition-[transform]"
             style={{
-              background: "var(--neu-bg)",
-              boxShadow: "var(--neu-inset-sm)",
+              background: NEU.bg,
+              boxShadow: NEU.insetSm,
             }}
+            aria-label={`To currency: ${toCurrency}`}
           >
-            <select
-              value={toCurrency}
-              onChange={(e) => setToCurrency(e.target.value)}
-              className="w-full bg-transparent text-sm font-extrabold text-neutral-800 outline-none cursor-pointer"
+            <CountryFlag code={toCurrency} size="md" />
+            <div className="flex-1 text-left min-w-0">
+              <p className="text-sm font-extrabold text-neutral-800 leading-tight">{toCurrency}</p>
+              <p className="text-[10px] text-neutral-400 leading-tight truncate">{toCurrencyObj?.name}</p>
+            </div>
+            <div
+              className="flex items-center gap-1 px-2 py-1 rounded-lg shrink-0"
+              style={{
+                background: "var(--neu-bg)",
+                boxShadow: "var(--neu-raised-sm)",
+              }}
             >
-              {SUPPORTED_CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code} className="text-neutral-800">
-                  {c.name} ({c.symbol})
-                </option>
-              ))}
-            </select>
-          </div>
+              <span className="text-xs font-bold text-neutral-500">{toCurrencyObj?.symbol}</span>
+              <MorphIcon
+                icon={ChevronDown}
+                size={11}
+                strokeWidth={2.6}
+                className="text-neutral-400"
+              />
+            </div>
+          </motion.button>
         </div>
       </div>
 
       {/* ── Conversion Result Display Card ── */}
-      <div className="mt-4 pt-4 border-t border-neutral-200/60">
-        <div
-          className="p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-          style={{
-            background: "var(--neu-bg)",
-            boxShadow: "var(--neu-inset-sm)",
-          }}
-        >
-          <div>
-            <p className="text-xs font-bold text-neutral-500">
-              {convertAmount || "0"} {fromCurrency} =
-            </p>
-            <p className="text-2xl sm:text-3xl font-black text-brand-600 tracking-tight mt-0.5">
-              {toCurrencyObj.symbol}{" "}
-              {convertedValue !== null ? convertedValue.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 4,
-              }) : "..."}
-              <span className="text-sm font-bold text-neutral-400 ml-1.5 font-sans">
-                {toCurrency}
-              </span>
-            </p>
-          </div>
-
-          {singleUnitRate && (
-            <div className="sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-neutral-200/50">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
-                Exchange Rate
-              </span>
-              <span className="text-xs sm:text-sm font-extrabold text-neutral-800">
-                1 {fromCurrency} = {singleUnitRate} {toCurrency}
-              </span>
-              <p className="text-[10px] text-neutral-400 mt-0.5">
-                Updated: {ratesData?.date || "Live"}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <ConversionResultCard
+        convertAmount={convertAmount}
+        fromCurrency={fromCurrency}
+        toCurrency={toCurrency}
+        toCurrencyObj={toCurrencyObj}
+        convertedValue={convertedValue}
+        singleUnitRate={singleUnitRate}
+        inverseRate={inverseRate}
+        ratesData={ratesData}
+      />
 
       {/* ── Global Market Reference Rates Sliding Carousel ── */}
       <LiveRatesCarousel
         ratesData={ratesData}
         currentCurrencyCode={currentCurrencyCode}
+      />
+
+      {/* ── From Currency Picker Sheet ── */}
+      <CurrencyPickerSheet
+        isOpen={openPicker === "from"}
+        onClose={() => setOpenPicker(null)}
+        currentCurrencyCode={fromCurrency}
+        onSelectCurrency={(code) => {
+          setFromCurrency(code)
+          setOpenPicker(null)
+        }}
+        isUpdating={false}
+        title="From Currency"
+        subtitle="Select the currency you want to convert from"
+        closeOnSelect={false}
+      />
+
+      {/* ── To Currency Picker Sheet ── */}
+      <CurrencyPickerSheet
+        isOpen={openPicker === "to"}
+        onClose={() => setOpenPicker(null)}
+        currentCurrencyCode={toCurrency}
+        onSelectCurrency={(code) => {
+          setToCurrency(code)
+          setOpenPicker(null)
+        }}
+        isUpdating={false}
+        title="Target Currency"
+        subtitle="Select the currency you want to convert to"
+        closeOnSelect={false}
       />
     </div>
   )

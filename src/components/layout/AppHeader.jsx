@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
 import { Plus, Bell, ChevronDown } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
+import { NEU } from "../../lib/neu"
 
 /**
  * Page metadata mapping route paths to titles and context hints.
@@ -86,17 +87,17 @@ export default function AppHeader() {
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* ── Notification Bell (Neumorphic active state on /notifications) ── */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ y: -1 }}
+            whileTap={{ y: 1 }}
             onClick={() => navigate("/notifications")}
-            className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all ${
+            className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all cursor-pointer ${
               isNotifActive
                 ? "text-brand-600"
                 : "text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/50"
             }`}
             style={{
-              background: isNotifActive ? "var(--neu-bg)" : "transparent",
-              boxShadow: isNotifActive ? "var(--neu-inset-sm)" : "none",
+              background: isNotifActive ? NEU.bg : "transparent",
+              boxShadow: isNotifActive ? NEU.insetSm : "none",
             }}
             aria-label="Notifications"
           >
@@ -110,15 +111,15 @@ export default function AppHeader() {
 
           {/* ── User Profile Pill (Neumorphic active state on /profile) ── */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ y: -1 }}
+            whileTap={{ y: 1 }}
             onClick={() => navigate("/profile")}
-            className={`flex items-center gap-2 p-1 sm:px-2 sm:py-1 rounded-full sm:rounded-xl transition-all text-left ${
+            className={`flex items-center gap-2 p-1 sm:px-2 sm:py-1 rounded-full sm:rounded-xl transition-all text-left cursor-pointer ${
               isProfileActive ? "text-brand-600" : "hover:bg-neutral-200/40"
             }`}
             style={{
-              background: isProfileActive ? "var(--neu-bg)" : "transparent",
-              boxShadow: isProfileActive ? "var(--neu-inset-sm)" : "none",
+              background: isProfileActive ? NEU.bg : "transparent",
+              boxShadow: isProfileActive ? NEU.insetSm : "none",
             }}
             aria-label="User profile"
           >

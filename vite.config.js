@@ -81,5 +81,12 @@ export default defineConfig({
   server: {
     host: true, // expose on local network (0.0.0.0)
     port: 5173,
+    proxy: {
+      '/api/frankfurter': {
+        target: 'https://api.frankfurter.dev/v1',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/frankfurter/, ''),
+      },
+    },
   },
 })

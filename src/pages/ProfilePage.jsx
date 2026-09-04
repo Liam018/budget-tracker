@@ -12,6 +12,8 @@ import {
   CurrencyPickerSheet,
   SessionCard,
 } from "../components/profile"
+import { NEU } from "../lib/neu"
+import { neuButtonHover, neuButtonTap } from "../lib/animations"
 
 /**
  * ProfilePage — User profile, account preferences,
@@ -116,13 +118,13 @@ export default function ProfilePage() {
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.96, boxShadow: "var(--neu-pressed)" }}
+          whileHover={neuButtonHover}
+          whileTap={neuButtonTap}
           onClick={() => navigate("/converter")}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-brand-600 hover:text-brand-700 transition-all cursor-pointer shrink-0 select-none w-full sm:w-auto"
           style={{
-            background: "var(--neu-bg)",
-            boxShadow: "var(--neu-raised-sm)",
+            background: NEU.bg,
+            boxShadow: NEU.raisedSm,
           }}
         >
           <span>Open Tool</span>

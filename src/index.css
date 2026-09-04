@@ -22,6 +22,14 @@ input[type="password"]::-ms-clear {
   /* Firefox */
 }
 
+/* Prevent accidental mobile double-tap zoom on interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
 
 /*
    Base background:  #edf0f7

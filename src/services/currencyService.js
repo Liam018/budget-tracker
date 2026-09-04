@@ -52,9 +52,32 @@ export const SUPPORTED_CURRENCIES = [
   { code: "ARS", name: "Argentine Peso", symbol: "ARS$", flag: "🇦🇷" },
 ]
 
+// Regional grouping for the live rates carousel
+export const CURRENCY_REGIONS = {
+  all: { label: "All Rates", codes: null },
+  majors: {
+    label: "Popular Majors",
+    codes: ["USD", "EUR", "JPY", "GBP", "CAD", "AUD", "CHF", "CNY", "SGD", "HKD"],
+  },
+  apac: {
+    label: "Asia-Pacific",
+    codes: ["PHP", "JPY", "CNY", "SGD", "HKD", "KRW", "AUD", "NZD", "THB", "MYR", "IDR", "VND", "TWD", "INR"],
+  },
+  americas: {
+    label: "Americas",
+    codes: ["USD", "CAD", "BRL", "MXN", "CLP", "COP", "ARS"],
+  },
+  europe: {
+    label: "Europe",
+    codes: ["EUR", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "TRY"],
+  },
+}
+
 const CACHE_KEY_RATES = "budget_tracker_exchange_rates"
 const CACHE_KEY_TIME = "budget_tracker_exchange_rates_time"
 const CACHE_TTL_MS = 1000 * 60 * 30 // 30 minutes cache
+const CACHE_KEY_HISTORICAL = "budget_tracker_fx_history"
+const CACHE_HISTORICAL_TTL = 1000 * 60 * 60 * 6 // 6 hours cache
 
 /**
  * Fetch latest exchange rates for a base currency.
@@ -81,6 +104,8 @@ export async function getExchangeRates(base = "PHP") {
   try {
     let rates = null
     let timestamp = new Date().toISOString()
+    let timeLastUpdateUtc = null
+    let timeNextUpdateUtc = null
 
     // 1. If user supplied CurrencyApi.net key, use it
     if (apiKey) {
@@ -99,6 +124,8 @@ export async function getExchangeRates(base = "PHP") {
       if (data.result === "success" && data.rates) {
         rates = data.rates
         timestamp = data.time_last_update_utc || new Date().toISOString()
+        timeLastUpdateUtc = data.time_last_update_utc
+        timeNextUpdateUtc = data.time_next_update_utc
       }
     }
 
@@ -110,6 +137,8 @@ export async function getExchangeRates(base = "PHP") {
       base,
       rates,
       updatedAt: timestamp,
+      timeLastUpdateUtc,
+      timeNextUpdateUtc,
     }
 
     // Cache locally
@@ -122,6 +151,126 @@ export async function getExchangeRates(base = "PHP") {
     // Return stale cache if available
     if (cachedData) {
       return JSON.parse(cachedData)
+    }
+    throw err
+  }
+}
+
+export const FRANKFURTER_CURRENCIES = new Set([
+  "AUD", "BGN", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK",
+  "EUR", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "ISK",
+  "JPY", "KRW", "MXN", "MYR", "NOK", "NZD", "PHP", "PLN",
+  "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR",
+])
+
+/**
+ * Fetch historical exchange rate time-series (7 to 30 days) from ECB (via Frankfurter API).
+ */
+export async function getHistoricalRates(fromCode = "USD", toCode = "PHP", days = 30) {
+  if (fromCode === toCode) {
+    return {
+      from: fromCode,
+      to: toCode,
+      points: [],
+      startRate: 1,
+      endRate: 1,
+      minRate: 1,
+      maxRate: 1,
+      changePct: 0,
+      isIdentical: true,
+    }
+  }
+
+  // If either currency is not tracked by the European Central Bank (e.g. crypto or unlisted fiat)
+  if (!FRANKFURTER_CURRENCIES.has(fromCode) || !FRANKFURTER_CURRENCIES.has(toCode)) {
+    return {
+      from: fromCode,
+      to: toCode,
+      points: [],
+      startRate: 0,
+      endRate: 0,
+      minRate: 0,
+      maxRate: 0,
+      changePct: 0,
+      isUnsupported: true,
+    }
+  }
+
+  const cacheKey = `${CACHE_KEY_HISTORICAL}_${fromCode}_${toCode}_${days}`
+  const cached = localStorage.getItem(cacheKey)
+  const cachedTime = localStorage.getItem(`${cacheKey}_time`)
+
+  if (cached && cachedTime) {
+    if (Date.now() - parseInt(cachedTime, 10) < CACHE_HISTORICAL_TTL) {
+      try {
+        return JSON.parse(cached)
+      } catch {}
+    }
+  }
+
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+
+  const formatDate = (d) => d.toISOString().split("T")[0]
+  const startStr = formatDate(startDate)
+  const endStr = formatDate(endDate)
+
+  const query = `${startStr}..${endStr}?from=${fromCode}&to=${toCode}`
+  const isDev = typeof import.meta !== "undefined" && import.meta.env?.DEV
+
+  try {
+    let res
+    if (isDev) {
+      try {
+        res = await fetch(`/api/frankfurter/${query}`)
+      } catch {
+        res = await fetch(`https://api.frankfurter.dev/v1/${query}`)
+      }
+    } else {
+      res = await fetch(`https://api.frankfurter.dev/v1/${query}`)
+    }
+
+    if (!res.ok) throw new Error(`Frankfurter status: ${res.status}`)
+    const data = await res.json()
+
+    if (data && data.rates) {
+      const points = Object.entries(data.rates)
+        .map(([date, rateObj]) => ({
+          date,
+          rate: rateObj[toCode],
+        }))
+        .filter((p) => p.rate != null)
+        .sort((a, b) => a.date.localeCompare(b.date))
+
+      if (points.length > 0) {
+        const startRate = points[0].rate
+        const endRate = points[points.length - 1].rate
+        const minRate = Math.min(...points.map((p) => p.rate))
+        const maxRate = Math.max(...points.map((p) => p.rate))
+        const changePct = startRate > 0 ? ((endRate - startRate) / startRate) * 100 : 0
+
+        const payload = {
+          from: fromCode,
+          to: toCode,
+          points,
+          startRate,
+          endRate,
+          minRate,
+          maxRate,
+          changePct,
+          isIdentical: false,
+        }
+
+        localStorage.setItem(cacheKey, JSON.stringify(payload))
+        localStorage.setItem(`${cacheKey}_time`, Date.now().toString())
+        return payload
+      }
+    }
+    throw new Error("No rate points available")
+  } catch (err) {
+    if (cached) {
+      return JSON.parse(cached)
     }
     throw err
   }

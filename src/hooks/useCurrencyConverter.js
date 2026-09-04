@@ -63,6 +63,32 @@ export function useCurrencyConverter(defaultBase = "PHP") {
     return convertCurrency(1, fromCurrency, toCurrency, ratesData)
   }, [ratesData, fromCurrency, toCurrency])
 
+  const inverseRate = useMemo(() => {
+    if (!ratesData) return 0
+    return convertCurrency(1, toCurrency, fromCurrency, ratesData)
+  }, [ratesData, fromCurrency, toCurrency])
+
+  const addAmount = useCallback((delta) => {
+    setConvertAmount((prev) => {
+      const current = parseFloat(prev) || 0
+      const next = Math.max(0, current + delta)
+      return next.toString()
+    })
+  }, [])
+
+  const clearAmount = useCallback(() => {
+    setConvertAmount("")
+  }, [])
+
+  const marketStatus = useMemo(() => {
+    return {
+      updatedAt: ratesData?.updatedAt,
+      timeLastUpdateUtc: ratesData?.timeLastUpdateUtc,
+      timeNextUpdateUtc: ratesData?.timeNextUpdateUtc,
+      isLive: !isLoadingRates && !!ratesData,
+    }
+  }, [ratesData, isLoadingRates])
+
   const toCurrencyObj = useMemo(() => {
     return (
       SUPPORTED_CURRENCIES.find((c) => c.code === toCurrency) || {
@@ -80,6 +106,8 @@ export function useCurrencyConverter(defaultBase = "PHP") {
     isSwapped,
     convertAmount,
     setConvertAmount,
+    addAmount,
+    clearAmount,
     fromCurrency,
     setFromCurrency,
     toCurrency,
@@ -88,6 +116,8 @@ export function useCurrencyConverter(defaultBase = "PHP") {
     handleSwapCurrencies,
     convertedValue,
     singleUnitRate,
+    inverseRate,
+    marketStatus,
     toCurrencyObj,
   }
 }

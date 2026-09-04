@@ -2,6 +2,8 @@ import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import { Mail, CheckCircle2, Coins, ChevronDown } from "lucide"
 import { CountryFlag } from "../ui"
+import { NEU } from "../../lib/neu"
+import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
 /**
  * ProfileCard — Displays user identity, active session status,
@@ -68,16 +70,13 @@ export default function ProfileCard({
 
             {/* Change Currency Button (Tactile Pressed Neumorphism) */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{
-                scale: 0.96,
-                boxShadow: "var(--neu-pressed)",
-              }}
+              whileHover={neuButtonHover}
+              whileTap={neuButtonTap}
               onClick={onOpenCurrencyModal}
               className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-brand-600 hover:text-brand-700 transition-all cursor-pointer w-full sm:w-auto shrink-0 select-none"
               style={{
-                background: "var(--neu-bg)",
-                boxShadow: "var(--neu-raised-sm)",
+                background: NEU.bg,
+                boxShadow: NEU.raisedSm,
               }}
             >
               <MorphIcon icon={Coins} size={14} strokeWidth={2} className="text-brand-600" />

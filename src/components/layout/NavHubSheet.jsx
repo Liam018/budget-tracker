@@ -6,70 +6,14 @@ import { useConfirm } from "../../hooks/useConfirm"
 import { toast } from "../ui"
 import { QUICK_ACTIONS, MENU_NAV_ITEMS } from "../../constants/navigation"
 import { useScrollLock } from "../../hooks/useScrollLock"
-
-// ── Unified Momentum Animation Variants ──
-// Directional harmony: Container rises from the bottom (y: 36 → 0)
-// and child blocks ride upward with it (y: 14 → 0) with a 25ms soft ripple.
-const sheetVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.97,
-    y: 36,
-    transformOrigin: "bottom center",
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transformOrigin: "bottom center",
-    transition: {
-      type: "spring",
-      stiffness: 340,
-      damping: 28,
-      mass: 0.85,
-      staggerChildren: 0.025,
-      delayChildren: 0.03,
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.97,
-    y: 28,
-    transformOrigin: "bottom center",
-    transition: {
-      duration: 0.18,
-      ease: [0.32, 0, 0.67, 0],
-    },
-  },
-}
-
-const childItemVariants = {
-  hidden: {
-    opacity: 0,
-    y: 14,
-    scale: 0.98,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 420,
-      damping: 26,
-      mass: 0.7,
-    },
-  },
-}
-
-const fadeVariants = {
-  hidden: { opacity: 0, y: 6 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.2, ease: "easeOut" },
-  },
-}
+import { NEU } from "../../lib/neu"
+import {
+  sheetVariants,
+  childItemVariants,
+  fadeVariants,
+  neuButtonHover,
+  neuButtonTap,
+} from "../../lib/animations"
 
 export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
   const location = useLocation()
@@ -134,13 +78,13 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
           {/* ── Top Interactive Profile Card (Comfortably Sized) ── */}
           <motion.button
             variants={childItemVariants}
-            whileHover={{ scale: 1.01, y: -1 }}
-            whileTap={{ scale: 0.98, boxShadow: "var(--neu-inset-sm)" }}
+            whileHover={neuButtonHover}
+            whileTap={neuButtonTap}
             onClick={() => onNavigate("/profile")}
             className="w-full flex items-center justify-between p-3 sm:p-3.5 rounded-2xl mb-4 transition-all cursor-pointer text-left select-none group"
             style={{
-              background: "var(--neu-bg)",
-              boxShadow: "var(--neu-raised-sm)",
+              background: NEU.bg,
+              boxShadow: NEU.raisedSm,
             }}
           >
             <div className="flex items-center gap-3 min-w-0">
@@ -188,13 +132,13 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
                 <motion.button
                   key={label}
                   variants={childItemVariants}
-                  whileHover={{ scale: 1.04, y: -2 }}
-                  whileTap={{ scale: 0.95, boxShadow: "var(--neu-inset-sm)" }}
+                  whileHover={neuButtonHover}
+                  whileTap={neuButtonTap}
                   onClick={() => onNavigate(to)}
                   className="flex flex-col items-center justify-center p-3 sm:p-3.5 rounded-2xl transition-all cursor-pointer text-center select-none"
                   style={{
-                    background: "var(--neu-bg)",
-                    boxShadow: "var(--neu-raised-sm)",
+                    background: NEU.bg,
+                    boxShadow: NEU.raisedSm,
                   }}
                 >
                   <Icon size={20} className={`${color} mb-1.5 sm:w-5.5 sm:h-5.5`} strokeWidth={2.4} />
@@ -221,8 +165,8 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
                   <motion.button
                     key={to}
                     variants={childItemVariants}
-                    whileHover={{ scale: 1.025, y: -1 }}
-                    whileTap={{ scale: 0.96, boxShadow: "var(--neu-inset-sm)" }}
+                    whileHover={isActive ? {} : neuButtonHover}
+                    whileTap={{ y: 1, boxShadow: isActive ? NEU.insetSm : NEU.pressed }}
                     onClick={() => onNavigate(to)}
                     className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer select-none ${
                       isActive
@@ -230,8 +174,8 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
                         : "text-neutral-700 hover:text-neutral-900"
                     }`}
                     style={{
-                      background: "var(--neu-bg)",
-                      boxShadow: isActive ? "var(--neu-inset-sm)" : "var(--neu-raised-sm)",
+                      background: NEU.bg,
+                      boxShadow: isActive ? NEU.insetSm : NEU.raisedSm,
                     }}
                   >
                     <div
@@ -253,13 +197,13 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
             {/* ── Sign Out Button (With Inset Depression Physics) ── */}
             <motion.button
               variants={childItemVariants}
-              whileHover={{ scale: 1.015, y: -1 }}
-              whileTap={{ scale: 0.97, boxShadow: "var(--neu-inset-sm)" }}
+              whileHover={neuButtonHover}
+              whileTap={neuButtonTap}
               onClick={handleSignOutClick}
               className="w-full mt-2 flex items-center justify-between p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer text-rose-600 hover:text-rose-700 select-none"
               style={{
-                background: "var(--neu-bg)",
-                boxShadow: "var(--neu-raised-sm)",
+                background: NEU.bg,
+                boxShadow: NEU.raisedSm,
               }}
             >
               <div className="flex items-center gap-2.5 min-w-0">

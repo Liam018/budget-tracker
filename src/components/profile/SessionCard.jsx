@@ -1,6 +1,8 @@
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import { LogOut } from "lucide"
+import { NEU } from "../../lib/neu"
+import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
 /**
  * SessionCard — Card for terminating user session with confirmation guard.
@@ -27,16 +29,13 @@ export default function SessionCard({ onSignOut }) {
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{
-            scale: 0.96,
-            boxShadow: "var(--neu-pressed)",
-          }}
+          whileHover={neuButtonHover}
+          whileTap={neuButtonTap}
           onClick={onSignOut}
           className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:text-rose-700 transition-all cursor-pointer shrink-0 select-none"
           style={{
-            background: "var(--neu-bg)",
-            boxShadow: "var(--neu-raised-sm)",
+            background: NEU.bg,
+            boxShadow: NEU.raisedSm,
           }}
         >
           <MorphIcon icon={LogOut} size={15} strokeWidth={2} className="text-rose-600" />

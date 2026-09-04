@@ -4,6 +4,7 @@ import { Plus } from "lucide-react"
 import Sidebar from "./Sidebar"
 import AppHeader from "./AppHeader"
 import BottomNav from "./BottomNav"
+import { NEU } from "../../lib/neu"
 
 /**
  * AppLayout — root shell for all protected app routes.
@@ -37,30 +38,28 @@ export default function AppLayout() {
         onClick={() => navigate("/transactions")}
         className="group hidden lg:flex fixed bottom-8 right-8 z-30 items-center gap-3 pl-3.5 pr-5 py-3 rounded-2xl cursor-pointer select-none overflow-hidden"
         style={{
-          background: "var(--neu-bg)",
-          boxShadow: "var(--neu-raised)",
+          background: NEU.bg,
+          boxShadow: NEU.raised,
         }}
         variants={{
           hover: {
-            y: -4,
-            scale: 1.03,
+            y: -2,
             boxShadow:
-              "7px 7px 16px var(--neu-dark), -5px -5px 14px var(--neu-light)",
+              "7px 7px 16px rgba(200, 204, 216, 0.45), -5px -5px 14px rgba(255, 255, 255, 0.85)",
           },
           tap: {
-            y: 0,
-            scale: 0.97,
-            boxShadow: "var(--neu-pressed)",
+            y: 1,
+            boxShadow: NEU.pressed,
           },
         }}
         transition={{ type: "spring", stiffness: 450, damping: 25 }}
         aria-label="Add transaction"
       >
-        {/* Animated icon container: rotates 90deg and springs on hover */}
+        {/* Animated icon container: rotates 90deg on hover */}
         <motion.div
           variants={{
-            hover: { rotate: 90, scale: 1.12 },
-            tap: { scale: 0.9 },
+            hover: { rotate: 90 },
+            tap: { y: 1 },
           }}
           transition={{ type: "spring", stiffness: 500, damping: 22 }}
           className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-sm shrink-0"

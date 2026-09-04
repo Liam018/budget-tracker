@@ -2,6 +2,8 @@ import { useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { Trash2, AlertTriangle, AlertCircle, HelpCircle, X } from "lucide-react"
 import { useScrollLock } from "../../hooks/useScrollLock"
+import { NEU } from "../../lib/neu"
+import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
 /**
  * ConfirmModal — Tactile Neumorphic Confirmation Dialog.
@@ -140,16 +142,13 @@ export default function ConfirmModal({
             <div className="grid grid-cols-2 gap-3">
               {/* Cancel Button (Raised Neumorphic) */}
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{
-                  scale: 0.96,
-                  boxShadow: "var(--neu-pressed)",
-                }}
+                whileHover={neuButtonHover}
+                whileTap={neuButtonTap}
                 onClick={onCancel}
                 className="py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold text-neutral-700 transition-all cursor-pointer select-none"
                 style={{
-                  background: "var(--neu-bg)",
-                  boxShadow: "var(--neu-raised-sm)",
+                  background: NEU.bg,
+                  boxShadow: NEU.raisedSm,
                 }}
               >
                 {cancelText}
@@ -157,8 +156,8 @@ export default function ConfirmModal({
 
               {/* Confirm Button (Gradient Accent) */}
               <motion.button
-                whileHover={{ scale: 1.02, y: -1 }}
-                whileTap={{ scale: 0.96 }}
+                whileHover={{ y: -1.5 }}
+                whileTap={{ y: 1 }}
                 onClick={onConfirm}
                 className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer select-none ${current.confirmBtn}`}
               >

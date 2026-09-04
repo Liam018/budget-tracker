@@ -5,6 +5,11 @@ import { MorphIcon } from "morphicons/react"
 import { Plus } from "lucide-react"
 import NavHubSheet from "./NavHubSheet"
 import { LEFT_TABS, RIGHT_TABS } from "../../constants/navigation"
+import {
+  generateNotchedStadiumPath,
+  NAV_BAR_HEIGHT,
+  NAV_NOTCH_RADIUS,
+} from "../../lib/navGeometry"
 
 
 
@@ -37,26 +42,8 @@ export default function BottomNav() {
     navigate(to)
   }
 
-  // Mathematical SVG path generator for the notched stadium capsule
-  const w = barWidth || 360
-  const h = 60
-  const r = 30
-  const cx = w / 2
-  const notchR = 32
-  const filletW = 14
-
-  const notchPath = `
-    M ${r} 0
-    L ${cx - (notchR + filletW)} 0
-    C ${cx - (notchR + filletW) + 7} 0, ${cx - notchR} 5, ${cx - notchR} 13
-    A ${notchR} ${notchR} 0 0 0 ${cx + notchR} 13
-    C ${cx + notchR} 5, ${cx + (notchR + filletW) - 7} 0, ${cx + (notchR + filletW)} 0
-    L ${w - r} 0
-    A ${r} ${r} 0 0 1 ${w - r} ${h}
-    L ${r} ${h}
-    A ${r} ${r} 0 0 1 ${r} 0
-    Z
-  `.trim()
+  // Generate SVG path for the notched stadium capsule via geometry helper
+  const notchPath = generateNotchedStadiumPath(barWidth)
 
   return (
     <>
@@ -89,7 +76,7 @@ export default function BottomNav() {
           }
           transition={{ type: "spring", stiffness: 420, damping: 28 }}
           className="relative mx-4 w-full flex items-end justify-center max-w-md pointer-events-auto"
-          style={{ height: `${h}px` }}
+          style={{ height: `${NAV_BAR_HEIGHT}px` }}
         >
 
           {/*  Quick Action & Navigation Hub Card  */}
@@ -121,7 +108,7 @@ export default function BottomNav() {
             {/* Left Tabs (Dashboard, Txns) */}
             <div
               className="flex items-center justify-around h-full pl-3"
-              style={{ width: `calc(50% - ${notchR + 10}px)` }}
+              style={{ width: `calc(50% - ${NAV_NOTCH_RADIUS + 10}px)` }}
             >
               {LEFT_TABS.map(({ label, icon, activeIcon, to }) => (
                 <NavLink
@@ -169,12 +156,12 @@ export default function BottomNav() {
             </div>
 
             {/* Center Notch Gap (spacer) */}
-            <div style={{ width: `${(notchR + 10) * 2}px` }} className="shrink-0 h-full" />
+            <div style={{ width: `${(NAV_NOTCH_RADIUS + 10) * 2}px` }} className="shrink-0 h-full" />
 
             {/* Right Tabs (Budget, Account) */}
             <div
               className="flex items-center justify-around h-full pr-3"
-              style={{ width: `calc(50% - ${notchR + 10}px)` }}
+              style={{ width: `calc(50% - ${NAV_NOTCH_RADIUS + 10}px)` }}
             >
               {RIGHT_TABS.map(({ label, icon, activeIcon, to }) => (
                 <NavLink
@@ -225,8 +212,8 @@ export default function BottomNav() {
 
           {/* Centre Action & Navigation Hub FAB (Same 52px Circle Size in Both States) */}
           <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
+            whileHover={{ y: -2 }}
+            whileTap={{ y: 1 }}
             onClick={() => setIsHubOpen((prev) => !prev)}
             className="absolute left-1/2 -translate-x-1/2 z-40 flex items-center justify-center rounded-full cursor-pointer pointer-events-auto transition-colors duration-200"
             style={{

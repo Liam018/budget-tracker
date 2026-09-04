@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth"
 import { useConfirm } from "../../hooks/useConfirm"
 import { toast } from "../ui"
 import { SIDEBAR_NAV_ITEMS } from "../../constants/navigation"
+import { NEU } from "../../lib/neu"
 
 export default function Sidebar() {
   const { user, profile, signOut } = useAuth()
@@ -48,8 +49,8 @@ export default function Sidebar() {
       <div
         className="flex flex-col w-full h-full py-6 px-4 rounded-2xl"
         style={{
-          background: "var(--neu-bg)",
-          boxShadow: "var(--neu-raised-sm)",
+          background: NEU.bg,
+          boxShadow: NEU.raisedSm,
         }}
       >
 
@@ -87,8 +88,8 @@ export default function Sidebar() {
                       layoutId="sidebar-active"
                       className="absolute inset-0 rounded-xl"
                       style={{
-                        background: "var(--neu-bg)",
-                        boxShadow: "var(--neu-inset-sm)",
+                        background: NEU.bg,
+                        boxShadow: NEU.insetSm,
                       }}
                       transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
@@ -146,8 +147,8 @@ export default function Sidebar() {
                     layoutId="sidebar-active"
                     className="absolute inset-0 rounded-xl"
                     style={{
-                      background: "var(--neu-bg)",
-                      boxShadow: "var(--neu-inset-sm)",
+                      background: NEU.bg,
+                      boxShadow: NEU.insetSm,
                     }}
                     transition={{ type: "spring", stiffness: 400, damping: 32 }}
                   />

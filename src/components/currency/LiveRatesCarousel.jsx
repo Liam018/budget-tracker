@@ -1,17 +1,13 @@
 import { useRef, useState, useEffect, useCallback } from "react"
-import { motion } from "motion/react"
-import { MorphIcon } from "morphicons/react"
-import {
-  ChevronLeft,
-  ChevronRight,
-  Rows2,
-  StretchHorizontal,
-} from "lucide"
+import { motion, AnimatePresence } from "motion/react"
 import {
   SUPPORTED_CURRENCIES,
   convertCurrency,
+  CURRENCY_REGIONS,
 } from "../../services/currencyService"
-import { CountryFlag } from "../ui"
+import RatesCarouselControls from "./RatesCarouselControls"
+import RatesCarouselFilterTabs from "./RatesCarouselFilterTabs"
+import LiveRateCard from "./LiveRateCard"
 
 /**
  * LiveRatesCarousel — Smooth horizontal scrolling (or 2-row grid) carousel
@@ -20,7 +16,20 @@ import { CountryFlag } from "../ui"
  */
 export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
   const sliderRef = useRef(null)
+  const contentRef = useRef(null)
   const [isDoubleRow, setIsDoubleRow] = useState(false)
+  const [selectedRegion, setSelectedRegion] = useState("all")
+
+  // Filter out current currency from reference list
+  const referenceCurrencies = SUPPORTED_CURRENCIES.filter(
+    (c) => c.code !== currentCurrencyCode
+  )
+
+  const regionCodes = CURRENCY_REGIONS[selectedRegion]?.codes
+  const filteredCurrencies = referenceCurrencies.filter((c) => {
+    if (!regionCodes) return true
+    return regionCodes.includes(c.code)
+  })
 
   // Mouse drag-to-scroll state
   const isMouseDown = useRef(false)
@@ -56,15 +65,28 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
 
   // Scroll boundary & continuous scroll states
   const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(true)
+  const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollIntervalRef = useRef(null)
   const scrollTimeoutRef = useRef(null)
 
   const updateScrollBounds = useCallback(() => {
     if (!sliderRef.current) return
-    const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current
-    setCanScrollLeft(scrollLeft > 6)
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6)
+    const { scrollLeft, clientWidth } = sliderRef.current
+    const scrollWidth = contentRef.current
+      ? contentRef.current.offsetWidth
+      : sliderRef.current.scrollWidth
+
+    const maxScroll = scrollWidth - clientWidth
+
+    // If all cards fit completely within the visible container, disable both arrows
+    if (maxScroll <= 4) {
+      setCanScrollLeft(false)
+      setCanScrollRight(false)
+      return
+    }
+
+    setCanScrollLeft(scrollLeft > 4)
+    setCanScrollRight(scrollLeft < maxScroll - 4)
   }, [])
 
   function stopContinuousScroll() {
@@ -95,7 +117,10 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
 
       function stepFrame() {
         if (!sliderRef.current) return
-        const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current
+        const { scrollLeft, clientWidth } = sliderRef.current
+        const scrollWidth = contentRef.current
+          ? contentRef.current.offsetWidth
+          : sliderRef.current.scrollWidth
 
         if (direction === "left" && scrollLeft <= 0) {
           stopContinuousScroll()
@@ -119,6 +144,7 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
 
   useEffect(() => {
     const el = sliderRef.current
+    const content = contentRef.current
     if (!el) return
     updateScrollBounds()
 
@@ -126,182 +152,111 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
     el.addEventListener("scroll", handleScroll, { passive: true })
     window.addEventListener("resize", handleScroll)
 
+    let ro = null
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => {
+        updateScrollBounds()
+      })
+      ro.observe(el)
+      if (content) ro.observe(content)
+    }
+
     return () => {
       stopContinuousScroll()
       el.removeEventListener("scroll", handleScroll)
       window.removeEventListener("resize", handleScroll)
+      if (ro) ro.disconnect()
     }
-  }, [updateScrollBounds, isDoubleRow])
+  }, [updateScrollBounds, isDoubleRow, selectedRegion])
 
-  // Filter out current currency from reference list
-  const referenceCurrencies = SUPPORTED_CURRENCIES.filter(
-    (c) => c.code !== currentCurrencyCode
-  )
+  // Recalculate bounds and reset scroll when region, double row, or currencies change
+  useEffect(() => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollLeft = 0
+      updateScrollBounds()
+      const raf = requestAnimationFrame(updateScrollBounds)
+      const t1 = setTimeout(updateScrollBounds, 60)
+      const t2 = setTimeout(updateScrollBounds, 250)
+      const t3 = setTimeout(updateScrollBounds, 450)
+      return () => {
+        cancelAnimationFrame(raf)
+        clearTimeout(t1)
+        clearTimeout(t2)
+        clearTimeout(t3)
+      }
+    }
+  }, [selectedRegion, isDoubleRow, filteredCurrencies.length, updateScrollBounds])
 
   return (
     <div className="mt-5 pt-4 border-t border-neutral-200/60">
-      <div className="flex items-center justify-between gap-2 mb-2.5">
+      <div className="flex items-center justify-between gap-2 mb-2">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
             Live Rates relative to 1 {currentCurrencyCode}
           </p>
           <p className="text-[10px] text-neutral-400 hidden sm:block">
-            Swipe or use controls to view all global currencies
+            Swipe or use controls to browse world currencies
           </p>
         </div>
 
         {/* Controls: 1 Row / 2 Rows Toggle & Navigation Arrows */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          {/* Double Row Layout Toggle */}
-          <motion.button
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.88, boxShadow: "var(--neu-pressed)" }}
-            onClick={() => setIsDoubleRow((prev) => !prev)}
-            title={isDoubleRow ? "Switch to 1 row" : "Switch to 2 rows"}
-            className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center cursor-pointer select-none touch-manipulation transition-all active:scale-90 ${
-              isDoubleRow
-                ? "text-brand-600"
-                : "text-neutral-500 hover:text-brand-600 active:text-brand-600"
-            }`}
-            style={{
-              background: "var(--neu-bg)",
-              boxShadow: isDoubleRow ? "var(--neu-inset-sm)" : "var(--neu-raised-sm)",
-            }}
-            aria-label={isDoubleRow ? "Switch to 1 row" : "Switch to 2 rows"}
-          >
-            <MorphIcon
-              icon={isDoubleRow ? Rows2 : StretchHorizontal}
-              size={15}
-              strokeWidth={2.4}
-              spring="bouncy"
-              className={isDoubleRow ? "text-brand-600" : "text-neutral-500"}
-            />
-          </motion.button>
+        <RatesCarouselControls
+          isDoubleRow={isDoubleRow}
+          onToggleDoubleRow={() => setIsDoubleRow((prev) => !prev)}
+          canScrollLeft={canScrollLeft}
+          canScrollRight={canScrollRight}
+          onStartScroll={startContinuousScroll}
+          onStopScroll={stopContinuousScroll}
+        />
+      </div>
 
-          {/* Left Arrow (Click for step, hold to scroll continuously) */}
-          <motion.button
-            whileHover={canScrollLeft ? { scale: 1.06 } : {}}
-            whileTap={canScrollLeft ? { scale: 0.88, boxShadow: "var(--neu-pressed)" } : {}}
-            onPointerDown={() => canScrollLeft && startContinuousScroll("left")}
-            onPointerUp={stopContinuousScroll}
-            onPointerLeave={stopContinuousScroll}
-            disabled={!canScrollLeft}
-            className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all ${
-              canScrollLeft
-                ? "text-neutral-500 hover:text-brand-600 active:text-brand-600 cursor-pointer select-none touch-manipulation active:scale-90"
-                : "text-neutral-400/70 cursor-not-allowed"
-            }`}
-            style={{
-              background: "var(--neu-bg)",
-              boxShadow: canScrollLeft ? "var(--neu-raised-sm)" : "var(--neu-inset-sm)",
-            }}
-            aria-label="Scroll left"
-          >
-            <MorphIcon
-              icon={ChevronLeft}
-              size={15}
-              strokeWidth={canScrollLeft ? 2.4 : 1.8}
-              className={canScrollLeft ? "text-neutral-500" : "text-neutral-400/70"}
-            />
-          </motion.button>
-
-          {/* Right Arrow (Click for step, hold to scroll continuously) */}
-          <motion.button
-            whileHover={canScrollRight ? { scale: 1.06 } : {}}
-            whileTap={canScrollRight ? { scale: 0.88, boxShadow: "var(--neu-pressed)" } : {}}
-            onPointerDown={() => canScrollRight && startContinuousScroll("right")}
-            onPointerUp={stopContinuousScroll}
-            onPointerLeave={stopContinuousScroll}
-            disabled={!canScrollRight}
-            className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-all ${
-              canScrollRight
-                ? "text-neutral-500 hover:text-brand-600 active:text-brand-600 cursor-pointer select-none touch-manipulation active:scale-90"
-                : "text-neutral-400/70 cursor-not-allowed"
-            }`}
-            style={{
-              background: "var(--neu-bg)",
-              boxShadow: canScrollRight ? "var(--neu-raised-sm)" : "var(--neu-inset-sm)",
-            }}
-            aria-label="Scroll right"
-          >
-            <MorphIcon
-              icon={ChevronRight}
-              size={15}
-              strokeWidth={canScrollRight ? 2.4 : 1.8}
-              className={canScrollRight ? "text-neutral-500" : "text-neutral-400/70"}
-            />
-          </motion.button>
-        </div>
+      {/* Regional Filter Tabs */}
+      <div className="mb-2">
+        <RatesCarouselFilterTabs
+          selectedRegion={selectedRegion}
+          onSelectRegion={setSelectedRegion}
+        />
       </div>
 
       {/* Horizontal Sliding Row or Double Row Grid (Mouse & Touch Draggable) */}
-      <motion.div
-        layout="position"
+      <div
         ref={sliderRef}
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
-        className={`overflow-x-auto scrollbar-none py-2.5 px-1 overscroll-x-contain cursor-grab active:cursor-grabbing select-none transition-all ${
-          isDraggingMouse ? "" : "scroll-smooth"
-        } ${
-          isDoubleRow
-            ? "grid grid-rows-2 grid-flow-col gap-3"
-            : "flex gap-3"
-        }`}
+        className="overflow-x-auto scrollbar-none py-3 px-2 overscroll-x-contain cursor-grab active:cursor-grabbing select-none relative"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
       >
-        {referenceCurrencies.map((curr) => {
-          const r = ratesData
-            ? convertCurrency(1, currentCurrencyCode, curr.code, ratesData)
-            : 0
-          return (
-            <motion.div
-              layout
-              key={curr.code}
-              transition={{
-                type: "spring",
-                stiffness: 350,
-                damping: 30,
-              }}
-              className="shrink-0 min-w-33 sm:min-w-35 p-2.5 rounded-xl text-left select-none"
-              style={{
-                background: "var(--neu-bg)",
-                boxShadow: "var(--neu-raised-sm)",
-              }}
-            >
-              <div className="flex items-center justify-between gap-1 mb-1">
-                <span className="text-[11px] font-bold text-neutral-700 flex items-center gap-1.5">
-                  <CountryFlag code={curr.code} size="sm" />
-                  <span>{curr.code}</span>
-                </span>
-                <span className="text-[10px] font-bold text-neutral-400">
-                  {curr.symbol}
-                </span>
-              </div>
-              <p className="text-xs font-black text-neutral-800 tracking-tight">
-                {r > 100
-                  ? r.toFixed(2)
-                  : r > 1
-                  ? r.toFixed(3)
-                  : r.toFixed(4)}{" "}
-                <span className="text-[10px] font-bold text-neutral-500">
-                  {curr.code}
-                </span>
-              </p>
-              <p
-                className="text-[10px] text-neutral-400 truncate mt-0.5"
-                title={curr.name}
-              >
-                {curr.name}
-              </p>
-            </motion.div>
-          )
-        })}
-      </motion.div>
+        <div
+          ref={contentRef}
+          className={
+            isDoubleRow
+              ? "grid grid-rows-2 grid-flow-col gap-3 w-max"
+              : "flex gap-3 w-max"
+          }
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            {filteredCurrencies.map((curr, index) => {
+              const r = ratesData
+                ? convertCurrency(1, currentCurrencyCode, curr.code, ratesData)
+                : 0
+              return (
+                <LiveRateCard
+                  key={curr.code}
+                  curr={curr}
+                  rate={r}
+                  isDoubleRow={isDoubleRow}
+                  index={index}
+                />
+              )
+            })}
+          </AnimatePresence>
+        </div>
+      </div>
     </div>
   )
 }
