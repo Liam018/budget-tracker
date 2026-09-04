@@ -1,19 +1,16 @@
-import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import { Star, Plus, X } from "lucide"
 import { SUPPORTED_CURRENCIES, convertCurrency } from "../../services/currencyService"
+import useCurrencyWatchlist from "../../hooks/useCurrencyWatchlist"
 import { CountryFlag } from "../ui"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
-const DEFAULT_WATCHLIST = ["USD", "EUR", "JPY", "GBP", "CAD", "AUD", "SGD", "CNY"]
-const STORAGE_KEY = "budget_tracker_fx_watchlist"
-
 /**
  * CurrencyWatchlistCard — Real-Time Multi-Currency Watchlist Matrix
  * Simultaneously computes the value of the user's active convertAmount across
- * custom pinned world currencies.
+ * custom pinned world currencies. Clicking any card sets it as the active target currency.
  */
 export default function CurrencyWatchlistCard({
   convertAmount,
@@ -21,38 +18,15 @@ export default function CurrencyWatchlistCard({
   ratesData,
   onSelectCurrency,
 }) {
-  const [pinnedCodes, setPinnedCodes] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved) return JSON.parse(saved)
-    } catch {}
-    return DEFAULT_WATCHLIST
-  })
+  const {
+    activePinnedCodes,
+    availableToAdd,
+    isAdding,
+    setIsAdding,
+    togglePin,
+  } = useCurrencyWatchlist(fromCurrency)
 
-  const [isAdding, setIsAdding] = useState(false)
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(pinnedCodes))
-    } catch {}
-  }, [pinnedCodes])
-
-  const togglePin = (code) => {
-    if (pinnedCodes.includes(code)) {
-      if (pinnedCodes.length <= 1) return // keep at least 1
-      setPinnedCodes((prev) => prev.filter((c) => c !== code))
-    } else {
-      setPinnedCodes((prev) => [...prev, code])
-    }
-  }
-
-  // Filter out the active fromCurrency from the displayed list
-  const activePinnedCodes = pinnedCodes.filter((c) => c !== fromCurrency)
   const numAmount = parseFloat(convertAmount) || 1
-
-  const availableToAdd = SUPPORTED_CURRENCIES.filter(
-    (c) => !pinnedCodes.includes(c.code) && c.code !== fromCurrency
-  )
 
   return (
     <div
@@ -62,7 +36,7 @@ export default function CurrencyWatchlistCard({
         boxShadow: NEU.raisedSm,
       }}
     >
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2.5">
           <div
@@ -103,7 +77,7 @@ export default function CurrencyWatchlistCard({
         </motion.button>
       </div>
 
-      {/* Optional Currency Adder Dropdown / Pills */}
+      {/* ── Currency Adder Dropdown Drawer ── */}
       <AnimatePresence>
         {isAdding && (
           <motion.div
@@ -162,7 +136,7 @@ export default function CurrencyWatchlistCard({
         )}
       </AnimatePresence>
 
-      {/* Watchlist Grid */}
+      {/* ── Watchlist Cards Grid ── */}
       <motion.div
         layout
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3"
@@ -197,7 +171,10 @@ export default function CurrencyWatchlistCard({
                   y: { type: "spring", stiffness: 420, damping: 32 },
                 }}
                 whileHover={{ y: -2 }}
-                className="p-3.5 rounded-2xl flex flex-col justify-between group relative select-none"
+                onClick={() => onSelectCurrency?.(code)}
+                className={`p-3.5 rounded-2xl flex flex-col justify-between group relative select-none ${
+                  onSelectCurrency ? "cursor-pointer" : ""
+                }`}
                 style={{
                   background: NEU.bg,
                   boxShadow: NEU.insetSm,
@@ -208,9 +185,12 @@ export default function CurrencyWatchlistCard({
                   type="button"
                   whileHover={{ scale: 1.15, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => togglePin(code)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    togglePin(code)
+                  }}
                   title={`Remove ${code} from watchlist`}
-                  className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-neutral-400 hover:text-rose-500 opacity-60 sm:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-neutral-400 hover:text-rose-500 opacity-60 sm:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
                 >
                   <MorphIcon icon={X} size={12} strokeWidth={2.4} />
                 </motion.button>

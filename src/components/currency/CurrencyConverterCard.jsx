@@ -133,7 +133,7 @@ export default function CurrencyConverterCard({
             Amount to Convert
           </label>
           <div
-            className="flex items-center px-3.5 h-[52px] rounded-2xl gap-2"
+            className="flex items-center px-3.5 h-13 rounded-2xl gap-2"
             style={{
               background: "var(--neu-bg)",
               boxShadow: "var(--neu-inset-sm)",
@@ -191,7 +191,7 @@ export default function CurrencyConverterCard({
           >
             &nbsp;
           </div>
-          <div className="h-[52px] flex items-center justify-center">
+          <div className="h-13 flex items-center justify-center">
             <motion.button
               whileHover={neuButtonHover}
               whileTap={neuButtonTap}
@@ -225,7 +225,7 @@ export default function CurrencyConverterCard({
             whileHover={{ y: -1 }}
             whileTap={{ y: 1, boxShadow: NEU.pressed }}
             onClick={() => setOpenPicker("to")}
-            className="w-full flex items-center gap-3 px-3.5 h-[52px] rounded-2xl cursor-pointer select-none transition-[transform]"
+            className="w-full flex items-center gap-3 px-3.5 h-13 rounded-2xl cursor-pointer select-none transition-[transform]"
             style={{
               background: NEU.bg,
               boxShadow: NEU.insetSm,

@@ -1,10 +1,40 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import { LineChart, TrendingUp, TrendingDown, Minus } from "lucide"
-import { getHistoricalRates } from "../../services/currencyService"
+import { LineChart, TrendingUp, TrendingDown } from "lucide"
+import useCurrencyHistory from "../../hooks/useCurrencyHistory"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
+
+/**
+ * Pure helper to compute SVG line and area fill coordinates for sparklines.
+ */
+function generateSparklinePaths(historyData, width = 600, height = 140) {
+  if (!historyData?.points || historyData.points.length < 2) return null
+
+  const points = historyData.points
+  const paddingX = 12
+  const paddingY = 20
+
+  const min = historyData.minRate
+  const max = historyData.maxRate
+  const range = max - min || 1
+
+  const coords = points.map((p, i) => {
+    const x = paddingX + (i / (points.length - 1)) * (width - paddingX * 2)
+    const y = height - paddingY - ((p.rate - min) / range) * (height - paddingY * 2)
+    return { x, y }
+  })
+
+  const d = coords.reduce((acc, pt, i) => {
+    if (i === 0) return `M ${pt.x},${pt.y}`
+    return `${acc} L ${pt.x},${pt.y}`
+  }, "")
+
+  const areaD = `${d} L ${coords[coords.length - 1].x},${height} L ${coords[0].x},${height} Z`
+
+  return { d, areaD, width, height }
+}
 
 /**
  * CurrencyTrendCard — Historical Forex Trend Sparkline (7D / 30D)
@@ -13,83 +43,17 @@ import { neuButtonHover, neuButtonTap } from "../../lib/animations"
  */
 export default function CurrencyTrendCard({ fromCurrency, toCurrency }) {
   const [timeframe, setTimeframe] = useState(30) // 7 | 30
-  const [historyData, setHistoryData] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasError, setHasError] = useState(false)
 
-  useEffect(() => {
-    let isCancelled = false
+  const { historyData, isLoading, hasError } = useCurrencyHistory(
+    fromCurrency,
+    toCurrency,
+    timeframe
+  )
 
-    async function fetchTrend() {
-      if (fromCurrency === toCurrency) {
-        setHistoryData(null)
-        return
-      }
-
-      setIsLoading(true)
-      setHasError(false)
-
-      try {
-        const data = await getHistoricalRates(fromCurrency, toCurrency, timeframe)
-        if (!isCancelled) {
-          if (data?.isUnsupported) {
-            setHistoryData(null)
-            setHasError(false)
-          } else {
-            setHistoryData(data)
-            setHasError(false)
-          }
-        }
-      } catch {
-        if (!isCancelled) {
-          setHasError(true)
-          setHistoryData(null)
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    fetchTrend()
-
-    return () => {
-      isCancelled = true
-    }
-  }, [fromCurrency, toCurrency, timeframe])
-
-  // Generate SVG path for the sparkline
-  const chartPath = useMemo(() => {
-    if (!historyData || !historyData.points || historyData.points.length < 2) return null
-
-    const points = historyData.points
-    const width = 600
-    const height = 140
-    const paddingX = 12
-    const paddingY = 20
-
-    const min = historyData.minRate
-    const max = historyData.maxRate
-    const range = max - min || 1
-
-    const coords = points.map((p, i) => {
-      const x = paddingX + (i / (points.length - 1)) * (width - paddingX * 2)
-      const y = height - paddingY - ((p.rate - min) / range) * (height - paddingY * 2)
-      return { x, y }
-    })
-
-    // Construct SVG path string
-    const d = coords.reduce((acc, pt, i) => {
-      if (i === 0) return `M ${pt.x},${pt.y}`
-      return `${acc} L ${pt.x},${pt.y}`
-    }, "")
-
-    // Area fill path
-    const areaD = `${d} L ${coords[coords.length - 1].x},${height} L ${coords[0].x},${height} Z`
-
-    return { d, areaD, width, height }
-  }, [historyData])
+  const chartPath = useMemo(
+    () => generateSparklinePaths(historyData),
+    [historyData]
+  )
 
   if (fromCurrency === toCurrency) return null
 
@@ -103,7 +67,7 @@ export default function CurrencyTrendCard({ fromCurrency, toCurrency }) {
         boxShadow: NEU.raisedSm,
       }}
     >
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2.5">
           <div
@@ -157,7 +121,7 @@ export default function CurrencyTrendCard({ fromCurrency, toCurrency }) {
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* ── Main Content Area ── */}
       {isLoading ? (
         <div
           className="h-40 rounded-2xl flex items-center justify-center text-xs text-neutral-400 font-medium"
