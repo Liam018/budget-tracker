@@ -12,9 +12,8 @@ A modern, responsive personal finance web app built with React, Vite, Tailwind C
 | **2** | 🔐 **Auth & Security** | Registration, Login, Forgot Password, `profiles` schema with RLS, Server-side rate limits & lockout via PostgreSQL RPCs, real-time validators & sanitizers, Morphicons eye toggle & buttons, session recovery. | ✅ **Done** |
 | **⭐** | 📖 **Welcome & Onboarding Story** | Full-screen auto-sliding story carousel (`WelcomePage.jsx`) with moving progress bars, touch-swipe gestures, and clean login/register buttons. | ✅ **Done** |
 | **3** | 🧭 **App Shell & Navigation** | Desktop Sidebar, Mobile Bottom Navigation bar, App Header with user popover, notifications badge, Explore More sheet, responsive `AppLayout` wrapper, dedicated Currency Converter & 160+ live rates carousel (`/converter`). | ✅ **Done** |
-| **📱** | 📲 **PWA (Android & iOS)** | Service Worker with offline caching (`vite-plugin-pwa`), Web App Manifest, Standalone display mode, iOS Home Screen meta tags, scroll locks on sheets, and custom `bloub-cercle-fier-violet.png` app icon. | ✅ **Done** |
-| **4** | 👛 **Accounts & Wallets** | Multi-account management (Cash, Bank, GCash, Maya, Credit Cards), balance tracking, currency support, account presets, and Neumorphic wallet cards. | ⏳ **NEXT** |
-| **5** | 🏷️ **Categories** | Income/Expense category taxonomy, customizable icons, colors, and default seeded categories. | ⏸️ Pending |
+| **📱** | 📲 **PWA (Android & iOS)** | Service Worker with offline caching (`vite-plugin-pwa`), Web App Manifest, Standalone display mode, iOS Home Screen meta tags, scroll locks on sheets, and custom `bloub-cercle-fier-| **4** | 👛 **Accounts & Wallets** | Multi-account management (Cash, Bank, GCash, Maya, Credit Cards), balance tracking, currency support, account presets, and Neumorphic wallet cards. | ✅ **Done** |
+| **5** | 🏷️ **Categories** | Income/Expense category taxonomy, customizable icons, colors, and default seeded categories. | ⏳ **NEXT** |
 | **6** | 💸 **Transactions** | Full CRUD for Income, Expenses & Transfers, multi-account ledger, filters, search, and date pickers. | ⏸️ Pending |
 | **7** | 📊 **Budgets** | Monthly spending limits per category, visual threshold bars (healthy / warning / exceeded), rollover calculations. | ⏸️ Pending |
 | **8** | 🏠 **Dashboard** | Total net worth, monthly cash flow, category breakdowns, recent transactions, quick action drawer. | ⏸️ Pending |
@@ -24,53 +23,71 @@ A modern, responsive personal finance web app built with React, Vite, Tailwind C
 
 ---
 
-## 🎯 Immediate Next Step: Step 4 — Accounts & Wallets Management System
+## 🎯 Immediate Next Step: Step 5 — Categories Taxonomy & Management System
 
-### 1. Supabase Database Schema (`accounts` table):
+### 1. Supabase Database Schema (`categories` table):
 ```sql
-create table if not exists public.accounts (
+create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade,
   name text not null,
-  type text not null check (type in ('cash', 'bank', 'e_wallet', 'credit_card', 'savings')),
-  balance numeric(15, 2) not null default 0.00,
-  currency text not null default 'PHP',
-  color text default '#863bff',
-  icon text default 'Wallet',
-  is_archived boolean default false,
+  type text not null check (type in ('income', 'expense')),
+  icon text not null default 'Tag',
+  color text not null default '#863bff',
+  is_default boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
 -- Enable RLS
-alter table public.accounts enable row level security;
+alter table public.categories enable row level security;
 
--- RLS Policies: users can only manage their own accounts
-create policy "Users can view own accounts" on public.accounts for select using (auth.uid() = user_id);
-create policy "Users can create own accounts" on public.accounts for insert with check (auth.uid() = user_id);
-create policy "Users can update own accounts" on public.accounts for update using (auth.uid() = user_id);
-create policy "Users can delete own accounts" on public.accounts for delete using (auth.uid() = user_id);
+-- Policies: Users see system defaults (user_id is null or is_default = true) AND their own custom categories
+create policy "Users can view default and own categories" on public.categories 
+  for select using (user_id is null or is_default = true or auth.uid() = user_id);
+
+create policy "Users can create custom categories" on public.categories 
+  for insert with check (auth.uid() = user_id and is_default = false);
+
+create policy "Users can update own categories" on public.categories 
+  for update using (auth.uid() = user_id and is_default = false);
+
+create policy "Users can delete own categories" on public.categories 
+  for delete using (auth.uid() = user_id and is_default = false);
 ```
 
-### 2. Frontend Components to Build:
-1. **[`src/pages/AccountsPage.jsx`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/pages/AccountsPage.jsx)**:
-   - Header with Total Net Worth summary and **"+ Add Account"** button.
-   - Segmented filter / tabs: All Accounts, Cash & Banks, E-Wallets, Credit Cards.
-   - Responsive grid of tactile Neumorphic Account Cards.
-2. **[`src/components/accounts/AccountCard.jsx`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/components/accounts/AccountCard.jsx)**:
-   - Neumorphic surface with brand color accent pill.
-   - Account institution branding / icon (GCash, Maya, BDO, BPI, Cash, etc.).
-   - Current balance formatted in user's preferred currency (e.g. ₱ PHP).
-   - Quick action options (Edit, Archive, View Transactions).
-3. **[`src/components/accounts/AccountModal.jsx`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/components/accounts/AccountModal.jsx)**:
-   - Adaptive bottom sheet (mobile) / centered dialog (desktop) with `useScrollLock`.
-   - Philippine Financial Institution Presets:
-     - **E-Wallets**: GCash (Blue), Maya (Green), ShopeePay (Orange), GrabPay.
-     - **Banks**: BDO (Dark Blue), BPI (Red), UnionBank (Orange), Metrobank (Blue), GoTyme, SeaBank.
-     - **Cash & Cards**: Physical Cash, Credit Card, Savings Jar.
-   - Initial balance input, custom name, and color picker.
-4. **[`src/hooks/useAccounts.js`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/hooks/useAccounts.js)**:
-   - Real-time data fetching, optimistic caching, balance aggregates, and Supabase CRUD operations.
+### 2. Philippine Preset Taxonomy:
+- **Expenses**:
+  - 🍔 Food & Dining (`#f97316`, `UtensilsCrossed`)
+  - 🛒 Groceries & Supermarket (`#10b981`, `ShoppingCart`)
+  - 🚗 Transportation & Commute (Jeepney/Bus/Gas) (`#06b6d4`, `Car`)
+  - 💡 Utilities (Meralco/Maynilad/Telco) (`#eab308`, `Zap`)
+  - 🏠 Housing & Rent (`#6366f1`, `Home`)
+  - 🛍️ Shopping & Personal Care (`#ec4899`, `ShoppingBag`)
+  - 🏥 Healthcare & Pharmacy (`#ef4444`, `HeartPulse`)
+  - 🎮 Entertainment & Leisure (`#8b5cf6`, `Gamepad2`)
+  - 📚 Education & Self-Improvement (`#3b82f6`, `GraduationCap`)
+  - 💸 Bills & Subscriptions (`#14b8a6`, `Receipt`)
+  - 🐾 Pets (`#d97706`, `Dog`)
+  - 🎁 Gifts & Donations (`#f43f5e`, `Gift`)
+  - 📦 Other Expenses (`#64748b`, `MoreHorizontal`)
+- **Income**:
+  - 💰 Salary & Wages (`#10b981`, `Banknote`)
+  - 💼 Freelance & Side Hustles (`#8b5cf6`, `Briefcase`)
+  - 🏢 Business & Sales (`#3b82f6`, `Store`)
+  - 📈 Investments & Dividends (`#06b6d4`, `TrendingUp`)
+  - 🎁 Allowance & Gifts (`#ec4899`, `Gift`)
+  - 💵 Other Income (`#64748b`, `Coins`)
+
+### 3. Frontend Architecture:
+1. **[`src/services/categoryService.js`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/services/categoryService.js)**:
+   - Supabase CRUD operations, automatic seeding for new users, fallback default categories list.
+2. **[`src/hooks/useCategories.js`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/hooks/useCategories.js)**:
+   - Custom hook managing categories state, income vs expense filtering, real-time subscription.
+3. **[`src/pages/CategoriesPage.jsx`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/pages/CategoriesPage.jsx)**:
+   - Segmented toggle (`Expenses` vs `Income`), search filter, grid display with Neumorphic cards.
+4. **[`src/components/categories/CategoryModal.jsx`](file:///c:/Users/ACER/OneDrive/Desktop/budget-tracker/src/components/categories/CategoryModal.jsx)**:
+   - Mobile bottom sheet / desktop dialog to create or edit custom categories with color/icon picker.
 
 ---
 
@@ -86,8 +103,9 @@ create policy "Users can delete own accounts" on public.accounts for delete usin
 
 ---
 
-## 🧪 Verification & Testing Plan for Step 4
-- **Database Operations**: Create accounts, verify balances save and update properly in Supabase with RLS.
-- **UI Responsiveness**: Test wallet grid on mobile viewport (`<640px`) and desktop (`>1024px`).
-- **Filipino Presets**: Confirm quick-select presets for GCash, Maya, BDO, BPI prefill appropriate names, icons, and colors.
+## 🧪 Verification & Testing Plan for Step 5
+- **Database Operations**: Migration for `categories` table with RLS and user scoping.
+- **Seeded Categories**: Verify default Philippine categories load automatically for expenses and income.
+- **Custom Categories**: Create, edit, and delete custom categories with custom icons and colors.
+- **UI Responsiveness**: Test category grid & modal on mobile (<640px) and desktop (>1024px).
 - **Build Quality**: Run `npm run build` to verify 0 errors.

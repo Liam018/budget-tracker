@@ -54,21 +54,19 @@ export default function WatchlistItemCard({
 
   return (
     <motion.div
-      layout
-      key={code}
-      initial={{ opacity: 0, scale: 0.85, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
+      layout="position"
+      initial={{ opacity: 0, scale: 0.9, boxShadow: NEU.insetSm }}
+      animate={{ opacity: 1, scale: 1, boxShadow: NEU.insetSm }}
       exit={{
         opacity: 0,
-        scale: 0.8,
-        y: -8,
-        transition: { duration: 0.18 },
+        scale: 0.85,
+        boxShadow: NEU.insetSm,
+        transition: { duration: 0.15, ease: "easeOut" },
       }}
       transition={{
-        layout: { type: "spring", stiffness: 420, damping: 32 },
-        opacity: { duration: 0.2 },
-        scale: { type: "spring", stiffness: 420, damping: 32 },
-        y: { type: "spring", stiffness: 420, damping: 32 },
+        layout: { type: "spring", stiffness: 380, damping: 30 },
+        opacity: { duration: 0.15 },
+        scale: { duration: 0.15 },
       }}
       whileHover={{ y: -2 }}
       onClick={handleSelect}
@@ -79,9 +77,9 @@ export default function WatchlistItemCard({
           ? `Click to convert ${fromCurrency} with ${code}`
           : undefined
       }
-      className={`p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between group relative select-none transition-all ${
+      className={`p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between group relative select-none ${
         isSelected ? "ring-2 ring-brand-500/30" : ""
-      } ${onSelectCurrency ? "cursor-pointer hover:shadow-md" : ""}`}
+      } ${onSelectCurrency ? "cursor-pointer" : ""}`}
       style={{
         background: NEU.bg,
         boxShadow: NEU.insetSm,

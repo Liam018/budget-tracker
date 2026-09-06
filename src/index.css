@@ -69,7 +69,7 @@ textarea {
   --color-transfer: #3b82f6;
   --color-warning: #f59e0b;
 
-  /* Neumorphic surface - this where you can adjust the colors if needed */ 
+  /* Neumorphic surface - this where you can adjust the colors if needed */
   --neu-bg: #edf0f7;
   --neu-dark: rgba(200, 204, 216, 0.4);
   --neu-light: rgba(255, 255, 255, 0.8);

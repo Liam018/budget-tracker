@@ -14,8 +14,8 @@
  *   --neu-light: rgba(255, 255, 255, 0.8)
  */
 
-const dark = "rgba(200, 204, 216, 0.4)"
-const light = "rgba(255, 255, 255, 0.8)"
+const dark = "rgba(200, 204, 216, 0.6)"
+const light = "rgba(255, 255, 255, 0.7)"
 
 export const NEU = {
   /** Background surface color */
