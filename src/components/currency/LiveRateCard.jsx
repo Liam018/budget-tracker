@@ -8,7 +8,7 @@ import { CountryFlag } from "../ui"
  *
  * Memoized for high performance while staying reactive to row layout changes.
  */
-function LiveRateCard({ curr, rate, isDoubleRow, index = 0 }) {
+function LiveRateCard({ curr, rate, isTripleRow, index = 0 }) {
   return (
     <motion.div
       layout

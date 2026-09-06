@@ -18,6 +18,23 @@ export const neuButtonTap = {
   transition: { duration: 0.08, ease: "easeIn" },
 }
 
+/**
+ * Neumorphic Chip / Pill Elevation Gestures (without white specular glow)
+ */
+export const neuChipShadow = "2px 2px 5px rgba(200, 204, 216, 0.5)"
+
+export const neuChipHover = {
+  y: -1.5,
+  boxShadow: "3px 3px 8px rgba(200, 204, 216, 0.65)",
+  transition: { duration: 0.15, ease: "easeOut" },
+}
+
+export const neuChipTap = {
+  y: 1,
+  boxShadow: "inset 2px 2px 4px rgba(200, 204, 216, 0.5)",
+  transition: { duration: 0.08, ease: "easeIn" },
+}
+
 
 /**
  * Bottom Sheet Variants — Container rises from the bottom with spring momentum

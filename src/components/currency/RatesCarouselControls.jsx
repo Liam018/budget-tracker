@@ -5,22 +5,22 @@ import {
   ChevronLeft,
   ChevronRight,
   Rows2,
-  StretchHorizontal,
+  Rows3,
 } from "lucide"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover } from "../../lib/animations"
 
 /**
  * RatesCarouselControls — Control cluster for row layout toggling
- * (1-row vs 2-row) and continuous glide navigation buttons.
+ * (2-row default vs 3-row toggle) and continuous glide navigation buttons.
  *
  * Employs robust explicit pointer tracking with window release fallbacks
  * to ensure long-press and swipe gestures never leave arrow buttons stuck
  * in a pressed state.
  */
 export default function RatesCarouselControls({
-  isDoubleRow,
-  onToggleDoubleRow,
+  isTripleRow = false,
+  onToggleTripleRow,
   canScrollLeft,
   canScrollRight,
   onStartScroll,
@@ -78,29 +78,29 @@ export default function RatesCarouselControls({
 
   return (
     <div className="flex items-center gap-1.5 shrink-0">
-      {/* Double Row Layout Toggle */}
+      {/* 2-Row vs 3-Row Layout Toggle */}
       <motion.button
-        whileHover={isDoubleRow ? {} : neuButtonHover}
-        whileTap={{ y: 1, boxShadow: isDoubleRow ? NEU.insetSm : NEU.pressed }}
-        onClick={onToggleDoubleRow}
-        title={isDoubleRow ? "Switch to 1 row" : "Switch to 2 rows"}
+        whileHover={isTripleRow ? {} : neuButtonHover}
+        whileTap={{ y: 1, boxShadow: isTripleRow ? NEU.insetSm : NEU.pressed }}
+        onClick={onToggleTripleRow}
+        title={isTripleRow ? "Switch to 2 rows" : "Switch to 3 rows"}
         className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center cursor-pointer select-none touch-manipulation transition-[transform,color] ${
-          isDoubleRow
+          isTripleRow
             ? "text-brand-600"
             : "text-neutral-500 hover:text-brand-600 active:text-brand-600"
         }`}
         style={{
           background: NEU.bg,
-          boxShadow: isDoubleRow ? NEU.insetSm : NEU.raisedSm,
+          boxShadow: isTripleRow ? NEU.insetSm : NEU.raisedSm,
         }}
-        aria-label={isDoubleRow ? "Switch to 1 row" : "Switch to 2 rows"}
+        aria-label={isTripleRow ? "Switch to 2 rows" : "Switch to 3 rows"}
       >
         <MorphIcon
-          icon={isDoubleRow ? Rows2 : StretchHorizontal}
+          icon={isTripleRow ? Rows3 : Rows2}
           size={15}
           strokeWidth={2.4}
           spring="bouncy"
-          className={isDoubleRow ? "text-brand-600" : "text-neutral-500"}
+          className={isTripleRow ? "text-brand-600" : "text-neutral-500"}
         />
       </motion.button>
 

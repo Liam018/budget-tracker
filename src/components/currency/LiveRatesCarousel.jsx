@@ -16,7 +16,8 @@ import LiveRateCard from "./LiveRateCard"
  * Features mouse drag-to-glide, hold-to-scroll, and auto-disabling boundary arrows.
  */
 export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
-  const [isDoubleRow, setIsDoubleRow] = useState(false)
+  // 2 rows by default, toggle to 3 rows
+  const [isTripleRow, setIsTripleRow] = useState(false)
   const [selectedRegion, setSelectedRegion] = useState("all")
 
   // Filter out current currency from reference list
@@ -41,7 +42,7 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
     startContinuousScroll,
     stopContinuousScroll,
     sliderProps,
-  } = useCarouselScroll([selectedRegion, isDoubleRow, filteredCurrencies.length])
+  } = useCarouselScroll([selectedRegion, isTripleRow, filteredCurrencies.length])
 
   return (
     <div className="mt-5 pt-4 border-t border-neutral-200/60">
@@ -55,10 +56,10 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
           </p>
         </div>
 
-        {/* Controls: 1 Row / 2 Rows Toggle & Navigation Arrows */}
+        {/* Controls: 2 Rows (default) / 3 Rows Toggle & Navigation Arrows */}
         <RatesCarouselControls
-          isDoubleRow={isDoubleRow}
-          onToggleDoubleRow={() => setIsDoubleRow((prev) => !prev)}
+          isTripleRow={isTripleRow}
+          onToggleTripleRow={() => setIsTripleRow((prev) => !prev)}
           canScrollLeft={canScrollLeft}
           canScrollRight={canScrollRight}
           onStartScroll={startContinuousScroll}
@@ -74,7 +75,7 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
         />
       </div>
 
-      {/* Horizontal Sliding Row or Double Row Grid (Mouse & Touch Draggable) */}
+      {/* Horizontal Sliding 2-Row or 3-Row Grid (Mouse & Touch Draggable) */}
       <div
         {...sliderProps}
         className="overflow-x-auto scrollbar-none py-3 px-2 overscroll-x-contain cursor-grab active:cursor-grabbing select-none relative"
@@ -86,9 +87,9 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
         <div
           ref={contentRef}
           className={
-            isDoubleRow
-              ? "grid grid-rows-2 grid-flow-col gap-3 w-max"
-              : "flex gap-3 w-max"
+            isTripleRow
+              ? "grid grid-rows-3 grid-flow-col gap-3 w-max"
+              : "grid grid-rows-2 grid-flow-col gap-3 w-max"
           }
         >
           <AnimatePresence mode="popLayout" initial={false}>
@@ -101,7 +102,7 @@ export default function LiveRatesCarousel({ ratesData, currentCurrencyCode }) {
                   key={curr.code}
                   curr={curr}
                   rate={r}
-                  isDoubleRow={isDoubleRow}
+                  isTripleRow={isTripleRow}
                   index={index}
                 />
               )

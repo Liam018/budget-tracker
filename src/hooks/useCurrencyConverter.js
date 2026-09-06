@@ -43,28 +43,52 @@ export function useCurrencyConverter(defaultBase = "PHP") {
     loadRates(defaultBase)
   }, [defaultBase, loadRates])
 
+  // Guarded setters to prevent source and target being the same currency
+  const handleSetFromCurrency = useCallback((code) => {
+    if (code === toCurrency) {
+      toast.error("Source and target currencies cannot be the same", {
+        id: "same-currency-guard",
+      })
+      return false
+    }
+    setFromCurrency(code)
+    return true
+  }, [toCurrency])
+
+  const handleSetToCurrency = useCallback((code) => {
+    if (code === fromCurrency) {
+      toast.error("Target and source currencies cannot be the same", {
+        id: "same-currency-guard",
+      })
+      return false
+    }
+    setToCurrency(code)
+    return true
+  }, [fromCurrency])
+
   // Swap currencies with icon morphing trigger
   const handleSwapCurrencies = useCallback(() => {
+    if (fromCurrency === toCurrency) return
     setIsSwapped((prev) => !prev)
     setFromCurrency((prevFrom) => {
       setToCurrency(prevFrom)
       return toCurrency
     })
-  }, [toCurrency])
+  }, [toCurrency, fromCurrency])
 
-  // Computed values
+  // Computed values — returns 0 if currencies are identical
   const convertedValue = useMemo(() => {
-    if (!ratesData) return 0
+    if (!ratesData || fromCurrency === toCurrency) return 0
     return convertCurrency(Number(convertAmount), fromCurrency, toCurrency, ratesData)
   }, [ratesData, convertAmount, fromCurrency, toCurrency])
 
   const singleUnitRate = useMemo(() => {
-    if (!ratesData) return 0
+    if (!ratesData || fromCurrency === toCurrency) return 0
     return convertCurrency(1, fromCurrency, toCurrency, ratesData)
   }, [ratesData, fromCurrency, toCurrency])
 
   const inverseRate = useMemo(() => {
-    if (!ratesData) return 0
+    if (!ratesData || fromCurrency === toCurrency) return 0
     return convertCurrency(1, toCurrency, fromCurrency, ratesData)
   }, [ratesData, fromCurrency, toCurrency])
 
@@ -109,9 +133,9 @@ export function useCurrencyConverter(defaultBase = "PHP") {
     addAmount,
     clearAmount,
     fromCurrency,
-    setFromCurrency,
+    setFromCurrency: handleSetFromCurrency,
     toCurrency,
-    setToCurrency,
+    setToCurrency: handleSetToCurrency,
     loadRates,
     handleSwapCurrencies,
     convertedValue,

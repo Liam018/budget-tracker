@@ -11,6 +11,8 @@ import { neuButtonHover } from "../../lib/animations"
 export default function CurrencyListItem({
   currency,
   isSelected,
+  isDisabled,
+  disabledReason,
   onSelect,
   disabled,
   index,
@@ -19,24 +21,30 @@ export default function CurrencyListItem({
     <motion.button
       layout
       initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: isDisabled ? 0.45 : 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{
         layout: { type: "spring", stiffness: 400, damping: 32 },
         opacity: { duration: 0.15 },
         y: { duration: 0.18, delay: Math.min(index * 0.018, 0.12) },
       }}
-      whileHover={isSelected ? {} : neuButtonHover}
-      whileTap={{
-        y: 1,
-        boxShadow: isSelected ? NEU.insetSm : NEU.pressed,
-      }}
+      whileHover={isSelected || isDisabled ? {} : neuButtonHover}
+      whileTap={
+        isDisabled
+          ? {}
+          : {
+              y: 1,
+              boxShadow: isSelected ? NEU.insetSm : NEU.pressed,
+            }
+      }
       onClick={onSelect}
-      disabled={disabled}
-      className={`w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors cursor-pointer text-left select-none ${
-        isSelected
-          ? "text-brand-600 font-bold"
-          : "text-neutral-700 hover:text-neutral-900"
+      disabled={disabled || isDisabled}
+      className={`w-full flex items-center justify-between p-3.5 rounded-2xl transition-colors text-left select-none ${
+        isDisabled
+          ? "cursor-not-allowed opacity-45 text-neutral-400"
+          : isSelected
+          ? "text-brand-600 font-bold cursor-pointer"
+          : "text-neutral-700 hover:text-neutral-900 cursor-pointer"
       }`}
       style={{
         background: NEU.bg,
@@ -46,9 +54,16 @@ export default function CurrencyListItem({
       <div className="flex items-center gap-3.5 min-w-0">
         <CountryFlag code={currency.code} size="lg" />
         <div className="min-w-0">
-          <p className="text-xs font-bold leading-tight truncate">
-            {currency.code} — {currency.name}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-bold leading-tight truncate">
+              {currency.code} — {currency.name}
+            </p>
+            {disabledReason && (
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-neutral-200/80 text-neutral-500 uppercase tracking-wider shrink-0">
+                {disabledReason}
+              </span>
+            )}
+          </div>
           <p className="text-[11px] text-neutral-400 leading-tight mt-0.5">
             Symbol: {currency.symbol}
           </p>

@@ -31,7 +31,6 @@ export default function useCurrencyWatchlist(fromCurrency = "PHP") {
   const togglePin = useCallback((code) => {
     setPinnedCodes((prev) => {
       if (prev.includes(code)) {
-        if (prev.length <= 1) return prev // Keep at least 1 pinned
         return prev.filter((c) => c !== code)
       }
       return [...prev, code]

@@ -6,9 +6,9 @@ const QUICK_DELTAS = [10, 50, 100, 500, 1000]
 
 /**
  * CurrencyQuickAmounts — Tactile Neumorphic Quick Amount Pills
- * Allows one-tap incrementing and reset of the conversion amount.
+ * Allows one-tap incrementing of the conversion amount.
  */
-export default function CurrencyQuickAmounts({ onAddAmount, onClearAmount, currentAmount }) {
+export default function CurrencyQuickAmounts({ onAddAmount }) {
   return (
     <div className="flex items-center gap-1.5 flex-wrap mt-2 select-none">
       <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mr-0.5">
@@ -30,22 +30,6 @@ export default function CurrencyQuickAmounts({ onAddAmount, onClearAmount, curre
           +{delta >= 1000 ? `${delta / 1000}k` : delta}
         </motion.button>
       ))}
-
-      {parseFloat(currentAmount) > 0 && (
-        <motion.button
-          type="button"
-          whileHover={neuButtonHover}
-          whileTap={neuButtonTap}
-          onClick={onClearAmount}
-          className="px-2 py-0.5 rounded-lg text-[10px] font-bold text-rose-500 hover:text-rose-600 transition-colors cursor-pointer shrink-0 ml-1"
-          style={{
-            background: NEU.bg,
-            boxShadow: NEU.raisedSm,
-          }}
-        >
-          Clear
-        </motion.button>
-      )}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   ArrowRightLeft,
   ArrowLeftRight,
   ChevronDown,
+  X,
 } from "lucide"
 import { SUPPORTED_CURRENCIES } from "../../services/currencyService"
 import { CountryFlag } from "../ui"
@@ -47,6 +48,29 @@ export default function CurrencyConverterCard({
 }) {
   // Which picker sheet is open: "from" | "to" | null
   const [openPicker, setOpenPicker] = useState(null)
+  // Refresh button state: "idle" | "spinning" | "checked"
+  const [refreshState, setRefreshState] = useState("idle")
+
+  const handleRefreshClick = async () => {
+    if (refreshState !== "idle" || isLoadingRates) return
+    setRefreshState("spinning")
+
+    try {
+      // Ensure a smooth rotation cycle (~700ms for 360°) before transitioning to check
+      const minSpin = new Promise((resolve) => setTimeout(resolve, 700))
+      const refreshCall = Promise.resolve(onRefresh?.())
+      await Promise.all([minSpin, refreshCall])
+      setRefreshState("checked")
+      setTimeout(() => {
+        setRefreshState("idle")
+      }, 1500)
+    } catch {
+      setRefreshState("idle")
+    }
+  }
+
+  const isChecked = refreshState === "checked"
+  const isSpinning = refreshState === "spinning"
 
   const fromCurrencyObj =
     SUPPORTED_CURRENCIES.find((c) => c.code === fromCurrency) ||
@@ -95,32 +119,49 @@ export default function CurrencyConverterCard({
           </div>
         </div>
 
-        {/* Refresh Button (Morphs from RefreshCw into Check on success) */}
+        {/* Refresh Button (Rotates first, then morphs into Check on success) */}
         <motion.button
-          whileHover={isRefreshed ? {} : neuButtonHover}
-          whileTap={neuButtonTap}
-          onClick={onRefresh}
-          disabled={isLoadingRates}
-          title="Refresh exchange rates"
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-500 hover:text-brand-600 transition-[transform,color] cursor-pointer select-none shrink-0"
+          whileHover={isChecked ? {} : neuButtonHover}
+          whileTap={isChecked ? {} : neuButtonTap}
+          onClick={handleRefreshClick}
+          disabled={isSpinning || isLoadingRates}
+          title={isChecked ? "Exchange rates updated" : "Refresh exchange rates"}
+          aria-label={isChecked ? "Exchange rates updated" : "Refresh exchange rates"}
+          className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all select-none shrink-0 ${
+            isChecked
+              ? "cursor-default text-emerald-600"
+              : isSpinning
+              ? "cursor-wait text-brand-600"
+              : "cursor-pointer text-neutral-500 hover:text-brand-600"
+          }`}
           style={{
             background: NEU.bg,
-            boxShadow: isRefreshed ? NEU.insetSm : NEU.raisedSm,
+            boxShadow: isChecked ? NEU.insetSm : NEU.raisedSm,
           }}
         >
-          <MorphIcon
-            icon={isRefreshed ? Check : RefreshCw}
-            size={15}
-            strokeWidth={2.4}
-            spring="bouncy"
-            className={
-              isRefreshed
-                ? "text-emerald-600"
-                : isLoadingRates
-                ? "animate-spin text-brand-600"
-                : "text-neutral-500"
+          <motion.div
+            animate={isSpinning ? { rotate: 360 } : { rotate: 0 }}
+            transition={
+              isSpinning
+                ? { repeat: Infinity, duration: 0.7, ease: "linear" }
+                : { duration: 0 }
             }
-          />
+            className="flex items-center justify-center"
+          >
+            <MorphIcon
+              icon={isChecked ? Check : RefreshCw}
+              size={15}
+              strokeWidth={2.4}
+              spring="bouncy"
+              className={
+                isChecked
+                  ? "text-emerald-600"
+                  : isSpinning
+                  ? "text-brand-600"
+                  : "text-neutral-500"
+              }
+            />
+          </motion.div>
         </motion.button>
       </div>
 
@@ -150,6 +191,24 @@ export default function CurrencyConverterCard({
               placeholder="0.00"
             />
 
+            {/* In-Input Quick Clear Button */}
+            {Boolean(convertAmount) && (
+              <motion.button
+                type="button"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={clearAmount}
+                title="Clear amount"
+                aria-label="Clear amount"
+                className="w-6 h-6 rounded-full flex items-center justify-center text-neutral-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+              >
+                <MorphIcon icon={X} size={13} strokeWidth={2.5} />
+              </motion.button>
+            )}
+
             {/* From Currency Pill — opens picker sheet */}
             <motion.button
               whileHover={neuButtonHover}
@@ -174,11 +233,9 @@ export default function CurrencyConverterCard({
           </div>
 
           {/* Quick Amount Presets */}
-          {addAmount && clearAmount && (
+          {addAmount && (
             <CurrencyQuickAmounts
               onAddAmount={addAmount}
-              onClearAmount={clearAmount}
-              currentAmount={convertAmount}
             />
           )}
         </div>
@@ -193,10 +250,15 @@ export default function CurrencyConverterCard({
           </div>
           <div className="h-13 flex items-center justify-center">
             <motion.button
-              whileHover={neuButtonHover}
-              whileTap={neuButtonTap}
+              whileHover={fromCurrency === toCurrency ? {} : neuButtonHover}
+              whileTap={fromCurrency === toCurrency ? {} : neuButtonTap}
               onClick={onSwap}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-brand-600 cursor-pointer transition-[transform] select-none"
+              disabled={fromCurrency === toCurrency}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-[transform] select-none ${
+                fromCurrency === toCurrency
+                  ? "opacity-50 cursor-not-allowed text-neutral-400"
+                  : "text-brand-600 cursor-pointer"
+              }`}
               style={{
                 background: NEU.bg,
                 boxShadow: NEU.raisedSm,
@@ -209,7 +271,7 @@ export default function CurrencyConverterCard({
                   size={16}
                   strokeWidth={2.4}
                   spring="bouncy"
-                  className="text-brand-600"
+                  className={fromCurrency === toCurrency ? "text-neutral-400" : "text-brand-600"}
                 />
               </div>
             </motion.button>
@@ -279,6 +341,8 @@ export default function CurrencyConverterCard({
         isOpen={openPicker === "from"}
         onClose={() => setOpenPicker(null)}
         currentCurrencyCode={fromCurrency}
+        disabledCurrencyCode={toCurrency}
+        disabledReason="Target"
         onSelectCurrency={(code) => {
           setFromCurrency(code)
           setOpenPicker(null)
@@ -294,6 +358,8 @@ export default function CurrencyConverterCard({
         isOpen={openPicker === "to"}
         onClose={() => setOpenPicker(null)}
         currentCurrencyCode={toCurrency}
+        disabledCurrencyCode={fromCurrency}
+        disabledReason="Source"
         onSelectCurrency={(code) => {
           setToCurrency(code)
           setOpenPicker(null)

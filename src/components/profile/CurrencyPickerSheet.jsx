@@ -4,6 +4,7 @@ import { MorphIcon } from "morphicons/react"
 import { X } from "lucide"
 import { SUPPORTED_CURRENCIES } from "../../services/currencyService"
 import { useScrollLock } from "../../hooks/useScrollLock"
+import { toast } from "../ui"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 import CurrencyListItem from "./CurrencyListItem"
@@ -15,9 +16,11 @@ import CurrencySearchBar from "./CurrencySearchBar"
  * - Desktop: Centered Neumorphic dialog with scale spring physics & Escape listener.
  *
  * Props:
- *   title          — Sheet heading (default: "Choose Default Currency")
- *   subtitle       — Subheading below title
- *   closeOnSelect  — Auto-close after selection (default: false, caller handles)
+ *   title                — Sheet heading (default: "Choose Default Currency")
+ *   subtitle             — Subheading below title
+ *   closeOnSelect        — Auto-close after selection (default: false, caller handles)
+ *   disabledCurrencyCode — Code of currency that cannot be selected (e.g. current counterpart)
+ *   disabledReason       — Tag/tooltip text for disabled currency (e.g. "Target", "Source")
  *
  * Search is debounced (300ms) so filtering only runs after the user pauses typing.
  * Results animate in/out with staggered spring physics via AnimatePresence + layout.
@@ -31,6 +34,8 @@ export default function CurrencyPickerSheet({
   title = "Choose Default Currency",
   subtitle = "Select your primary currency for accounts and analytics",
   closeOnSelect = false,
+  disabledCurrencyCode = null,
+  disabledReason = null,
 }) {
   const [searchQuery, setSearchQuery] = useState("")
   // deferredQuery lags behind searchQuery by ~300ms — React processes
@@ -225,16 +230,28 @@ export default function CurrencyPickerSheet({
               <AnimatePresence mode="popLayout" initial={false}>
                 {filteredCurrencies.map((c, index) => {
                   const isSelected = c.code === currentCurrencyCode
+                  const isDisabled = Boolean(disabledCurrencyCode && c.code === disabledCurrencyCode)
                   return (
                     <CurrencyListItem
                       key={c.code}
                       currency={c}
                       isSelected={isSelected}
+                      isDisabled={isDisabled}
+                      disabledReason={isDisabled ? disabledReason : null}
                       onSelect={() => {
+                        if (isDisabled) {
+                          toast.error(
+                            disabledReason
+                              ? `Cannot select the same currency as ${disabledReason.toLowerCase()}`
+                              : "Source and target currencies cannot be the same",
+                            { id: "same-currency-guard" }
+                          )
+                          return
+                        }
                         onSelectCurrency(c.code)
                         if (closeOnSelect) onClose()
                       }}
-                      disabled={isUpdating}
+                      disabled={isUpdating || isDisabled}
                       index={index}
                     />
                   )

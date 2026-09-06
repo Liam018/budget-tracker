@@ -27,21 +27,87 @@ export default function ConversionResultCard({
 }) {
   const [copied, setCopied] = useState(false)
 
-  const handleCopy = async () => {
-    if (!convertedValue) return
-    const formattedVal = convertedValue.toLocaleString(undefined, {
+  const isSameCurrency = Boolean(fromCurrency && toCurrency && fromCurrency === toCurrency)
+
+  const handleCopy = async (e) => {
+    e?.stopPropagation?.()
+    if (copied || isSameCurrency) return
+    if (convertedValue === null || convertedValue === undefined) return
+
+    const numVal =
+      typeof convertedValue === "number" && !isNaN(convertedValue)
+        ? convertedValue
+        : 0
+    const formattedVal = numVal.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 4,
     })
-    const text = `${convertAmount || "0"} ${fromCurrency} = ${toCurrencyObj?.symbol || ""}${formattedVal} ${toCurrency} (1 ${fromCurrency} = ${singleUnitRate} ${toCurrency})`
+    const text = `${convertAmount || "0"} ${fromCurrency} = ${toCurrencyObj?.symbol || ""}${formattedVal} ${toCurrency} (1 ${fromCurrency} = ${singleUnitRate ? singleUnitRate.toFixed(4) : "..."} ${toCurrency})`
 
-    try {
-      await navigator.clipboard.writeText(text)
+    let success = false
+
+    // Method 1: Modern asynchronous Clipboard API (secure context HTTPS or localhost)
+    if (navigator?.clipboard?.writeText && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text)
+        success = true
+      } catch (err) {
+        console.warn("navigator.clipboard.writeText failed, attempting fallback:", err)
+      }
+    }
+
+    // Method 2: Robust fallback for iOS Safari, Android Chrome, HTTP LAN, and webviews
+    if (!success) {
+      try {
+        const textArea = document.createElement("textarea")
+        textArea.value = text
+        // Keep in viewport without visual disruption or keyboard popup
+        textArea.style.position = "fixed"
+        textArea.style.top = "0"
+        textArea.style.left = "0"
+        textArea.style.width = "2em"
+        textArea.style.height = "2em"
+        textArea.style.padding = "0"
+        textArea.style.border = "none"
+        textArea.style.outline = "none"
+        textArea.style.boxShadow = "none"
+        textArea.style.background = "transparent"
+        textArea.style.fontSize = "16px" // Prevents iOS Safari auto-zoom
+        document.body.appendChild(textArea)
+
+        textArea.focus()
+        textArea.select()
+        textArea.setSelectionRange(0, text.length)
+
+        // Mobile iOS selection range fallback
+        const range = document.createRange()
+        range.selectNodeContents(textArea)
+        const selection = window.getSelection()
+        if (selection) {
+          selection.removeAllRanges()
+          selection.addRange(range)
+        }
+
+        success = document.execCommand("copy")
+        if (selection) {
+          selection.removeAllRanges()
+        }
+        document.body.removeChild(textArea)
+      } catch (err) {
+        console.error("Copy fallback failed:", err)
+      }
+    }
+
+    if (success) {
       setCopied(true)
-      toast.success("Conversion copied to clipboard")
+      toast.success("Conversion copied to clipboard", {
+        id: "copy-conversion-result",
+      })
       setTimeout(() => setCopied(false), 1800)
-    } catch {
-      toast.error("Failed to copy to clipboard")
+    } else {
+      toast.error("Failed to copy to clipboard", {
+        id: "copy-conversion-result",
+      })
     }
   }
 
@@ -54,50 +120,78 @@ export default function ConversionResultCard({
           boxShadow: NEU.insetSm,
         }}
       >
-        <div className="min-w-0 pr-8 sm:pr-0">
+        <div className="min-w-0">
           <p className="text-xs font-bold text-neutral-500">
             {convertAmount || "0"} {fromCurrency} =
           </p>
-          <p className="text-2xl sm:text-3xl font-black text-brand-600 tracking-tight mt-0.5 truncate">
-            {toCurrencyObj?.symbol || ""}{" "}
-            {convertedValue !== null
-              ? convertedValue.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 4,
-                })
-              : "..."}
-            <span className="text-sm font-bold text-neutral-400 ml-1.5 font-sans">
-              {toCurrency}
-            </span>
-          </p>
+          {isSameCurrency ? (
+            <p className="text-sm sm:text-base font-bold text-amber-600 mt-1">
+              Select different currencies to convert
+            </p>
+          ) : (
+            <p className="text-2xl sm:text-3xl font-black text-brand-600 tracking-tight mt-0.5 truncate">
+              {toCurrencyObj?.symbol || ""}{" "}
+              {convertedValue !== null && !isNaN(convertedValue)
+                ? convertedValue.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 4,
+                  })
+                : "..."}
+              <span className="text-sm font-bold text-neutral-400 ml-1.5 font-sans">
+                {toCurrency}
+              </span>
+            </p>
+          )}
         </div>
 
         <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-neutral-200/50 shrink-0">
-          <div className="sm:text-right">
+          <div className="sm:text-right min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 block">
               Direct &amp; Inverse Rate
             </span>
-            <span className="text-xs sm:text-sm font-extrabold text-neutral-800 block">
-              1 {fromCurrency} = {singleUnitRate ? singleUnitRate.toFixed(4) : "..."} {toCurrency}
-            </span>
-            {inverseRate > 0 && fromCurrency !== toCurrency && (
-              <span className="text-[11px] font-semibold text-neutral-500 block mt-0.5">
-                1 {toCurrency} = {inverseRate.toFixed(4)} {fromCurrency}
+            {isSameCurrency ? (
+              <span className="text-xs font-semibold text-neutral-400 block">
+                Identical currencies (1:1)
               </span>
+            ) : (
+              <>
+                <span className="text-xs sm:text-sm font-extrabold text-neutral-800 block truncate">
+                  1 {fromCurrency} = {singleUnitRate ? singleUnitRate.toFixed(4) : "..."} {toCurrency}
+                </span>
+                {inverseRate > 0 && fromCurrency !== toCurrency && (
+                  <span className="text-[11px] font-semibold text-neutral-500 block mt-0.5 truncate">
+                    1 {toCurrency} = {inverseRate.toFixed(4)} {fromCurrency}
+                  </span>
+                )}
+              </>
             )}
           </div>
 
-          {/* Copy Result Button */}
+          {/* Copy Result Button — disabled when already copied or same currency */}
           <motion.button
             type="button"
-            whileHover={neuButtonHover}
-            whileTap={neuButtonTap}
+            disabled={copied || isSameCurrency}
+            whileHover={copied || isSameCurrency ? {} : neuButtonHover}
+            whileTap={copied || isSameCurrency ? {} : neuButtonTap}
             onClick={handleCopy}
-            title="Copy conversion summary"
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-neutral-600 hover:text-brand-600 transition-colors cursor-pointer select-none shrink-0"
+            title={
+              isSameCurrency
+                ? "Cannot copy conversion of identical currencies"
+                : copied
+                ? "Copied to clipboard"
+                : "Copy conversion summary"
+            }
+            aria-label={copied ? "Copied" : "Copy conversion summary"}
+            className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:px-2.5 sm:py-1.5 rounded-xl text-xs sm:text-[11px] font-bold transition-all select-none shrink-0 touch-manipulation z-10 ${
+              isSameCurrency
+                ? "cursor-not-allowed opacity-50 text-neutral-400"
+                : copied
+                ? "cursor-default text-emerald-600 opacity-95 pointer-events-none"
+                : "cursor-pointer text-neutral-600 hover:text-brand-600 active:scale-95"
+            }`}
             style={{
               background: NEU.bg,
-              boxShadow: NEU.raisedSm,
+              boxShadow: copied ? NEU.insetSm : NEU.raisedSm,
             }}
           >
             <MorphIcon

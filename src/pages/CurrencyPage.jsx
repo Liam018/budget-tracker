@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
 import { useAuth } from "../hooks/useAuth"
 import { useCurrencyConverter } from "../hooks/useCurrencyConverter"
-import { SUPPORTED_CURRENCIES } from "../services/currencyService"
 import {
   CurrencyConverterCard,
   CurrencyWatchlistCard,
@@ -28,7 +27,7 @@ export default function CurrencyPage() {
   const converter = useCurrencyConverter(currentCurrencyCode)
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 pb-6">
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 md:pb-20 pb-6">
       {/* ── Base Currency Quick Badge ── */}
       <div className="flex items-center justify-end">
         <motion.button
@@ -82,6 +81,7 @@ export default function CurrencyPage() {
       <CurrencyWatchlistCard
         convertAmount={converter.convertAmount}
         fromCurrency={converter.fromCurrency}
+        toCurrency={converter.toCurrency}
         ratesData={converter.ratesData}
         onSelectCurrency={(code) => converter.setToCurrency(code)}
       />
