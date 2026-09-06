@@ -117,7 +117,7 @@ export default function WatchlistHeader({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 4 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute right-0 top-full mt-2 z-30 min-w-[160px] p-1.5 rounded-2xl"
+                  className="absolute right-0 top-full mt-2 z-30 min-w-40 p-1.5 rounded-2xl"
                   style={{
                     background: NEU.bg,
                     boxShadow: NEU.raised,

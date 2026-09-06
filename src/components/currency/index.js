@@ -1,4 +1,6 @@
 export { default as CurrencyConverterCard } from "./CurrencyConverterCard"
+export { default as ConverterHeader } from "./ConverterHeader"
+export { default as ConverterInputs } from "./ConverterInputs"
 export { default as LiveRatesCarousel } from "./LiveRatesCarousel"
 export { default as ConversionResultCard } from "./ConversionResultCard"
 export { default as LiveRateCard } from "./LiveRateCard"
