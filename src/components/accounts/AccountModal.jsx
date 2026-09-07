@@ -73,6 +73,7 @@ export default function AccountModal({
   const [institution, setInstitution] = useState("")
   const [accountNumber, setAccountNumber] = useState("")
   const [activeTab, setActiveTab] = useState("presets") // "presets" | "custom"
+  const [showAppearanceOptions, setShowAppearanceOptions] = useState(false)
 
   const dragControls = useDragControls()
   useScrollLock(isOpen)
@@ -101,6 +102,7 @@ export default function AccountModal({
       setInstitution(accountToEdit.institution || "")
       setAccountNumber(accountToEdit.account_number || "")
       setActiveTab("custom")
+      setShowAppearanceOptions(true)
     } else {
       // Default to Cash preset
       setName("")
@@ -111,6 +113,7 @@ export default function AccountModal({
       setInstitution("")
       setAccountNumber("")
       setActiveTab("presets")
+      setShowAppearanceOptions(false)
     }
   }, [accountToEdit, isOpen])
 
@@ -203,183 +206,193 @@ export default function AccountModal({
             {...motionProps}
             className={`relative pointer-events-auto z-10 flex flex-col overflow-hidden select-none ${
               isMobile
-                ? "w-full max-w-lg mx-auto rounded-t-3xl max-h-[90dvh]"
-                : "w-full max-w-lg rounded-3xl max-h-[85vh] p-1"
+                ? "w-full max-w-lg mx-auto rounded-t-3xl max-h-[92dvh] h-auto"
+                : "w-full max-w-lg rounded-3xl max-h-[88vh] h-auto"
             }`}
             style={{
-              background: "var(--neu-bg)",
+              background: NEU.bg,
               boxShadow: isMobile
                 ? "0 -10px 25px -5px rgba(0, 0, 0, 0.12)"
-                : "var(--neu-raised)",
+                : NEU.raised,
             }}
           >
             {/* Mobile Pull Handle */}
             {isMobile && (
               <div
                 onPointerDown={(e) => dragControls.start(e)}
-                className="pt-3 pb-2 shrink-0 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
+                className="pt-3 pb-1.5 shrink-0 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing touch-none select-none"
                 aria-label="Drag down to close"
               >
                 <div
                   className="w-12 h-1.5 rounded-full"
                   style={{
-                    background: "var(--neu-bg)",
-                    boxShadow: "var(--neu-inset-sm)",
+                    background: NEU.bg,
+                    boxShadow: NEU.insetSm,
                   }}
                 />
               </div>
             )}
 
-            {/* Header */}
-            <div className="px-5 pt-2 pb-3 flex items-center justify-between border-b border-neutral-200/50">
-              <div className="flex items-center gap-2.5">
+            {/* Header (Pinned) */}
+            <div className="px-5 py-3.5 flex items-center justify-between border-b border-neutral-200/60 shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs transition-colors"
                   style={{ background: color }}
                 >
                   <MorphIcon
                     icon={ICON_MAP[icon] || Wallet}
-                    size={17}
+                    size={18}
                     strokeWidth={2.4}
                   />
                 </div>
-                <div>
-                  <h3 className="text-base font-extrabold text-neutral-800 tracking-tight leading-tight">
+                <div className="min-w-0">
+                  <h3 className="text-base font-extrabold text-neutral-800 tracking-tight leading-tight truncate">
                     {isEditing ? "Edit Account" : "Add New Account"}
                   </h3>
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-neutral-400 truncate">
                     {isEditing
                       ? "Update balance or account details"
-                      : "Choose a Philippine preset or customize"}
+                      : activeTab === "presets"
+                      ? "Pick a Philippine institution or customize"
+                      : "Create a custom account"}
                   </p>
                 </div>
               </div>
 
-              {!isMobile && (
-                <motion.button
-                  whileHover={neuButtonHover}
-                  whileTap={neuButtonTap}
-                  onClick={onClose}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
-                  style={{
-                    background: NEU.bg,
-                    boxShadow: NEU.raisedSm,
-                  }}
-                  aria-label="Close"
-                >
-                  <MorphIcon icon={X} size={15} strokeWidth={2.4} />
-                </motion.button>
-              )}
+              <motion.button
+                whileHover={neuButtonHover}
+                whileTap={neuButtonTap}
+                onClick={onClose}
+                type="button"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer shrink-0 ml-2"
+                style={{
+                  background: NEU.bg,
+                  boxShadow: NEU.raisedSm,
+                }}
+                aria-label="Close"
+              >
+                <MorphIcon icon={X} size={15} strokeWidth={2.4} />
+              </motion.button>
             </div>
 
-            {/* Scrollable Form Body */}
+            {/* Form Container with Flex Column so Body scrolls and Footer stays Pinned */}
             <form
               onSubmit={handleSubmit}
-              className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-none"
+              className="flex flex-col flex-1 min-h-0 overflow-hidden"
             >
-              {/* Presets vs Custom Segmented Switcher (Only when adding new) */}
-              {!isEditing && (
-                <div
-                  className="p-1 rounded-2xl flex items-center gap-1 mb-2"
-                  style={{
-                    background: NEU.bg,
-                    boxShadow: NEU.insetSm,
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("presets")}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === "presets"
-                        ? "text-brand-600 shadow-xs"
-                        : "text-neutral-500 hover:text-neutral-800"
-                    }`}
-                    style={
-                      activeTab === "presets"
-                        ? { background: NEU.bg, boxShadow: NEU.raisedSm }
-                        : {}
-                    }
+              {/* Scrollable Form Body */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-none">
+                {/* Presets vs Custom Segmented Switcher (Only when adding new) */}
+                {!isEditing && (
+                  <div
+                    className="p-1 rounded-2xl flex items-center gap-1"
+                    style={{
+                      background: NEU.bg,
+                      boxShadow: NEU.insetSm,
+                    }}
                   >
-                    <MorphIcon icon={Sparkles} size={13} strokeWidth={2.4} />
-                    <span>Philippine Presets</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("custom")}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === "custom"
-                        ? "text-brand-600 shadow-xs"
-                        : "text-neutral-500 hover:text-neutral-800"
-                    }`}
-                    style={
-                      activeTab === "custom"
-                        ? { background: NEU.bg, boxShadow: NEU.raisedSm }
-                        : {}
-                    }
-                  >
-                    <MorphIcon icon={Plus} size={13} strokeWidth={2.4} />
-                    <span>Custom Details</span>
-                  </button>
-                </div>
-              )}
-
-              {/* Philippine Presets Selection Grid */}
-              {!isEditing && activeTab === "presets" && (
-                <div className="space-y-2">
-                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
-                    Quick Pick (Popular in the Philippines)
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
-                    {PHILIPPINE_INSTITUTION_PRESETS.map((preset) => {
-                      const isSelected = name === preset.name
-                      const PresetIcon = ICON_MAP[preset.icon] || Wallet
-                      return (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => handleSelectPreset(preset)}
-                          className={`flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all cursor-pointer ${
-                            isSelected
-                              ? "text-neutral-800 font-extrabold"
-                              : "text-neutral-600 hover:text-neutral-900"
-                          }`}
-                          style={{
-                            background: NEU.bg,
-                            boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
-                          }}
-                        >
-                          <div
-                            className="w-7 h-7 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs text-xs"
-                            style={{ background: preset.color }}
-                          >
-                            <MorphIcon icon={PresetIcon} size={14} strokeWidth={2.4} />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold truncate leading-tight">
-                              {preset.name}
-                            </p>
-                            <span className="text-[9px] text-neutral-400 block truncate">
-                              {preset.badge}
-                            </span>
-                          </div>
-                        </button>
-                      )
-                    })}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("presets")}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "presets"
+                          ? "text-brand-600"
+                          : "text-neutral-500 hover:text-neutral-800"
+                      }`}
+                      style={
+                        activeTab === "presets"
+                          ? { background: NEU.bg, boxShadow: NEU.raisedSm }
+                          : {}
+                      }
+                    >
+                      <MorphIcon icon={Sparkles} size={13} strokeWidth={2.4} />
+                      <span>Philippine Presets</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab("custom")
+                        setShowAppearanceOptions(true)
+                      }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        activeTab === "custom"
+                          ? "text-brand-600"
+                          : "text-neutral-500 hover:text-neutral-800"
+                      }`}
+                      style={
+                        activeTab === "custom"
+                          ? { background: NEU.bg, boxShadow: NEU.raisedSm }
+                          : {}
+                      }
+                    >
+                      <MorphIcon icon={Plus} size={13} strokeWidth={2.4} />
+                      <span>Custom Details</span>
+                    </button>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Name & Type */}
-              <div className="space-y-3">
+                {/* Philippine Presets Selection Grid */}
+                {!isEditing && activeTab === "presets" && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
+                        Select Institution Preset
+                      </label>
+                      <span className="text-[10px] font-semibold text-neutral-400">
+                        {PHILIPPINE_INSTITUTION_PRESETS.length} available
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {PHILIPPINE_INSTITUTION_PRESETS.map((preset) => {
+                        const isSelected = institution === preset.name || name === preset.name
+                        const PresetIcon = ICON_MAP[preset.icon] || Wallet
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => handleSelectPreset(preset)}
+                            className={`flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all cursor-pointer ${
+                              isSelected
+                                ? "text-neutral-900 font-extrabold"
+                                : "text-neutral-600 hover:text-neutral-900"
+                            }`}
+                            style={{
+                              background: NEU.bg,
+                              boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
+                            }}
+                          >
+                            <div
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs text-xs"
+                              style={{ background: preset.color }}
+                            >
+                              <MorphIcon icon={PresetIcon} size={14} strokeWidth={2.4} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold truncate leading-tight">
+                                {preset.name}
+                              </p>
+                              <span className="text-[9px] text-neutral-400 block truncate">
+                                {preset.badge}
+                              </span>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Account Name */}
                 <div>
                   <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
                     Account Name *
                   </label>
                   <div
-                    className="flex items-center px-3.5 h-12 rounded-xl"
+                    className="flex items-center px-3.5 h-11 rounded-xl"
                     style={{
-                      background: "var(--neu-bg)",
-                      boxShadow: "var(--neu-inset-sm)",
+                      background: NEU.bg,
+                      boxShadow: NEU.insetSm,
                     }}
                   >
                     <input
@@ -393,35 +406,37 @@ export default function AccountModal({
                   </div>
                 </div>
 
-                {/* Account Type */}
-                <div>
-                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-                    Account Type
-                  </label>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {ACCOUNT_TYPE_OPTIONS.map((opt) => {
-                      const isSelected = type === opt.id
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => setType(opt.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                            isSelected
-                              ? "text-brand-600"
-                              : "text-neutral-500 hover:text-neutral-800"
-                          }`}
-                          style={{
-                            background: NEU.bg,
-                            boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
-                          }}
-                        >
-                          {opt.label}
-                        </button>
-                      )
-                    })}
+                {/* Account Type (Always in Custom/Edit mode) */}
+                {(isEditing || activeTab === "custom") && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                      Account Type
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                      {ACCOUNT_TYPE_OPTIONS.map((opt) => {
+                        const isSelected = type === opt.id
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setType(opt.id)}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
+                              isSelected
+                                ? "text-brand-600"
+                                : "text-neutral-500 hover:text-neutral-800"
+                            }`}
+                            style={{
+                              background: NEU.bg,
+                              boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Current Balance */}
                 <div>
@@ -429,10 +444,10 @@ export default function AccountModal({
                     {isEditing ? "Current Balance" : "Starting Balance"} (₱ PHP)
                   </label>
                   <div
-                    className="flex items-center px-3.5 h-12 rounded-xl gap-2"
+                    className="flex items-center px-3.5 h-11 rounded-xl gap-2"
                     style={{
-                      background: "var(--neu-bg)",
-                      boxShadow: "var(--neu-inset-sm)",
+                      background: NEU.bg,
+                      boxShadow: NEU.insetSm,
                     }}
                   >
                     <span className="text-sm font-extrabold text-neutral-400">₱</span>
@@ -458,10 +473,10 @@ export default function AccountModal({
                     Account / Card Number <span className="text-neutral-400 font-normal">(Optional)</span>
                   </label>
                   <div
-                    className="flex items-center px-3.5 h-12 rounded-xl"
+                    className="flex items-center px-3.5 h-11 rounded-xl"
                     style={{
-                      background: "var(--neu-bg)",
-                      boxShadow: "var(--neu-inset-sm)",
+                      background: NEU.bg,
+                      boxShadow: NEU.insetSm,
                     }}
                   >
                     <input
@@ -474,72 +489,91 @@ export default function AccountModal({
                   </div>
                 </div>
 
-                {/* Color Picker */}
-                <div>
-                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-                    Accent Color
-                  </label>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {PRESET_COLORS.map((c) => {
-                      const isSelected = color === c
-                      return (
-                        <button
-                          key={c}
-                          type="button"
-                          onClick={() => setColor(c)}
-                          className="w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 cursor-pointer shadow-xs"
-                          style={{ background: c }}
-                          aria-label={`Color ${c}`}
-                        >
-                          {isSelected && (
-                            <MorphIcon
-                              icon={Check}
-                              size={14}
-                              strokeWidth={3}
-                              className="text-white"
-                            />
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
+                {/* Appearance: Color & Icon (Always in Custom/Edit, expandable in Presets) */}
+                {isEditing || activeTab === "custom" || showAppearanceOptions ? (
+                  <div className="space-y-4 pt-2 border-t border-neutral-200/50">
+                    {/* Color Picker */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                        Accent Color
+                      </label>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {PRESET_COLORS.map((c) => {
+                          const isSelected = color === c
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => setColor(c)}
+                              className="w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 cursor-pointer shadow-xs"
+                              style={{ background: c }}
+                              aria-label={`Color ${c}`}
+                            >
+                              {isSelected && (
+                                <MorphIcon
+                                  icon={Check}
+                                  size={14}
+                                  strokeWidth={3}
+                                  className="text-white"
+                                />
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
 
-                {/* Icon Selector */}
-                <div>
-                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-                    Icon
-                  </label>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {AVAILABLE_ICONS.map((ic) => {
-                      const isSelected = icon === ic
-                      const IcComponent = ICON_MAP[ic] || Wallet
-                      return (
-                        <button
-                          key={ic}
-                          type="button"
-                          onClick={() => setIcon(ic)}
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-                            isSelected
-                              ? "text-brand-600"
-                              : "text-neutral-400 hover:text-neutral-700"
-                          }`}
-                          style={{
-                            background: NEU.bg,
-                            boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
-                          }}
-                          aria-label={ic}
-                        >
-                          <MorphIcon icon={IcComponent} size={16} strokeWidth={2.4} />
-                        </button>
-                      )
-                    })}
+                    {/* Icon Selector */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                        Icon
+                      </label>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                        {AVAILABLE_ICONS.map((ic) => {
+                          const isSelected = icon === ic
+                          const IcComponent = ICON_MAP[ic] || Wallet
+                          return (
+                            <button
+                              key={ic}
+                              type="button"
+                              onClick={() => setIcon(ic)}
+                              className={`h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                                isSelected
+                                  ? "text-brand-600"
+                                  : "text-neutral-400 hover:text-neutral-700"
+                              }`}
+                              style={{
+                                background: NEU.bg,
+                                boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
+                              }}
+                              aria-label={ic}
+                            >
+                              <MorphIcon icon={IcComponent} size={16} strokeWidth={2.4} />
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowAppearanceOptions(true)}
+                      className="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1.5 py-1 transition-colors cursor-pointer"
+                    >
+                      <MorphIcon icon={Sparkles} size={13} strokeWidth={2.4} />
+                      <span>Customize Icon & Color</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-3 border-t border-neutral-200/50 flex items-center justify-end gap-2.5 pb-2">
+              {/* Pinned Action Footer */}
+              <div
+                className="shrink-0 px-5 py-3.5 border-t border-neutral-200/60 flex items-center justify-end gap-3"
+                style={{ background: NEU.bg }}
+              >
                 <motion.button
                   type="button"
                   whileHover={neuButtonHover}
