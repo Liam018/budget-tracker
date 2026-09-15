@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react"
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import {
-  ChevronLeft,
-  ChevronRight,
-  Rows2,
-  Rows3,
-} from "lucide"
+import { Rows2, Rows3 } from "lucide"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover } from "../../lib/animations"
 
@@ -99,7 +95,7 @@ export default function RatesCarouselControls({
           icon={isTripleRow ? Rows3 : Rows2}
           size={15}
           strokeWidth={2.4}
-          spring="bouncy"
+          spring="snappy"
           className={isTripleRow ? "text-brand-600" : "text-neutral-500"}
         />
       </motion.button>
@@ -109,29 +105,28 @@ export default function RatesCarouselControls({
         whileHover={canScrollLeft && !isLeftPressed ? neuButtonHover : {}}
         animate={{
           y: isLeftPressed ? 1 : 0,
-          boxShadow: isLeftPressed
-            ? NEU.pressed
-            : canScrollLeft
-            ? NEU.raisedSm
-            : NEU.insetSm,
         }}
         transition={{ duration: 0.08 }}
         onPointerDown={handlePointerDown("left")}
         onPointerLeave={handlePointerLeave}
         onContextMenu={(e) => e.preventDefault()}
         disabled={!canScrollLeft}
-        className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-[color,opacity] ${
+        className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-[color,opacity,box-shadow] duration-100 ${
           canScrollLeft
             ? "text-neutral-500 hover:text-brand-600 active:text-brand-600 cursor-pointer select-none touch-manipulation"
             : "text-neutral-400/70 cursor-not-allowed"
         }`}
         style={{
           background: NEU.bg,
+          boxShadow: isLeftPressed
+            ? NEU.pressed
+            : canScrollLeft
+            ? NEU.raisedSm
+            : NEU.insetSm,
         }}
         aria-label="Scroll left"
       >
-        <MorphIcon
-          icon={ChevronLeft}
+        <ChevronLeft
           size={15}
           strokeWidth={canScrollLeft ? 2.4 : 1.8}
           className={canScrollLeft ? "text-neutral-500" : "text-neutral-400/70"}
@@ -143,29 +138,28 @@ export default function RatesCarouselControls({
         whileHover={canScrollRight && !isRightPressed ? neuButtonHover : {}}
         animate={{
           y: isRightPressed ? 1 : 0,
-          boxShadow: isRightPressed
-            ? NEU.pressed
-            : canScrollRight
-            ? NEU.raisedSm
-            : NEU.insetSm,
         }}
         transition={{ duration: 0.08 }}
         onPointerDown={handlePointerDown("right")}
         onPointerLeave={handlePointerLeave}
         onContextMenu={(e) => e.preventDefault()}
         disabled={!canScrollRight}
-        className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-[color,opacity] ${
+        className={`w-8 h-8 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center transition-[color,opacity,box-shadow] duration-100 ${
           canScrollRight
             ? "text-neutral-500 hover:text-brand-600 active:text-brand-600 cursor-pointer select-none touch-manipulation"
             : "text-neutral-400/70 cursor-not-allowed"
         }`}
         style={{
           background: NEU.bg,
+          boxShadow: isRightPressed
+            ? NEU.pressed
+            : canScrollRight
+            ? NEU.raisedSm
+            : NEU.insetSm,
         }}
         aria-label="Scroll right"
       >
-        <MorphIcon
-          icon={ChevronRight}
+        <ChevronRight
           size={15}
           strokeWidth={canScrollRight ? 2.4 : 1.8}
           className={canScrollRight ? "text-neutral-500" : "text-neutral-400/70"}

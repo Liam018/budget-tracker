@@ -217,8 +217,7 @@ export default function CurrencyWatchlistCard({
 
       {/* ── Watchlist Cards Grid ── */}
       {/* Responsive layout: 1 col on small phones (<420px), 2 cols on mobile/tablet (420px-768px), 3 cols on desktop */}
-      <motion.div
-        layout
+      <div
         className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3"
       >
         <AnimatePresence mode="popLayout" initial={false}>
@@ -237,7 +236,7 @@ export default function CurrencyWatchlistCard({
             />
           ))}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
       {/* ── Expand / Collapse Toggle (When there are many items) ── */}
       {sortedList.length > INITIAL_VISIBLE_COUNT && (
@@ -264,6 +263,7 @@ export default function CurrencyWatchlistCard({
               icon={isExpanded ? ChevronUp : ChevronDown}
               size={13}
               strokeWidth={2.4}
+              spring="snappy"
             />
           </motion.button>
         </div>

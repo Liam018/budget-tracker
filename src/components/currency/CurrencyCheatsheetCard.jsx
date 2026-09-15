@@ -1,6 +1,5 @@
 import { useMemo } from "react"
-import { MorphIcon } from "morphicons/react"
-import { Calculator } from "lucide"
+import { Calculator } from "lucide-react"
 import { CountryFlag } from "../ui"
 import { NEU } from "../../lib/neu"
 
@@ -96,7 +95,7 @@ export default function CurrencyCheatsheetCard({
             boxShadow: NEU.insetSm,
           }}
         >
-          <MorphIcon icon={Calculator} size={16} strokeWidth={2.4} className="text-brand-600" />
+          <Calculator size={16} strokeWidth={2.4} className="text-brand-600" />
         </div>
         <div>
           <h3 className="text-xs sm:text-base font-extrabold text-neutral-800 tracking-tight leading-tight">

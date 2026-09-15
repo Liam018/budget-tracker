@@ -11,6 +11,8 @@ import {
   ProfileCard,
   CurrencyPickerSheet,
   SessionCard,
+  SecurityCard,
+  ChangePasswordModal,
 } from "../components/profile"
 import { NEU } from "../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../lib/animations"
@@ -31,6 +33,7 @@ export default function ProfilePage() {
 
   const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false)
   const [isUpdatingCurrency, setIsUpdatingCurrency] = useState(false)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
 
   async function handleSelectCurrency(currencyCode) {
     if (currencyCode === currentCurrencyCode) {
@@ -132,6 +135,9 @@ export default function ProfilePage() {
         </motion.button>
       </div>
 
+      {/* ── Account Security & Password Management Card ── */}
+      <SecurityCard onOpenChangePassword={() => setIsPasswordModalOpen(true)} />
+
       {/* ── Session Management (Sign Out) Card ── */}
       <SessionCard onSignOut={handleSignOut} />
 
@@ -142,6 +148,12 @@ export default function ProfilePage() {
         currentCurrencyCode={currentCurrencyCode}
         onSelectCurrency={handleSelectCurrency}
         isUpdating={isUpdatingCurrency}
+      />
+
+      {/* ── Change Password Modal ── */}
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
       />
     </div>
   )

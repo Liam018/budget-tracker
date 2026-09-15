@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import { TrendingUp, RefreshCw, Check } from "lucide"
+import { RefreshCw, Check } from "lucide"
+import { TrendingUp } from "lucide-react"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
@@ -43,8 +44,7 @@ export default function ConverterHeader({ marketStatus, isLoadingRates, onRefres
             boxShadow: "var(--neu-inset-sm)",
           }}
         >
-          <MorphIcon
-            icon={TrendingUp}
+          <TrendingUp
             size={18}
             strokeWidth={2.4}
             className="text-brand-600"
@@ -95,7 +95,8 @@ export default function ConverterHeader({ marketStatus, isLoadingRates, onRefres
               ? { repeat: Infinity, duration: 0.7, ease: "linear" }
               : { duration: 0 }
           }
-          className="flex items-center justify-center"
+          className="flex items-center justify-center transform-gpu"
+          style={{ willChange: isSpinning ? "transform" : "auto" }}
         >
           <MorphIcon
             icon={isChecked ? Check : RefreshCw}

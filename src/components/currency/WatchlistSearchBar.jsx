@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "motion/react"
-import { MorphIcon } from "morphicons/react"
-import { Search, X } from "lucide"
+import { Search, X } from "lucide-react"
 import { NEU } from "../../lib/neu"
 
 /**
@@ -20,6 +19,7 @@ export default function WatchlistSearchBar({
           initial={{ opacity: 0, height: 0, marginBottom: 0 }}
           animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
           exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
           className="overflow-hidden"
         >
           <div
@@ -29,7 +29,7 @@ export default function WatchlistSearchBar({
               boxShadow: NEU.insetSm,
             }}
           >
-            <MorphIcon icon={Search} size={14} className="text-neutral-400 shrink-0" strokeWidth={2.2} />
+            <Search size={14} className="text-neutral-400 shrink-0" strokeWidth={2.2} />
             <input
               ref={inputRef}
               type="text"
@@ -45,7 +45,7 @@ export default function WatchlistSearchBar({
                 className="text-neutral-400 hover:text-neutral-600 cursor-pointer p-0.5"
                 aria-label="Clear filter"
               >
-                <MorphIcon icon={X} size={13} strokeWidth={2.4} />
+                <X size={13} strokeWidth={2.4} />
               </button>
             )}
           </div>

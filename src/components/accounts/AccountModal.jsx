@@ -186,7 +186,7 @@ export default function AccountModal({
     <AnimatePresence>
       {isOpen && (
         <div
-          className={`fixed inset-0 z-50 flex pointer-events-none ${
+          className={`fixed inset-0 z-50 flex pointer-events-none overflow-hidden ${
             isMobile ? "flex-col justify-end" : "items-center justify-center p-4"
           }`}
         >

@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
-import { MorphIcon } from "morphicons/react"
-import { X } from "lucide"
+import { X } from "lucide-react"
 import { CountryFlag, toast } from "../ui"
 import { NEU } from "../../lib/neu"
 
@@ -55,16 +54,15 @@ export default function WatchlistItemCard({
   return (
     <motion.div
       layout="position"
-      initial={{ opacity: 0, scale: 0.9, boxShadow: NEU.insetSm }}
-      animate={{ opacity: 1, scale: 1, boxShadow: NEU.insetSm }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
       exit={{
         opacity: 0,
         scale: 0.85,
-        boxShadow: NEU.insetSm,
         transition: { duration: 0.15, ease: "easeOut" },
       }}
       transition={{
-        layout: { type: "spring", stiffness: 380, damping: 30 },
+        layout: { type: "spring", stiffness: 420, damping: 32 },
         opacity: { duration: 0.15 },
         scale: { duration: 0.15 },
       }}
@@ -77,12 +75,13 @@ export default function WatchlistItemCard({
           ? `Click to convert ${fromCurrency} with ${code}`
           : undefined
       }
-      className={`p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between group relative select-none ${
+      className={`p-3.5 sm:p-4 rounded-2xl flex flex-col justify-between group relative select-none transform-gpu ${
         isSelected ? "ring-2 ring-brand-500/30" : ""
       } ${onSelectCurrency ? "cursor-pointer" : ""}`}
       style={{
         background: NEU.bg,
         boxShadow: NEU.insetSm,
+        willChange: "transform",
       }}
     >
       {/* Unpin button — accessible on touch devices with opacity-70, hoverable on desktop */}
@@ -105,7 +104,7 @@ export default function WatchlistItemCard({
         aria-label={`Remove ${code} from watchlist`}
         className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-neutral-400 hover:text-rose-500 hover:bg-rose-50/50 opacity-70 sm:opacity-0 group-hover:opacity-100 transition-[opacity,color,background-color] duration-150 ease-out cursor-pointer z-10"
       >
-        <MorphIcon icon={X} size={12} strokeWidth={2.4} />
+        <X size={12} strokeWidth={2.4} />
       </motion.button>
 
       {/* Top: Flag, Code, and Currency Name */}

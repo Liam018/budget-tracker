@@ -1,11 +1,7 @@
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import {
-  ArrowRightLeft,
-  ArrowLeftRight,
-  ChevronDown,
-  X,
-} from "lucide"
+import { ArrowRightLeft, ArrowLeftRight } from "lucide"
+import { ChevronDown, X } from "lucide-react"
 import { CountryFlag } from "../ui"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
@@ -68,7 +64,7 @@ export default function ConverterInputs({
               aria-label="Clear amount"
               className="w-6 h-6 rounded-full flex items-center justify-center text-neutral-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
             >
-              <MorphIcon icon={X} size={13} strokeWidth={2.5} />
+              <X size={13} strokeWidth={2.5} />
             </motion.button>
           )}
 
@@ -77,7 +73,7 @@ export default function ConverterInputs({
             whileHover={neuButtonHover}
             whileTap={neuButtonTap}
             onClick={() => onOpenPicker("from")}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer select-none transition-[transform]"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer select-none transition-transform"
             style={{
               background: NEU.bg,
               boxShadow: NEU.raisedSm,
@@ -86,9 +82,8 @@ export default function ConverterInputs({
           >
             <CountryFlag code={fromCurrency} size="sm" />
             <span className="text-xs font-bold text-neutral-700">{fromCurrency}</span>
-            <MorphIcon
-              icon={ChevronDown}
-              size={11}
+            <ChevronDown
+              size={12}
               strokeWidth={2.6}
               className="text-neutral-400"
             />
@@ -101,7 +96,7 @@ export default function ConverterInputs({
         )}
       </div>
 
-      {/* Swap Button (Morphs between ArrowRightLeft and ArrowLeftRight) */}
+      {/* Swap Button (Hardware-accelerated Morph & 180° rotation) */}
       <div className="flex flex-col items-center justify-start md:col-span-1">
         <div
           className="hidden md:block text-[11px] font-bold uppercase tracking-wider mb-1.5 opacity-0 select-none pointer-events-none"
@@ -111,11 +106,12 @@ export default function ConverterInputs({
         </div>
         <div className="h-13 flex items-center justify-center">
           <motion.button
+            type="button"
             whileHover={isSameCurrency ? {} : neuButtonHover}
             whileTap={isSameCurrency ? {} : neuButtonTap}
             onClick={onSwap}
             disabled={isSameCurrency}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-[transform] select-none ${
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform select-none ${
               isSameCurrency
                 ? "opacity-50 cursor-not-allowed text-neutral-400"
                 : "text-brand-600 cursor-pointer"
@@ -126,15 +122,29 @@ export default function ConverterInputs({
             }}
             aria-label="Swap currencies"
           >
-            <div className="flex items-center justify-center rotate-90 md:rotate-0 transition-transform duration-300">
-              <MorphIcon
-                icon={isSwapped ? ArrowLeftRight : ArrowRightLeft}
-                size={16}
-                strokeWidth={2.4}
-                spring="bouncy"
-                className={isSameCurrency ? "text-neutral-400" : "text-brand-600"}
-              />
-            </div>
+            <motion.div
+              animate={{
+                rotate: isSwapped ? 180 : 0,
+                scale: [1, 0.9, 1],
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 420,
+                damping: 24,
+              }}
+              className="flex items-center justify-center transform-gpu"
+              style={{ willChange: "transform" }}
+            >
+              <div className="rotate-90 md:rotate-0 flex items-center justify-center">
+                <MorphIcon
+                  icon={isSwapped ? ArrowLeftRight : ArrowRightLeft}
+                  size={16}
+                  strokeWidth={2.4}
+                  spring="snappy"
+                  className={isSameCurrency ? "text-neutral-400" : "text-brand-600"}
+                />
+              </div>
+            </motion.div>
           </motion.button>
         </div>
       </div>
@@ -168,9 +178,8 @@ export default function ConverterInputs({
             }}
           >
             <span className="text-xs font-bold text-neutral-500">{toCurrencyObj?.symbol}</span>
-            <MorphIcon
-              icon={ChevronDown}
-              size={11}
+            <ChevronDown
+              size={12}
               strokeWidth={2.6}
               className="text-neutral-400"
             />

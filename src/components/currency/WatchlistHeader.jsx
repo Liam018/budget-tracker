@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import { Star, Plus, X, Search, ArrowUpDown } from "lucide"
+import { Plus, X } from "lucide"
+import { Star, Search, ArrowUpDown } from "lucide-react"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
@@ -35,7 +36,7 @@ export default function WatchlistHeader({
             boxShadow: NEU.insetSm,
           }}
         >
-          <MorphIcon icon={Star} size={16} strokeWidth={2.4} className="text-amber-500 fill-amber-500/20" />
+          <Star size={16} strokeWidth={2.4} className="text-amber-500 fill-amber-500/20" />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -78,7 +79,7 @@ export default function WatchlistHeader({
               boxShadow: isSearchOpen || isSearching ? NEU.insetSm : NEU.raisedSm,
             }}
           >
-            <MorphIcon icon={Search} size={14} strokeWidth={2.4} />
+            <Search size={14} strokeWidth={2.4} />
             <span className="text-[11px] font-bold hidden sm:inline">Search</span>
           </motion.button>
         )}
@@ -101,7 +102,7 @@ export default function WatchlistHeader({
                 boxShadow: isSortOpen ? NEU.insetSm : NEU.raisedSm,
               }}
             >
-              <MorphIcon icon={ArrowUpDown} size={14} strokeWidth={2.4} />
+              <ArrowUpDown size={14} strokeWidth={2.4} />
               <span className="text-[11px] font-bold hidden sm:inline">
                 {sortBy !== "default"
                   ? sortOptions.find((s) => s.id === sortBy)?.label.split(" ")[0]
@@ -153,7 +154,7 @@ export default function WatchlistHeader({
           </div>
         )}
 
-        {/* Add Currency Toggle */}
+        {/* Add Currency Toggle (Morphs between Plus and X) */}
         <motion.button
           type="button"
           whileHover={neuButtonHover}
@@ -167,7 +168,7 @@ export default function WatchlistHeader({
             boxShadow: isAdding ? NEU.insetSm : NEU.raisedSm,
           }}
         >
-          <MorphIcon icon={isAdding ? X : Plus} size={13} strokeWidth={2.6} />
+          <MorphIcon icon={isAdding ? X : Plus} size={13} strokeWidth={2.6} spring="snappy" />
           <span>{isAdding ? "Close" : "Add"}</span>
         </motion.button>
       </div>

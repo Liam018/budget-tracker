@@ -11,18 +11,19 @@ import { CountryFlag } from "../ui"
 function LiveRateCard({ curr, rate, isTripleRow, index = 0 }) {
   return (
     <motion.div
-      layout
+      layout="position"
       initial={{ opacity: 0, scale: 0.85, y: 8 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.85, y: -6 }}
       transition={{
         layout: { type: "spring", stiffness: 420, damping: 32 },
-        opacity: { duration: 0.2 },
+        opacity: { duration: 0.18 },
         scale: { type: "spring", stiffness: 420, damping: 32 },
         y: { type: "spring", stiffness: 420, damping: 32, delay: Math.min(index * 0.015, 0.12) },
       }}
       whileHover={{ y: -2, scale: 1.02 }}
-      className="shrink-0 min-w-33 sm:min-w-35"
+      className="shrink-0 min-w-33 sm:min-w-35 transform-gpu"
+      style={{ willChange: "transform" }}
     >
       <div
         className="w-full h-full p-2.5 rounded-xl text-left select-none"

@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react"
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import { LineChart, TrendingUp, TrendingDown } from "lucide"
+import { TrendingUp, TrendingDown } from "lucide"
+import { LineChart } from "lucide-react"
 import useCurrencyHistory from "../../hooks/useCurrencyHistory"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
@@ -77,7 +78,7 @@ export default function CurrencyTrendCard({ fromCurrency, toCurrency }) {
               boxShadow: NEU.insetSm,
             }}
           >
-            <MorphIcon icon={LineChart} size={16} strokeWidth={2.4} className="text-brand-600" />
+            <LineChart size={16} strokeWidth={2.4} className="text-brand-600" />
           </div>
           <div>
             <h3 className="text-xs sm:text-base font-extrabold text-neutral-800 tracking-tight leading-tight">
@@ -159,6 +160,7 @@ export default function CurrencyTrendCard({ fromCurrency, toCurrency }) {
                   icon={isUp ? TrendingUp : TrendingDown}
                   size={13}
                   strokeWidth={2.6}
+                  spring="snappy"
                   className={isUp ? "text-emerald-600" : "text-rose-600"}
                 />
                 {isUp ? "+" : ""}

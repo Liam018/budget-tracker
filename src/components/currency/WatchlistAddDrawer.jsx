@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "motion/react"
-import { MorphIcon } from "morphicons/react"
-import { Search, X } from "lucide"
+import { Search, X } from "lucide-react"
 import { CountryFlag } from "../ui"
 import { NEU } from "../../lib/neu"
 import { neuChipShadow, neuChipHover, neuChipTap } from "../../lib/animations"
@@ -25,6 +24,7 @@ export default function WatchlistAddDrawer({
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="overflow-hidden mb-4"
         >
           <div
@@ -54,7 +54,7 @@ export default function WatchlistAddDrawer({
                   boxShadow: NEU.insetSm,
                 }}
               >
-                <MorphIcon icon={Search} size={13} className="text-neutral-400 shrink-0" strokeWidth={2.2} />
+                <Search size={13} className="text-neutral-400 shrink-0" strokeWidth={2.2} />
                 <input
                   ref={inputRef}
                   type="text"
@@ -70,7 +70,7 @@ export default function WatchlistAddDrawer({
                     className="text-neutral-400 hover:text-neutral-600 cursor-pointer p-0.5"
                     aria-label="Clear add search"
                   >
-                    <MorphIcon icon={X} size={12} strokeWidth={2.4} />
+                    <X size={12} strokeWidth={2.4} />
                   </button>
                 )}
               </div>
@@ -82,7 +82,6 @@ export default function WatchlistAddDrawer({
                 <AnimatePresence mode="popLayout" initial={false}>
                   {filteredAvailableToAdd.map((curr) => (
                     <motion.button
-                      layout
                       key={curr.code}
                       type="button"
                       initial={{ opacity: 0, scale: 0.8 }}

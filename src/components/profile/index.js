@@ -1,5 +1,7 @@
 export { default as ProfileCard } from "./ProfileCard"
 export { default as CurrencyPickerSheet } from "./CurrencyPickerSheet"
 export { default as SessionCard } from "./SessionCard"
+export { default as SecurityCard } from "./SecurityCard"
+export { default as ChangePasswordModal } from "./ChangePasswordModal"
 export { default as CurrencyListItem } from "./CurrencyListItem"
 export { default as CurrencySearchBar } from "./CurrencySearchBar"

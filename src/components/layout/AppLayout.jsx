@@ -26,7 +26,7 @@ export default function AppLayout() {
         <AppHeader />
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 pb-28 lg:pb-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 pb-28 lg:pb-8 overflow-y-auto [scrollbar-gutter:stable]">
           <Outlet />
         </main>
       </div>
