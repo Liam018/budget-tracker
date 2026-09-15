@@ -301,15 +301,6 @@ export default function LoginPage() {
           </Link>
         </p>
       </motion.div>
-
-      {/* Feature Story Walkthrough Replay Link */}
-      {/* <Link
-        to="/welcome"
-        className="mt-4 flex items-center justify-center gap-1.5 text-xs text-neutral-400 hover:text-brand-600 transition-colors"
-      >
-        <Sparkles size={12} />
-        <span>Explore app features & story</span>
-      </Link> */}
     </div>
   )
 }

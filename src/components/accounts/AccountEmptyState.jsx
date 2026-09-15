@@ -1,6 +1,5 @@
 import { motion } from "motion/react"
-import { MorphIcon } from "morphicons/react"
-import { Wallet, Plus, Sparkles } from "lucide"
+import { Wallet, Plus } from "lucide-react"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
@@ -30,7 +29,7 @@ export default function AccountEmptyState({ onAddAccount, onSelectQuickPreset })
           boxShadow: NEU.insetSm,
         }}
       >
-        <MorphIcon icon={Wallet} size={30} strokeWidth={2.2} />
+        <Wallet size={30} strokeWidth={2.2} />
       </div>
 
       <h3 className="text-base sm:text-lg font-black text-neutral-800 tracking-tight">
@@ -47,7 +46,7 @@ export default function AccountEmptyState({ onAddAccount, onSelectQuickPreset })
         onClick={onAddAccount}
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold text-white bg-brand-600 hover:bg-brand-700 shadow-xs cursor-pointer transition-all mb-6"
       >
-        <MorphIcon icon={Plus} size={15} strokeWidth={2.6} />
+        <Plus size={15} strokeWidth={2.6} />
         <span>Add Your First Account</span>
       </motion.button>
 

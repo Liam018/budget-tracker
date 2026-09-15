@@ -2,6 +2,12 @@ import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import {
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+} from "lucide"
+import {
   Wallet,
   Banknote,
   Building2,
@@ -19,11 +25,7 @@ import {
   Archive,
   RotateCcw,
   Trash2,
-  Copy,
-  Check,
-  Eye,
-  EyeOff,
-} from "lucide"
+} from "lucide-react"
 import { formatCurrency } from "../../services/accountService"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
@@ -185,10 +187,10 @@ export default function AccountCard({
 
   return (
     <motion.div
-      layout
+      layout="position"
       initial={{ opacity: 0, scale: 0.94, y: 12 }}
       animate={{
-        opacity: is_archived ? 0.65 : 1,
+        opacity: 1,
         scale: 1,
         y: 0,
       }}
@@ -200,14 +202,15 @@ export default function AccountCard({
       }}
       transition={{
         type: "spring",
-        stiffness: 380,
-        damping: 28,
+        stiffness: 420,
+        damping: 30,
         mass: 0.6,
       }}
       style={{
         zIndex: menuOpen ? 40 : 1,
+        willChange: "transform",
       }}
-      className="relative select-none"
+      className="relative select-none transform-gpu"
     >
       {/* ── Neumorphic Card Shell ── */}
       <motion.div
@@ -215,7 +218,6 @@ export default function AccountCard({
           canHover
             ? {
                 y: -3,
-                boxShadow: NEU.raisedHover,
                 transition: { duration: 0.18, ease: "easeOut" },
               }
             : undefined
@@ -228,7 +230,7 @@ export default function AccountCard({
           background: NEU.bg,
           boxShadow: NEU.raised,
         }}
-        className="relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 min-h-[200px] sm:min-h-[210px] flex flex-col justify-between border border-neutral-200/80 transition-shadow duration-300"
+        className="relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 min-h-50 sm:min-h-52.5 flex flex-col justify-between transition-[transform,box-shadow] duration-200 hover:shadow-(--neu-raised-hover)"
       >
         {/* ── Internal Background Clip Layer (Watermarks & Color Wash) ── */}
         <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-3xl pointer-events-none z-0">
@@ -243,22 +245,28 @@ export default function AccountCard({
           {/* Tactile Concentric Arc Watermark */}
           <div className="absolute -right-12 -bottom-14 w-48 h-48 rounded-full border border-neutral-300/25 pointer-events-none" />
           <div className="absolute -right-6 -bottom-8 w-36 h-36 rounded-full border border-white/50 pointer-events-none" />
-
-          {/* Archived Watermark Stamp */}
-          {is_archived && (
-            <div className="absolute inset-0 pointer-events-none bg-neutral-200/40 backdrop-grayscale-[0.5] flex items-center justify-center">
-              <span
-                className="px-4 py-1.5 rounded-xl border border-neutral-300/60 text-[11px] font-black uppercase tracking-[0.25em] text-neutral-500"
-                style={{
-                  background: NEU.bg,
-                  boxShadow: NEU.raisedSm,
-                }}
-              >
-                Archived
-              </span>
-            </div>
-          )}
         </div>
+
+        {/* ── Archived Notice Banner ── */}
+        {is_archived && (
+          <div className="relative z-20 mb-3 flex items-center justify-between px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-800 text-[11px] font-bold">
+            <div className="flex items-center gap-1.5">
+              <Archive size={13} className="text-amber-600 shrink-0" />
+              <span>Archived Account</span>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onArchive?.(account.id, false)
+              }}
+              className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-700 hover:text-amber-900 bg-amber-500/15 hover:bg-amber-500/25 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+            >
+              <RotateCcw size={10} strokeWidth={2.5} />
+              <span>Restore</span>
+            </button>
+          </div>
+        )}
 
         {/* ── TOP ROW: Brand Icon + Details + Options Menu ── */}
         <div className="relative z-20 flex items-start justify-between gap-3">
@@ -271,11 +279,9 @@ export default function AccountCard({
                 boxShadow: `0 4px 12px -2px ${color || "#863bff"}55`,
               }}
             >
-              <MorphIcon
-                icon={IconComponent}
+              <IconComponent
                 size={20}
                 strokeWidth={2.4}
-                spring="smooth"
               />
             </div>
 
@@ -284,16 +290,18 @@ export default function AccountCard({
                 {name}
               </h3>
               <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                {/* Sunken Neumorphic Type / Institution Badge */}
-                <span
-                  className="px-2 py-0.5 rounded-md text-[9px] font-extrabold text-neutral-600 uppercase tracking-wider"
-                  style={{
-                    background: NEU.bg,
-                    boxShadow: NEU.insetSm,
-                  }}
-                >
-                  {institution || TYPE_BADGES[type] || "ACCOUNT"}
-                </span>
+                {/* Sunken Neumorphic Institution Badge (only when distinct from account name) */}
+                {institution && institution.toLowerCase() !== name.toLowerCase() && (
+                  <span
+                    className="px-2 py-0.5 rounded-md text-[9px] font-extrabold text-neutral-600 uppercase tracking-wider"
+                    style={{
+                      background: NEU.bg,
+                      boxShadow: NEU.insetSm,
+                    }}
+                  >
+                    {institution}
+                  </span>
+                )}
                 <span className="text-[10px] text-neutral-400 font-semibold tracking-wide">
                   {TYPE_LABELS[type] || "Account"}
                 </span>
@@ -311,18 +319,16 @@ export default function AccountCard({
                 e.stopPropagation()
                 setMenuOpen((prev) => !prev)
               }}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer border border-neutral-300/40"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer"
               style={{
                 background: NEU.bg,
                 boxShadow: menuOpen ? NEU.insetSm : NEU.raisedSm,
               }}
               aria-label="Account options"
             >
-              <MorphIcon
-                icon={MoreVertical}
+              <MoreVertical
                 size={15}
                 strokeWidth={2.4}
-                spring="smooth"
               />
             </motion.button>
 
@@ -350,11 +356,9 @@ export default function AccountCard({
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-700 hover:text-brand-600 hover:bg-neutral-200/50 transition-colors cursor-pointer"
                   >
-                    <MorphIcon
-                      icon={Edit3}
+                    <Edit3
                       size={13}
                       strokeWidth={2.4}
-                      spring="smooth"
                     />
                     <span>Edit Details</span>
                   </button>
@@ -368,12 +372,11 @@ export default function AccountCard({
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-neutral-700 hover:text-amber-600 hover:bg-amber-50/60 transition-colors cursor-pointer"
                   >
-                    <MorphIcon
-                      icon={is_archived ? RotateCcw : Archive}
-                      size={13}
-                      strokeWidth={2.4}
-                      spring="smooth"
-                    />
+                    {is_archived ? (
+                      <RotateCcw size={13} strokeWidth={2.4} />
+                    ) : (
+                      <Archive size={13} strokeWidth={2.4} />
+                    )}
                     <span>{is_archived ? "Restore Card" : "Archive Card"}</span>
                   </button>
 
@@ -388,11 +391,9 @@ export default function AccountCard({
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-500 hover:text-rose-600 hover:bg-rose-50/60 transition-colors cursor-pointer"
                   >
-                    <MorphIcon
-                      icon={Trash2}
+                    <Trash2
                       size={13}
                       strokeWidth={2.4}
-                      spring="smooth"
                     />
                     <span>Delete Card</span>
                   </button>
@@ -415,7 +416,7 @@ export default function AccountCard({
                 whileTap={neuButtonTap}
                 onClick={handleCopy}
                 title="Click to copy account number"
-                className="group flex items-center gap-2 px-3 py-1.5 rounded-xl transition-colors cursor-pointer border border-neutral-300/40"
+                className="group flex items-center gap-2 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
                 style={{
                   background: NEU.bg,
                   boxShadow: NEU.insetSm,
@@ -429,7 +430,7 @@ export default function AccountCard({
                     icon={copied ? Check : Copy}
                     size={12}
                     strokeWidth={2.4}
-                    spring="smooth"
+                    spring="snappy"
                     className={copied ? "text-emerald-600" : ""}
                   />
                 </span>
@@ -458,16 +459,43 @@ export default function AccountCard({
           )}
         </div>
 
-        {/* ── FOOTER: Cardholder Name + Balance & Privacy Peek ── */}
+        {/* ── FOOTER: Tactile Neumorphic Motif & Balance ── */}
         <div className="relative z-10 pt-3 border-t border-neutral-300/40 flex items-end justify-between gap-3">
-          {/* Cardholder / Account Label */}
-          <div className="min-w-0">
-            <span className="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">
-              Account
-            </span>
-            <p className="text-xs sm:text-sm font-black text-neutral-800 truncate uppercase tracking-wide max-w-[130px] sm:max-w-[170px]">
-              {name}
-            </p>
+          {/* Neumorphic EMV Smart Chip & Contactless Waves */}
+          <div className="flex items-center gap-2 pb-0.5 select-none" aria-hidden="true">
+            <div
+              className="relative w-9 h-6 rounded-md border border-neutral-300/40 p-0.5 flex items-center justify-center shrink-0 overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, rgba(235, 238, 245, 0.95), rgba(215, 220, 230, 0.8))",
+                boxShadow: NEU.insetSm,
+              }}
+            >
+              {/* Micro circuit etchings */}
+              <div className="w-full h-full rounded-[3px] border border-neutral-400/30 relative flex items-center justify-center">
+                <div className="w-full h-px bg-neutral-400/30 absolute" />
+                <div className="h-full w-px bg-neutral-400/30 absolute" />
+                <div
+                  className="w-3 h-2 rounded-xs border border-neutral-400/30"
+                  style={{ background: `${color || "#863bff"}15` }}
+                />
+              </div>
+            </div>
+
+            {/* Tactile Contactless NFC Waves */}
+            <div className="flex items-center text-neutral-400/70">
+              <svg
+                className="w-4 h-4 -rotate-45"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+              >
+                <path d="M5 12.55a11 11 0 0 1 14.08 0" opacity="0.35" />
+                <path d="M8.5 15.5a6 6 0 0 1 7 0" opacity="0.65" />
+                <path d="M11.5 18a2 2 0 0 1 1 0" />
+              </svg>
+            </div>
           </div>
 
           {/* Balance Display with Privacy Peek */}
@@ -490,7 +518,7 @@ export default function AccountCard({
                   icon={showBalance ? Eye : EyeOff}
                   size={11}
                   strokeWidth={2.4}
-                  spring="smooth"
+                  spring="snappy"
                 />
               </button>
             </div>

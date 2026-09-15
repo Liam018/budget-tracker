@@ -1,6 +1,4 @@
-import { motion } from "motion/react"
-import { MorphIcon } from "morphicons/react"
-import { TrendingUp, ArrowUpRight, ArrowDownRight, ShieldCheck } from "lucide"
+import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { formatCurrency } from "../../services/accountService"
 import { NEU } from "../../lib/neu"
 
@@ -26,7 +24,6 @@ export default function AccountNetWorthSummary({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            
             <span className="text-[11px] font-medium text-neutral-400">
               {activeCount} {activeCount === 1 ? "Active Account" : "Active Accounts"}
             </span>
@@ -57,7 +54,7 @@ export default function AccountNetWorthSummary({
             }}
           >
             <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center shrink-0">
-              <MorphIcon icon={ArrowUpRight} size={16} strokeWidth={2.6} />
+              <ArrowUpRight size={16} strokeWidth={2.6} />
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
@@ -78,7 +75,7 @@ export default function AccountNetWorthSummary({
             }}
           >
             <div className="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-600 flex items-center justify-center shrink-0">
-              <MorphIcon icon={ArrowDownRight} size={16} strokeWidth={2.6} />
+              <ArrowDownRight size={16} strokeWidth={2.6} />
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
