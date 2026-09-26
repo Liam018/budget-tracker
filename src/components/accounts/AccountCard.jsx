@@ -28,7 +28,7 @@ import {
 } from "lucide-react"
 import { formatCurrency } from "../../services/accountService"
 import { NEU } from "../../lib/neu"
-import { neuButtonHover, neuButtonTap } from "../../lib/animations"
+import { neuButtonHover, neuButtonTap, cardItemVariants } from "../../lib/animations"
 import { toast } from "../ui"
 
 /** Safe haptic vibration utility for mobile devices */
@@ -188,24 +188,10 @@ export default function AccountCard({
   return (
     <motion.div
       layout="position"
-      initial={{ opacity: 0, scale: 0.94, y: 12 }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        y: 0,
-      }}
-      exit={{
-        opacity: 0,
-        scale: 0.92,
-        y: -8,
-        transition: { duration: 0.14, ease: "easeOut" },
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 420,
-        damping: 30,
-        mass: 0.6,
-      }}
+      variants={cardItemVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       style={{
         zIndex: menuOpen ? 40 : 1,
         willChange: "transform",

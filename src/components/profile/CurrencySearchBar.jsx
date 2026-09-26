@@ -11,6 +11,7 @@ export default function CurrencySearchBar({
   onClear,
   isStale,
   inputRef,
+  autoFocus = false,
 }) {
   return (
     <div
@@ -34,7 +35,7 @@ export default function CurrencySearchBar({
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder="Search currency name or code (e.g. USD, EUR, PHP)..."
         className="w-full bg-transparent text-xs font-semibold text-neutral-800 outline-none placeholder:text-neutral-400"
-        autoFocus
+        autoFocus={autoFocus}
       />
       {/* Clear button — only shows when there is text */}
       <AnimatePresence>

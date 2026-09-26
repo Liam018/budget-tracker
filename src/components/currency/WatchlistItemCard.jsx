@@ -2,6 +2,7 @@ import { motion } from "motion/react"
 import { X } from "lucide-react"
 import { CountryFlag, toast } from "../ui"
 import { NEU } from "../../lib/neu"
+import { cardItemVariants, neuButtonHover, neuButtonTap } from "../../lib/animations"
 
 /**
  * WatchlistItemCard — Individual Pinned Currency Card in the Watchlist Grid
@@ -54,19 +55,12 @@ export default function WatchlistItemCard({
   return (
     <motion.div
       layout="position"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{
-        opacity: 0,
-        scale: 0.85,
-        transition: { duration: 0.15, ease: "easeOut" },
-      }}
-      transition={{
-        layout: { type: "spring", stiffness: 420, damping: 32 },
-        opacity: { duration: 0.15 },
-        scale: { duration: 0.15 },
-      }}
-      whileHover={{ y: -2 }}
+      variants={cardItemVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      whileHover={neuButtonHover}
+      whileTap={neuButtonTap}
       onClick={handleSelect}
       title={
         isSelected

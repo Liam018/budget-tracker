@@ -21,7 +21,13 @@ import {
 } from "lucide"
 import { useScrollLock } from "../../hooks/useScrollLock"
 import { NEU } from "../../lib/neu"
-import { neuButtonHover, neuButtonTap } from "../../lib/animations"
+import {
+  neuButtonHover,
+  neuButtonTap,
+  modalVariants,
+  mobileSheetVariants,
+  backdropVariants,
+} from "../../lib/animations"
 import {
   PHILIPPINE_INSTITUTION_PRESETS,
   PRESET_COLORS,
@@ -169,17 +175,17 @@ export default function AccountModal({
         dragElastic: { top: 0.02, bottom: 0.65 },
         dragSnapToOrigin: true,
         onDragEnd: handleDragEnd,
-        initial: { y: "100%" },
-        animate: { y: 0 },
-        exit: { y: "100%" },
-        transition: { type: "spring", stiffness: 400, damping: 32, mass: 0.8 },
+        variants: mobileSheetVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit",
       }
     : {
         drag: false,
-        initial: { scale: 0.94, y: 12 },
-        animate: { scale: 1, y: 0 },
-        exit: { scale: 0.94, y: 8 },
-        transition: { type: "spring", stiffness: 420, damping: 28 },
+        variants: modalVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit",
       }
 
   return (
@@ -192,10 +198,10 @@ export default function AccountModal({
         >
           {/* Frosted Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={onClose}
             className="fixed inset-0 backdrop-blur-md pointer-events-auto"
             aria-hidden="true"

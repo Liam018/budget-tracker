@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react"
 import { Trash2, AlertTriangle, AlertCircle, HelpCircle, X } from "lucide-react"
 import { useScrollLock } from "../../hooks/useScrollLock"
 import { NEU } from "../../lib/neu"
-import { neuButtonHover, neuButtonTap } from "../../lib/animations"
+import { neuButtonHover, neuButtonTap, modalVariants, backdropVariants } from "../../lib/animations"
 
 /**
  * ConfirmModal — Tactile Neumorphic Confirmation Dialog.
@@ -75,10 +75,10 @@ export default function ConfirmModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
           {/* ── Pure Frosted Blur Backdrop with synchronized fade-out on exit ── */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={onCancel}
             className="fixed inset-0 backdrop-blur-md pointer-events-auto"
             aria-hidden="true"
@@ -90,10 +90,10 @@ export default function ConfirmModal({
             aria-modal="true"
             aria-labelledby="confirm-modal-title"
             aria-describedby="confirm-modal-description"
-            initial={{ scale: 0.94, y: 10 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.94, y: 8 }}
-            transition={{ type: "spring", stiffness: 440, damping: 28 }}
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             className="relative w-full max-w-sm rounded-3xl p-6 sm:p-7 text-center pointer-events-auto z-10"
             style={{
               background: "var(--neu-bg)",

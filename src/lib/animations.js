@@ -74,13 +74,18 @@ export const sheetVariants = {
 }
 
 /**
- * Centered Modal Variants — Dialog scales up with soft spring physics
+ * Soft Elevation (modalVariants) — Primary Neumorphic Modal Variant
+ * Feels like a tactile surface lifting gently off the desk towards the eye.
+ *
+ * - Modest Y-rise: 12px → 0px
+ * - Subtle Optical Expansion: 96% → 100%
+ * - Critically Damped: No harsh bouncy wobble; smooth hydraulic lift.
  */
-export const modalVariants = {
+export const softElevationVariants = {
   hidden: {
     opacity: 0,
-    scale: 0.94,
-    y: 16,
+    scale: 0.96,
+    y: 12,
   },
   visible: {
     opacity: 1,
@@ -88,19 +93,139 @@ export const modalVariants = {
     y: 0,
     transition: {
       type: "spring",
-      stiffness: 380,
-      damping: 28,
+      stiffness: 360,
+      damping: 30,
+      mass: 0.8,
     },
   },
   exit: {
     opacity: 0,
-    scale: 0.95,
-    y: 12,
+    scale: 0.98,
+    y: 6,
+    transition: {
+      duration: 0.16,
+      ease: [0.32, 0, 0.67, 0],
+    },
+  },
+}
+
+// Canonical alias for desktop modals
+export const modalVariants = softElevationVariants
+
+/**
+ * Soft Float — For transaction details, inspector sheets, and report summaries
+ * Smooth vertical glide without scale distortion.
+ */
+export const softFloatVariants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+    scale: 0.98,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.24,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: 10,
+    scale: 0.98,
+    transition: {
+      duration: 0.16,
+      ease: [0.7, 0, 0.84, 0],
+    },
+  },
+}
+
+/**
+ * Mobile Bottom Sheet Variants — Slides up from screen bottom with spring physics
+ */
+export const mobileSheetVariants = {
+  hidden: {
+    y: "100%",
+  },
+  visible: {
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 420,
+      damping: 32,
+      mass: 0.8,
+    },
+  },
+  exit: {
+    y: "100%",
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 32,
+      mass: 0.8,
+    },
+  },
+}
+
+/**
+ * Frosted Blur Backdrop Variants — Synchronized backdrop fade-in and fade-out
+ */
+export const backdropVariants = {
+  hidden: {
+    opacity: 0,
+  },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.18,
+      ease: "easeOut",
+    },
+  },
+  exit: {
+    opacity: 0,
     transition: {
       duration: 0.16,
       ease: "easeIn",
     },
   },
+}
+
+/**
+ * Drawer / Accordion Variants — Expands & collapses height smoothly
+ */
+export const drawerVariants = {
+  hidden: {
+    opacity: 0,
+    height: 0,
+  },
+  visible: {
+    opacity: 1,
+    height: "auto",
+    transition: {
+      duration: 0.2,
+      ease: "easeOut",
+    },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    transition: {
+      duration: 0.16,
+      ease: "easeIn",
+    },
+  },
+}
+
+/**
+ * MorphIcon Vector Animation Springs
+ */
+export const MORPH_CONFIG = {
+  snappy: "snappy", // fast, crisp response (tabs, toggles, eye, swap, expand)
+  bouncy: "bouncy", // playful response
+  smooth: "smooth", // gentle, subtle
+  strokeWidth: 2.2, // standard stroke width
 }
 
 /**
@@ -121,6 +246,37 @@ export const childItemVariants = {
       stiffness: 420,
       damping: 26,
       mass: 0.7,
+    },
+  },
+}
+
+/**
+ * Card Item Reveal — For interactive grid items and dashboard cards
+ */
+export const cardItemVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.94,
+    y: 12,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 420,
+      damping: 30,
+      mass: 0.6,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.92,
+    y: -8,
+    transition: {
+      duration: 0.14,
+      ease: "easeOut",
     },
   },
 }

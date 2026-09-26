@@ -3,7 +3,32 @@ import { useEffect } from "react"
 let activeLockCount = 0
 let originalBodyOverflow = ""
 let originalMainOverflow = ""
-let restoreTimeout = null
+let isLockedInDom = false
+
+/**
+ * Safely restores background scroll styles by stripping the inline override
+ * so CSS classes (like `overflow-y-auto`) take over.
+ */
+function unlockScroll() {
+  if (originalBodyOverflow && originalBodyOverflow !== "hidden") {
+    document.body.style.overflow = originalBodyOverflow
+  } else {
+    document.body.style.removeProperty("overflow")
+  }
+
+  const mainEl = document.querySelector("main")
+  if (mainEl) {
+    if (originalMainOverflow && originalMainOverflow !== "hidden") {
+      mainEl.style.overflowY = originalMainOverflow
+    } else {
+      mainEl.style.removeProperty("overflow-y")
+    }
+  }
+
+  originalBodyOverflow = ""
+  originalMainOverflow = ""
+  isLockedInDom = false
+}
 
 /**
  * useScrollLock — Prevents background page scrolling while a modal or sheet is open.
@@ -18,36 +43,28 @@ export function useScrollLock(isLocked) {
   useEffect(() => {
     if (!isLocked) return
 
-    // Cancel any pending unlock from a recently closed modal
-    if (restoreTimeout) {
-      clearTimeout(restoreTimeout)
-      restoreTimeout = null
-    }
-
     const mainEl = document.querySelector("main")
 
-    if (activeLockCount === 0) {
-      originalBodyOverflow = document.body.style.overflow
-      document.body.style.overflow = "hidden"
+    if (!isLockedInDom) {
+      const currentBody = document.body.style.overflow
+      const currentMain = mainEl ? mainEl.style.overflowY : ""
 
+      originalBodyOverflow = currentBody !== "hidden" ? currentBody : ""
+      originalMainOverflow = currentMain !== "hidden" ? currentMain : ""
+
+      document.body.style.overflow = "hidden"
       if (mainEl) {
-        originalMainOverflow = mainEl.style.overflowY
         mainEl.style.overflowY = "hidden"
       }
+      isLockedInDom = true
     }
+
     activeLockCount++
 
     return () => {
       activeLockCount = Math.max(0, activeLockCount - 1)
       if (activeLockCount === 0) {
-        // Delay restoring overflow until exit animations finish (~220ms)
-        restoreTimeout = setTimeout(() => {
-          document.body.style.overflow = originalBodyOverflow
-          if (mainEl) {
-            mainEl.style.overflowY = originalMainOverflow
-          }
-          restoreTimeout = null
-        }, 220)
+        unlockScroll()
       }
     }
   }, [isLocked])

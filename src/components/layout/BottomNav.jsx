@@ -53,10 +53,11 @@ export default function BottomNav() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, pointerEvents: "none" }}
             transition={{ duration: 0.22 }}
             onClick={() => setIsHubOpen(false)}
             className="fixed inset-0 z-25 lg:hidden bg-neutral-900/8 backdrop-blur-[1px]"
+            style={{ pointerEvents: isHubOpen ? "auto" : "none" }}
             aria-hidden="true"
           />
         )}
@@ -215,14 +216,14 @@ export default function BottomNav() {
             whileHover={{ y: -2 }}
             whileTap={{ y: 1 }}
             onClick={() => setIsHubOpen((prev) => !prev)}
-            className="absolute left-1/2 -translate-x-1/2 z-40 flex items-center justify-center rounded-full cursor-pointer pointer-events-auto transition-colors duration-200"
+            className="absolute left-1/2 -translate-x-1/2 z-40 flex items-center justify-center rounded-full cursor-pointer pointer-events-auto transition-all duration-200"
             style={{
               top: "-14px",
               width: "52px",
               height: "52px",
               background: isHubOpen ? "var(--neu-bg)" : "linear-gradient(145deg, #6366f1, #4338ca)",
               boxShadow: isHubOpen
-                ? "none"
+                ? "0 4px 12px rgba(0, 0, 0, 0.08)"
                 : "0 4px 10px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08)",
             }}
             aria-label={isHubOpen ? "Close navigation hub" : "Open quick actions and navigation hub"}

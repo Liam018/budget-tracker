@@ -6,7 +6,13 @@ import { SUPPORTED_CURRENCIES } from "../../services/currencyService"
 import { useScrollLock } from "../../hooks/useScrollLock"
 import { toast } from "../ui"
 import { NEU } from "../../lib/neu"
-import { neuButtonHover, neuButtonTap } from "../../lib/animations"
+import {
+  neuButtonHover,
+  neuButtonTap,
+  modalVariants,
+  mobileSheetVariants,
+  backdropVariants,
+} from "../../lib/animations"
 import CurrencyListItem from "./CurrencyListItem"
 import CurrencySearchBar from "./CurrencySearchBar"
 
@@ -49,14 +55,21 @@ export default function CurrencyPickerSheet({
   // Prevent background scroll while picker is open
   useScrollLock(isOpen)
 
-  // Track responsive viewport state
+  // Track responsive viewport state & touch input to avoid popping virtual keyboard on mobile/smaller screens
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 640 : false
   )
+  const [shouldAutoFocus, setShouldAutoFocus] = useState(() => {
+    if (typeof window === "undefined") return false
+    const isCoarse = window.matchMedia?.("(pointer: coarse)").matches
+    return window.innerWidth >= 768 && !isCoarse
+  })
 
   useEffect(() => {
     function handleResize() {
+      const isCoarse = window.matchMedia?.("(pointer: coarse)").matches
       setIsMobile(window.innerWidth < 640)
+      setShouldAutoFocus(window.innerWidth >= 768 && !isCoarse)
     }
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
@@ -101,17 +114,17 @@ export default function CurrencyPickerSheet({
         dragElastic: { top: 0.02, bottom: 0.65 },
         dragSnapToOrigin: true,
         onDragEnd: handleDragEnd,
-        initial: { y: "100%" },
-        animate: { y: 0 },
-        exit: { y: "100%" },
-        transition: { type: "spring", stiffness: 420, damping: 32, mass: 0.8 },
+        variants: mobileSheetVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit",
       }
     : {
         drag: false,
-        initial: { scale: 0.94, y: 10 },
-        animate: { scale: 1, y: 0 },
-        exit: { scale: 0.94, y: 8 },
-        transition: { type: "spring", stiffness: 440, damping: 28 },
+        variants: modalVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit",
       }
 
   return (
@@ -126,10 +139,10 @@ export default function CurrencyPickerSheet({
         >
           {/* ── Pure Frosted Blur Backdrop with synchronized fade-out on exit ── */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={onClose}
             className="fixed inset-0 backdrop-blur-md pointer-events-auto"
             aria-hidden="true"
@@ -215,6 +228,7 @@ export default function CurrencyPickerSheet({
                 }}
                 isStale={isStale}
                 inputRef={inputRef}
+                autoFocus={shouldAutoFocus}
               />
             </div>
 

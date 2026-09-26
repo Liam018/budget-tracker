@@ -9,7 +9,13 @@ import { useScrollLock } from "../../hooks/useScrollLock"
 import { required, minLength, passwordStrength, matches, validateField } from "../../lib/validators"
 import { useRateLimiter } from "../../hooks/useRateLimiter"
 import { NEU } from "../../lib/neu"
-import { neuButtonHover, neuButtonTap } from "../../lib/animations"
+import {
+  neuButtonHover,
+  neuButtonTap,
+  modalVariants,
+  mobileSheetVariants,
+  backdropVariants,
+} from "../../lib/animations"
 
 function PasswordStrengthBar({ password = "" }) {
   const len = password.length
@@ -121,17 +127,17 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
         dragElastic: { top: 0.02, bottom: 0.65 },
         dragSnapToOrigin: true,
         onDragEnd: handleDragEnd,
-        initial: { y: "100%" },
-        animate: { y: 0 },
-        exit: { y: "100%" },
-        transition: { type: "spring", stiffness: 420, damping: 32, mass: 0.8 },
+        variants: mobileSheetVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit",
       }
     : {
         drag: false,
-        initial: { scale: 0.94, y: 10 },
-        animate: { scale: 1, y: 0 },
-        exit: { scale: 0.94, y: 8 },
-        transition: { type: "spring", stiffness: 440, damping: 28 },
+        variants: modalVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit",
       }
 
   // Keyboard shortcut listener (Escape to close)
@@ -258,10 +264,10 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
         >
           {/* ── Pure Frosted Blur Backdrop with synchronized fade-out on exit ── */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
             onClick={onClose}
             className="fixed inset-0 backdrop-blur-md pointer-events-auto"
             aria-hidden="true"

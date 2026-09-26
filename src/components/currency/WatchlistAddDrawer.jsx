@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "motion/react"
 import { Search, X } from "lucide-react"
 import { CountryFlag } from "../ui"
 import { NEU } from "../../lib/neu"
-import { neuChipShadow, neuChipHover, neuChipTap } from "../../lib/animations"
+import { neuChipShadow, neuChipHover, neuChipTap, drawerVariants } from "../../lib/animations"
 
 /**
  * WatchlistAddDrawer — Collapsible Neumorphic Drawer for Adding Supported Currencies
@@ -21,10 +21,10 @@ export default function WatchlistAddDrawer({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          variants={drawerVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
           className="overflow-hidden mb-4"
         >
           <div

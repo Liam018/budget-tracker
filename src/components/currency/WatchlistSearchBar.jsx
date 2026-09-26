@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "motion/react"
 import { Search, X } from "lucide-react"
 import { NEU } from "../../lib/neu"
+import { drawerVariants } from "../../lib/animations"
 
 /**
  * WatchlistSearchBar — Expandable Inset Neumorphic Search Filter for Active Watchlist
@@ -16,11 +17,11 @@ export default function WatchlistSearchBar({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-          animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
-          exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-          className="overflow-hidden"
+          variants={drawerVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="overflow-hidden mb-4"
         >
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-2xl"
