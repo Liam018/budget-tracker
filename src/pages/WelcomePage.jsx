@@ -36,12 +36,13 @@ export default function WelcomePage() {
       // Clean the URL so the toast doesn't show again on manual refresh
       window.history.replaceState({}, "", "/welcome")
     }
-  }, [])
+  }, [location.search])
 
   // Reset the guard whenever the slide actually changes
   useEffect(() => {
     isAdvancingRef.current = false
-    setProgress(0)
+    const timer = setTimeout(() => setProgress(0), 0)
+    return () => clearTimeout(timer)
   }, [currentSlide])
 
   // Smooth timer loop: increments progress smoothly and freezes on pause
