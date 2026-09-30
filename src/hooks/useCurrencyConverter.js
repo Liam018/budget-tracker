@@ -21,7 +21,8 @@ export function useCurrencyConverter(defaultBase = "PHP") {
 
   // Keep fromCurrency synchronized if defaultBase changes
   useEffect(() => {
-    setFromCurrency(defaultBase)
+    const timer = setTimeout(() => setFromCurrency(defaultBase), 0)
+    return () => clearTimeout(timer)
   }, [defaultBase])
 
   // Load exchange rates for base currency
@@ -40,8 +41,26 @@ export function useCurrencyConverter(defaultBase = "PHP") {
   }, [defaultBase])
 
   useEffect(() => {
-    loadRates(defaultBase)
-  }, [defaultBase, loadRates])
+    let ignore = false
+    getExchangeRates(defaultBase)
+      .then((data) => {
+        if (!ignore) {
+          setRatesData(data)
+          setIsRefreshed(true)
+          setIsLoadingRates(false)
+          setTimeout(() => setIsRefreshed(false), 1400)
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          toast.error("Failed to load real-time exchange rates")
+          setIsLoadingRates(false)
+        }
+      })
+    return () => {
+      ignore = true
+    }
+  }, [defaultBase])
 
   // Guarded setters to prevent source and target being the same currency
   const handleSetFromCurrency = useCallback((code) => {

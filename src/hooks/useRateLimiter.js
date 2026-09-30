@@ -91,8 +91,45 @@ export function useRateLimiter({
 
   // Re-check server on mount or when identifier changes
   useEffect(() => {
-    checkServerStatus(normalizedId)
-  }, [checkServerStatus, normalizedId])
+    if (!normalizedId || normalizedId === "anonymous") return
+    let ignore = false
+    supabase
+      .rpc("check_rate_limit", {
+        p_identifier: normalizedId,
+        p_action: action,
+        p_max_attempts: maxAttempts,
+        p_lockout_seconds: baseLockoutSeconds,
+      })
+      .then(({ data, error }) => {
+        if (!ignore && !error && data) {
+          const isLocked = Boolean(data.is_locked)
+          const remaining = Number(data.remaining_seconds) || 0
+          const attempts = Number(data.attempts) || 0
+
+          setState({ isLocked, secondsRemaining: remaining, attempts })
+          setSecondsRemaining(remaining)
+
+          if (isLocked && remaining > 0) {
+            localStorage.setItem(
+              storageKey,
+              JSON.stringify({
+                lockedUntil: Date.now() + remaining * 1000,
+                attempts,
+              })
+            )
+          } else if (!isLocked) {
+            localStorage.removeItem(storageKey)
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn("Rate limit check warning:", err.message)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [normalizedId, action, maxAttempts, baseLockoutSeconds, storageKey])
 
   // 3. Local countdown timer
   useEffect(() => {

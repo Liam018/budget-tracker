@@ -29,12 +29,15 @@ export default function RatesCarouselControls({
 
   // Automatically release press if carousel hits boundary during scroll
   useEffect(() => {
-    if (activeButton === "left" && !canScrollLeft) {
-      setActiveButton(null)
-      onStopScroll()
-    } else if (activeButton === "right" && !canScrollRight) {
-      setActiveButton(null)
-      onStopScroll()
+    if (
+      (activeButton === "left" && !canScrollLeft) ||
+      (activeButton === "right" && !canScrollRight)
+    ) {
+      const timer = setTimeout(() => {
+        setActiveButton(null)
+        onStopScroll()
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [activeButton, canScrollLeft, canScrollRight, onStopScroll])
 

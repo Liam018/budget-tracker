@@ -9,7 +9,6 @@ import { NEU } from "../../lib/neu"
 export default function AccountNetWorthSummary({
   metrics,
   currency = "PHP",
-  onAddAccount,
 }) {
   const { netWorth, totalAssets, totalLiabilities, activeCount } = metrics
 

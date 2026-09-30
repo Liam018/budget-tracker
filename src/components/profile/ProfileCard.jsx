@@ -1,6 +1,6 @@
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import { Mail, CheckCircle2, Coins, ChevronDown } from "lucide"
+import { Mail, CheckCircle2, Coins } from "lucide"
 import { CountryFlag } from "../ui"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"

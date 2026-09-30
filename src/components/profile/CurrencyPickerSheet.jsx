@@ -85,9 +85,12 @@ export default function CurrencyPickerSheet({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen, onClose])
 
-  // Reset search when sheet opens/closes
+  // Reset search when sheet closes
   useEffect(() => {
-    if (!isOpen) setSearchQuery("")
+    if (!isOpen) {
+      const timer = setTimeout(() => setSearchQuery(""), 0)
+      return () => clearTimeout(timer)
+    }
   }, [isOpen])
 
   // Filtered list only updates when deferredQuery changes (debounced)

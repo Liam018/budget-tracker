@@ -140,7 +140,9 @@ export async function getHistoricalRates(fromCode = "USD", toCode = "PHP", days 
     if (Date.now() - parseInt(cachedTime, 10) < CACHE_HISTORICAL_TTL) {
       try {
         return JSON.parse(cached)
-      } catch {}
+      } catch {
+        // Ignore cache parsing failure and fetch fresh data
+      }
     }
   }
 

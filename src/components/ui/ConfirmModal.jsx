@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { motion, AnimatePresence } from "motion/react"
-import { Trash2, AlertTriangle, AlertCircle, HelpCircle, X } from "lucide-react"
+import { Trash2, AlertTriangle, HelpCircle, X } from "lucide-react"
 import { useScrollLock } from "../../hooks/useScrollLock"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap, modalVariants, backdropVariants } from "../../lib/animations"

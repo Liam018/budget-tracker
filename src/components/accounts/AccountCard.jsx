@@ -30,19 +30,7 @@ import { formatCurrency } from "../../services/accountService"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap, cardItemVariants } from "../../lib/animations"
 import { toast } from "../ui"
-
-/** Safe haptic vibration utility for mobile devices */
-export function triggerHaptic(type = "light") {
-  if (typeof window !== "undefined" && typeof navigator !== "undefined" && navigator.vibrate) {
-    try {
-      if (type === "light") navigator.vibrate(12)
-      else if (type === "medium") navigator.vibrate(22)
-      else if (type === "success") navigator.vibrate([8, 25, 12])
-    } catch {
-      // Ignore vibration errors
-    }
-  }
-}
+import { triggerHaptic } from "../../lib/haptics"
 
 const ICON_MAP = {
   Wallet,
@@ -69,16 +57,6 @@ const TYPE_LABELS = {
   other: "Digital Asset",
 }
 
-const TYPE_BADGES = {
-  cash: "CASH",
-  bank: "DEBIT",
-  e_wallet: "E-WALLET",
-  credit_card: "CREDIT",
-  savings: "SAVINGS",
-  investment: "INVEST",
-  other: "ASSET",
-}
-
 /**
  * AccountCard — Tactile Neumorphic Account & Wallet Card.
  *
@@ -91,7 +69,6 @@ export default function AccountCard({
   onEdit,
   onArchive,
   onDelete,
-  index = 0,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -99,12 +76,15 @@ export default function AccountCard({
   const menuRef = useRef(null)
 
   // Track hover capability to avoid sticky hover states on touch screens
-  const [canHover, setCanHover] = useState(false)
+  const [canHover, setCanHover] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(hover: hover) and (pointer: fine)").matches
+      : false
+  )
 
   useEffect(() => {
     if (typeof window === "undefined") return
     const hoverMedia = window.matchMedia("(hover: hover) and (pointer: fine)")
-    setCanHover(hoverMedia.matches)
     const handleHoverChange = (e) => setCanHover(e.matches)
     hoverMedia.addEventListener("change", handleHoverChange)
     return () => hoverMedia.removeEventListener("change", handleHoverChange)

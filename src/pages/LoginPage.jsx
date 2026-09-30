@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate, Navigate, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
-import { Mail, Lock, Wallet, AlertCircle, Clock, ShieldAlert, ArrowLeft, Sparkles } from "lucide-react"
+import { Mail, Lock, Wallet, AlertCircle, Clock, ShieldAlert, ArrowLeft } from "lucide-react"
 import { MorphIcon } from "morphicons/react"
 import { LogIn, Loader2 } from "lucide" // icon data for morphicons
 import MorphEyeIcon from "../components/ui/MorphEyeIcon"
@@ -51,7 +51,7 @@ export default function LoginPage() {
       })
       window.history.replaceState({}, "", "/login")
     }
-  }, [])
+  }, [location.search])
 
   const [form, setForm] = useState({ email: "", password: "" })
   const [errors, setErrors] = useState({})
@@ -67,7 +67,6 @@ export default function LoginPage() {
     remainingAttempts,
     failedAttempts,
     checkDebounce,
-    checkServerStatus,
     recordFailure,
     recordSuccess,
   } = useRateLimiter({

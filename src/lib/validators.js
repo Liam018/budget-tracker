@@ -40,7 +40,7 @@ export const matches = (getOtherValue, message = 'Fields do not match.') =>
 
 /** Only letters, spaces, hyphens, and apostrophes (for names). */
 export const nameFormat = (label = 'Name') =>
-  (value) => !/^[a-zA-Z\s'\-]+$/.test(value?.trim() ?? '')
+  (value) => !/^[a-zA-Z\s'-]+$/.test(value?.trim() ?? '')
     ? `${label} must contain letters only.`
     : null
 

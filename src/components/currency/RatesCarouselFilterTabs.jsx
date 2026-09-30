@@ -1,7 +1,6 @@
 import { motion } from "motion/react"
 import { CURRENCY_REGIONS } from "../../services/currencyService"
 import { NEU } from "../../lib/neu"
-import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 
 /**
  * RatesCarouselFilterTabs — Neumorphic Regional Filter Pills

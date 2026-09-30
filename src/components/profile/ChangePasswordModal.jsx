@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence, useDragControls } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import { Lock, X, Check, ShieldCheck, AlertCircle, Loader2 } from "lucide"
+import { Lock, X, ShieldCheck, AlertCircle, Loader2 } from "lucide"
 import { MorphEyeIcon, toast } from "../ui"
 import PasswordRequirements from "../ui/PasswordRequirements"
 import { useAuth } from "../../hooks/useAuth"
@@ -150,16 +150,19 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen, onClose])
 
-  // Reset form when modal opens or closes
+  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
-      setErrors({})
-      setTouched({})
-      setServerError("")
-      setShowCurrent(false)
-      setShowNew(false)
-      setShowConfirm(false)
+      const timer = setTimeout(() => {
+        setForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
+        setErrors({})
+        setTouched({})
+        setServerError("")
+        setShowCurrent(false)
+        setShowNew(false)
+        setShowConfirm(false)
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [isOpen])
 

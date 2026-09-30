@@ -10,23 +10,20 @@ import { useState, useEffect } from "react"
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [isInstallable, setIsInstallable] = useState(false)
-  const [isInstalled, setIsInstalled] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
-
-  useEffect(() => {
-    // Check if running in standalone mode (already installed)
-    const isStandalone =
+  const [isInstalled, setIsInstalled] = useState(() => {
+    if (typeof window === "undefined") return false
+    return (
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true
-
-    setIsInstalled(isStandalone)
-
-    // Detect iOS
+    )
+  })
+  const [isIOS] = useState(() => {
+    if (typeof window === "undefined") return false
     const userAgent = window.navigator.userAgent.toLowerCase()
-    const isIosDevice =
-      /iphone|ipad|ipod/.test(userAgent) && !window.MSStream
-    setIsIOS(isIosDevice)
+    return /iphone|ipad|ipod/.test(userAgent) && !window.MSStream
+  })
 
+  useEffect(() => {
     // Android/Desktop: Listen for beforeinstallprompt
     function handleBeforeInstallPrompt(e) {
       e.preventDefault()

@@ -1,5 +1,6 @@
 export { default as MorphEyeIcon } from "./MorphEyeIcon"
 export { default as PasswordRequirements } from "./PasswordRequirements"
-export { Toaster, toast } from "./Toaster"
+export { Toaster } from "./Toaster"
+export { toast } from "sonner"
 export { default as ConfirmModal } from "./ConfirmModal"
 export { CountryFlag } from "./CountryFlag"

@@ -17,6 +17,7 @@ import { toast } from "../components/ui"
  */
 export function useAccounts() {
   const { user } = useAuth()
+  const userId = user?.id
   const [accounts, setAccounts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -24,13 +25,12 @@ export function useAccounts() {
 
   // Fetch accounts from Supabase
   const loadAccounts = useCallback(async (showRefreshing = false) => {
-    if (!user?.id) return
+    if (!userId) return
     if (showRefreshing) setIsRefreshing(true)
-    else setIsLoading(true)
     setError(null)
 
     try {
-      const data = await getAccounts(user.id)
+      const data = await getAccounts(userId)
       setAccounts(data)
     } catch (err) {
       console.error("Failed to load accounts:", err)
@@ -40,26 +40,43 @@ export function useAccounts() {
       setIsLoading(false)
       setIsRefreshing(false)
     }
-  }, [user?.id])
+  }, [userId])
 
   // Initial load
   useEffect(() => {
-    loadAccounts()
-  }, [loadAccounts])
+    if (!userId) return
+    let ignore = false
+    getAccounts(userId)
+      .then((data) => {
+        if (!ignore) {
+          setAccounts(data)
+          setIsLoading(false)
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          setError(err.message || "Failed to load accounts")
+          setIsLoading(false)
+        }
+      })
+    return () => {
+      ignore = true
+    }
+  }, [userId])
 
   // Setup Supabase Realtime channel for live multi-device syncing
   useEffect(() => {
-    if (!user?.id) return
+    if (!userId) return
 
     const channel = supabase
-      .channel(`user-accounts-${user.id}`)
+      .channel(`user-accounts-${userId}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "accounts",
-          filter: `user_id=eq.${user.id}`,
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           if (payload.eventType === "INSERT") {
@@ -81,14 +98,14 @@ export function useAccounts() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user?.id])
+  }, [userId])
 
   // Add Account
   const handleAddAccount = useCallback(
     async (accountData) => {
-      if (!user?.id) return false
+      if (!userId) return false
       try {
-        const newAcc = await createAccount({ ...accountData, user_id: user.id })
+        const newAcc = await createAccount({ ...accountData, user_id: userId })
         setAccounts((prev) => {
           if (prev.some((a) => a.id === newAcc.id)) return prev
           return [...prev, newAcc]
@@ -101,7 +118,7 @@ export function useAccounts() {
         throw err
       }
     },
-    [user?.id]
+    [userId]
   )
 
   // Update Account

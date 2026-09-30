@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import {
   Wallet,
@@ -12,6 +12,8 @@ import {
   PiggyBank,
   Archive,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import { useAccounts } from "../hooks/useAccounts"
 import {
@@ -65,10 +67,57 @@ export default function AccountsPage() {
   const activeTabRef = useRef(null)
   const tabsContainerRef = useRef(null)
 
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  // Measure whether categories are scrollable left or right
+  const checkScrollBounds = useCallback(() => {
+    const el = tabsContainerRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    const maxScroll = scrollWidth - clientWidth
+    setCanScrollLeft(scrollLeft > 4)
+    setCanScrollRight(maxScroll > 4 && scrollLeft < maxScroll - 4)
+  }, [])
+
+  // Monitor scroll events and container resize for responsive scroll indication
+  useEffect(() => {
+    const el = tabsContainerRef.current
+    if (!el) return
+
+    const rafId = requestAnimationFrame(checkScrollBounds)
+    el.addEventListener("scroll", checkScrollBounds, { passive: true })
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkScrollBounds()
+    })
+    resizeObserver.observe(el)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      el.removeEventListener("scroll", checkScrollBounds)
+      resizeObserver.disconnect()
+    }
+  }, [checkScrollBounds, archivedAccounts.length])
+
+  // Re-check scroll bounds after tab change or programmatic scroll
+  useEffect(() => {
+    const timer = setTimeout(checkScrollBounds, 350)
+    return () => clearTimeout(timer)
+  }, [selectedType, checkScrollBounds])
+
+  const handleScrollCategories = (direction) => {
+    if (!tabsContainerRef.current) return
+    const scrollAmount = direction === "left" ? -180 : 180
+    tabsContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" })
+    triggerHaptic("light")
+  }
+
   // Auto-fallback to "all" if active tab is "archived" but there are no archived accounts left
   useEffect(() => {
     if (selectedType === "archived" && archivedAccounts.length === 0) {
-      setSelectedType("all")
+      const timer = setTimeout(() => setSelectedType("all"), 0)
+      return () => clearTimeout(timer)
     }
   }, [selectedType, archivedAccounts.length])
 
@@ -185,6 +234,89 @@ export default function AccountsPage() {
       <div className="space-y-3.5">
         {/* Tier 1: Full-Width Categories Track */}
         <div className="relative w-full">
+          {/* Left Scroll Indicator & Gradient Fade */}
+          <AnimatePresence>
+            {canScrollLeft && (
+              <motion.div
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -6 }}
+                transition={{ duration: 0.2 }}
+                className="absolute left-0 inset-y-0 z-20 flex items-center pl-1 sm:pl-1.5 pointer-events-none"
+              >
+                {/* Gradient mask */}
+                <div
+                  className="absolute inset-y-0.5 left-0 w-12 sm:w-16 rounded-l-2xl pointer-events-none"
+                  style={{
+                    background: `linear-gradient(to right, ${NEU.bg} 40%, rgba(237, 240, 247, 0) 100%)`,
+                  }}
+                />
+                {/* Scroll button */}
+                <motion.button
+                  type="button"
+                  onClick={() => handleScrollCategories("left")}
+                  className="relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-neutral-600 hover:text-neutral-900 active:text-brand-600 transition-colors pointer-events-auto cursor-pointer flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30"
+                  style={{
+                    background: NEU.bg,
+                    boxShadow: NEU.raisedSm,
+                  }}
+                  whileHover={neuButtonHover}
+                  whileTap={neuButtonTap}
+                  aria-label="Scroll categories left"
+                >
+                  <ChevronLeft size={14} strokeWidth={2.6} />
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Right Scroll Indicator & Gradient Fade */}
+          <AnimatePresence>
+            {canScrollRight && (
+              <motion.div
+                initial={{ opacity: 0, x: 6 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 6 }}
+                transition={{ duration: 0.2 }}
+                className="absolute right-0 inset-y-0 z-20 flex items-center justify-end pr-1 sm:pr-1.5 pointer-events-none"
+              >
+                {/* Gradient mask */}
+                <div
+                  className="absolute inset-y-0.5 right-0 w-12 sm:w-16 rounded-r-2xl pointer-events-none"
+                  style={{
+                    background: `linear-gradient(to left, ${NEU.bg} 40%, rgba(237, 240, 247, 0) 100%)`,
+                  }}
+                />
+                {/* Scroll button */}
+                <motion.button
+                  type="button"
+                  onClick={() => handleScrollCategories("right")}
+                  className="relative z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-neutral-600 hover:text-neutral-900 active:text-brand-600 transition-colors pointer-events-auto cursor-pointer flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/30"
+                  style={{
+                    background: NEU.bg,
+                    boxShadow: NEU.raisedSm,
+                  }}
+                  whileHover={neuButtonHover}
+                  whileTap={neuButtonTap}
+                  aria-label="Scroll categories right"
+                >
+                  <motion.span
+                    animate={{ x: [0, 2, 0] }}
+                    transition={{
+                      repeat: Infinity,
+                      repeatDelay: 2.5,
+                      duration: 1.2,
+                      ease: "easeInOut",
+                    }}
+                    className="flex items-center justify-center"
+                  >
+                    <ChevronRight size={14} strokeWidth={2.6} />
+                  </motion.span>
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div
             ref={tabsContainerRef}
             className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-2xl overflow-x-auto scrollbar-none scroll-smooth touch-pan-x"

@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 /**
  * src/lib/sanitizer.js
  * Client-side input sanitization helpers.

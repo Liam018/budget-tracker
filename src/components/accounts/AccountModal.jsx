@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence, useDragControls } from "motion/react"
 import { MorphIcon } from "morphicons/react"
 import {
@@ -99,28 +99,31 @@ export default function AccountModal({
 
   // Sync state when opening or when accountToEdit changes
   useEffect(() => {
-    if (accountToEdit) {
-      setName(accountToEdit.name || "")
-      setType(accountToEdit.type || "cash")
-      setBalance(accountToEdit.balance !== undefined ? String(accountToEdit.balance) : "")
-      setColor(accountToEdit.color || "#10b981")
-      setIcon(accountToEdit.icon || "Wallet")
-      setInstitution(accountToEdit.institution || "")
-      setAccountNumber(accountToEdit.account_number || "")
-      setActiveTab("custom")
-      setShowAppearanceOptions(true)
-    } else {
-      // Default to Cash preset
-      setName("")
-      setType("cash")
-      setBalance("")
-      setColor("#10b981")
-      setIcon("Banknote")
-      setInstitution("")
-      setAccountNumber("")
-      setActiveTab("presets")
-      setShowAppearanceOptions(false)
-    }
+    const timer = setTimeout(() => {
+      if (accountToEdit) {
+        setName(accountToEdit.name || "")
+        setType(accountToEdit.type || "cash")
+        setBalance(accountToEdit.balance !== undefined ? String(accountToEdit.balance) : "")
+        setColor(accountToEdit.color || "#10b981")
+        setIcon(accountToEdit.icon || "Wallet")
+        setInstitution(accountToEdit.institution || "")
+        setAccountNumber(accountToEdit.account_number || "")
+        setActiveTab("custom")
+        setShowAppearanceOptions(true)
+      } else {
+        // Default to Cash preset
+        setName("")
+        setType("cash")
+        setBalance("")
+        setColor("#10b981")
+        setIcon("Banknote")
+        setInstitution("")
+        setAccountNumber("")
+        setActiveTab("presets")
+        setShowAppearanceOptions(false)
+      }
+    }, 0)
+    return () => clearTimeout(timer)
   }, [accountToEdit, isOpen])
 
   // Escape key listener

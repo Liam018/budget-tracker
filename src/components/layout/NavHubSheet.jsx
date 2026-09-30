@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom"
-import { motion, AnimatePresence } from "motion/react"
+import { motion, AnimatePresence, useDragControls } from "motion/react"
 import { LogOut, ChevronRight } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
 import { useConfirm } from "../../hooks/useConfirm"
@@ -15,11 +15,22 @@ import {
   neuButtonTap,
 } from "../../lib/animations"
 
+function triggerHaptic(ms = 8) {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    try {
+      navigator.vibrate(ms)
+    } catch {
+      // Ignore vibration failures if unsupported or blocked
+    }
+  }
+}
+
 export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, profile, signOut } = useAuth()
   const confirm = useConfirm()
+  const dragControls = useDragControls()
 
   // Prevent background scroll while hub sheet is open
   useScrollLock(isOpen)
@@ -37,6 +48,7 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
   const secondaryMenuItems = MENU_NAV_ITEMS.filter((item) => item.to !== "/profile")
 
   async function handleSignOutClick() {
+    triggerHaptic(10)
     onClose()
     const ok = await confirm({
       title: "Sign Out?",
@@ -66,6 +78,17 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
           initial="hidden"
           animate="visible"
           exit="exit"
+          drag="y"
+          dragControls={dragControls}
+          dragListener={false}
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.04, bottom: 0.55 }}
+          onDragEnd={(_e, { offset, velocity }) => {
+            if (offset.y > 50 || velocity.y > 300) {
+              triggerHaptic(12)
+              onClose()
+            }
+          }}
           className="absolute bottom-17.5 inset-x-0 rounded-3xl pointer-events-auto select-none max-h-[calc(100dvh-6.5rem)] flex flex-col"
           style={{
             background: "var(--neu-bg)",
@@ -75,14 +98,32 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
           role="dialog"
           aria-label="Quick Actions and Navigation Menu"
         >
+          {/* ── Tactile Sunken Neumorphic Drag Handle ── */}
+          <div
+            onPointerDown={(e) => dragControls.start(e)}
+            className="w-full flex flex-col items-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none select-none group"
+            title="Swipe down to dismiss"
+          >
+            <div
+              className="w-10 h-1.2 rounded-full transition-all duration-200 group-hover:w-12 group-active:scale-95"
+              style={{
+                background: "rgba(180, 185, 200, 0.7)",
+                boxShadow: "inset 1px 1px 2px rgba(0,0,0,0.15), 0 1px 1px rgba(255,255,255,0.8)",
+              }}
+            />
+          </div>
+
           {/* Scrollable Container for Small Mobile Viewports */}
-          <div className="overflow-y-auto overscroll-contain scrollbar-none p-5 pb-5 flex-1">
+          <div className="overflow-y-auto overscroll-contain scrollbar-none px-5 pb-5 pt-1 flex-1">
             {/* ── Top Interactive Profile Card (Comfortably Sized) ── */}
             <motion.button
               variants={childItemVariants}
               whileHover={neuButtonHover}
               whileTap={neuButtonTap}
-              onClick={() => onNavigate("/profile")}
+              onClick={() => {
+                triggerHaptic(8)
+                onNavigate("/profile")
+              }}
               className="w-full flex items-center justify-between p-3 sm:p-3.5 rounded-2xl mb-4 transition-all cursor-pointer text-left select-none group"
               style={{
                 background: NEU.bg,
@@ -136,14 +177,19 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
                     variants={childItemVariants}
                     whileHover={neuButtonHover}
                     whileTap={neuButtonTap}
-                    onClick={() => onNavigate(to)}
-                    className="flex flex-col items-center justify-center p-3 sm:p-3.5 rounded-2xl transition-all cursor-pointer text-center select-none"
+                    onClick={() => {
+                      triggerHaptic(8)
+                      onNavigate(to)
+                    }}
+                    className="group flex flex-col items-center justify-center p-3 sm:p-3.5 rounded-2xl transition-all cursor-pointer text-center select-none"
                     style={{
                       background: NEU.bg,
                       boxShadow: NEU.raisedSm,
                     }}
                   >
-                    <Icon size={20} className={`${color} mb-1.5 sm:w-5.5 sm:h-5.5`} strokeWidth={2.4} />
+                    <div className="transition-transform duration-200 group-hover:scale-115 group-active:scale-90">
+                      <Icon size={20} className={`${color} mb-1.5 sm:w-5.5 sm:h-5.5`} strokeWidth={2.4} />
+                    </div>
                     <span className="text-xs sm:text-sm font-extrabold text-neutral-800 tracking-tight leading-none truncate max-w-full">
                       {label}
                     </span>
@@ -169,8 +215,11 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
                       variants={childItemVariants}
                       whileHover={isActive ? {} : neuButtonHover}
                       whileTap={{ y: 1, boxShadow: isActive ? NEU.insetSm : NEU.pressed }}
-                      onClick={() => onNavigate(to)}
-                      className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer select-none ${
+                      onClick={() => {
+                        triggerHaptic(8)
+                        onNavigate(to)
+                      }}
+                      className={`group flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl text-left transition-all cursor-pointer select-none ${
                         isActive
                           ? "text-brand-600 font-bold"
                           : "text-neutral-700 hover:text-neutral-900"
@@ -181,7 +230,7 @@ export default function NavHubSheet({ isOpen, onClose, onNavigate }) {
                       }}
                     >
                       <div
-                        className={`w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-xl flex items-center justify-center shrink-0 ${
+                        className={`w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 group-active:scale-95 ${
                           isActive ? "bg-brand-500 text-white" : "bg-neutral-200/50 text-neutral-600"
                         }`}
                       >

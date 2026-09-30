@@ -13,6 +13,16 @@ import {
 
 
 
+function triggerHaptic(ms = 8) {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    try {
+      navigator.vibrate(ms)
+    } catch {
+      // Ignore vibration errors if unsupported or blocked
+    }
+  }
+}
+
 export default function BottomNav() {
   const [isHubOpen, setIsHubOpen] = useState(false)
   const [barWidth, setBarWidth] = useState(360)
@@ -34,7 +44,8 @@ export default function BottomNav() {
 
   // Auto-close hub when navigating to any route
   useEffect(() => {
-    setIsHubOpen(false)
+    const timer = setTimeout(() => setIsHubOpen(false), 0)
+    return () => clearTimeout(timer)
   }, [location.pathname])
 
   function handleNavigate(to) {
@@ -107,7 +118,12 @@ export default function BottomNav() {
           >
 
             {/* Left Tabs (Dashboard, Txns) */}
-            <div
+            <motion.div
+              animate={{
+                x: isHubOpen ? -8 : 0,
+                opacity: isHubOpen ? 0.35 : 1,
+              }}
+              transition={{ type: "spring", stiffness: 380, damping: 26 }}
               className="flex items-center justify-around h-full pl-3"
               style={{ width: `calc(50% - ${NAV_NOTCH_RADIUS + 10}px)` }}
             >
@@ -117,11 +133,12 @@ export default function BottomNav() {
                   to={to}
                   end={to === "/"}
                   onClick={(e) => {
+                    triggerHaptic(6)
                     if (location.pathname === to) {
                       e.preventDefault()
                     }
                   }}
-                  className="relative flex flex-col items-center justify-center flex-1 h-full min-w-0 select-none"
+                  className="relative flex flex-col items-center justify-center flex-1 h-full min-w-0 select-none py-1"
                 >
                   {({ isActive }) => (
                     <>
@@ -143,24 +160,42 @@ export default function BottomNav() {
                         className="relative z-10 text-[9px] font-semibold tracking-wide leading-none mt-0.5"
                         animate={
                           isActive
-                            ? { opacity: 1, y: 0,  color: "#4f46e5" }
+                            ? { opacity: 1, y: 0, color: "#4f46e5" }
                             : { opacity: 0.5, y: 2, color: "#9ca3af" }
                         }
                         transition={{ duration: 0.18 }}
                       >
                         {label}
                       </motion.span>
+
+                      {/* Micro Dot Indicator */}
+                      {isActive && (
+                        <motion.span
+                          layoutId="activeTabDot"
+                          className="absolute bottom-1 w-1 h-1 rounded-full bg-brand-600 pointer-events-none"
+                          transition={{
+                            type: "spring",
+                            stiffness: 440,
+                            damping: 30,
+                          }}
+                        />
+                      )}
                     </>
                   )}
                 </NavLink>
               ))}
-            </div>
+            </motion.div>
 
             {/* Center Notch Gap (spacer) */}
             <div style={{ width: `${(NAV_NOTCH_RADIUS + 10) * 2}px` }} className="shrink-0 h-full" />
 
             {/* Right Tabs (Budget, Account) */}
-            <div
+            <motion.div
+              animate={{
+                x: isHubOpen ? 8 : 0,
+                opacity: isHubOpen ? 0.35 : 1,
+              }}
+              transition={{ type: "spring", stiffness: 380, damping: 26 }}
               className="flex items-center justify-around h-full pr-3"
               style={{ width: `calc(50% - ${NAV_NOTCH_RADIUS + 10}px)` }}
             >
@@ -170,11 +205,12 @@ export default function BottomNav() {
                   to={to}
                   end={to === "/"}
                   onClick={(e) => {
+                    triggerHaptic(6)
                     if (location.pathname === to) {
                       e.preventDefault()
                     }
                   }}
-                  className="relative flex flex-col items-center justify-center flex-1 h-full min-w-0 select-none"
+                  className="relative flex flex-col items-center justify-center flex-1 h-full min-w-0 select-none py-1"
                 >
                   {({ isActive }) => (
                     <>
@@ -196,26 +232,42 @@ export default function BottomNav() {
                         className="relative z-10 text-[9px] font-semibold tracking-wide leading-none mt-0.5"
                         animate={
                           isActive
-                            ? { opacity: 1, y: 0,  color: "#4f46e5" }
+                            ? { opacity: 1, y: 0, color: "#4f46e5" }
                             : { opacity: 0.5, y: 2, color: "#9ca3af" }
                         }
                         transition={{ duration: 0.18 }}
                       >
                         {label}
                       </motion.span>
+
+                      {/* Micro Dot Indicator */}
+                      {isActive && (
+                        <motion.span
+                          layoutId="activeTabDot"
+                          className="absolute bottom-1 w-1 h-1 rounded-full bg-brand-600 pointer-events-none"
+                          transition={{
+                            type: "spring",
+                            stiffness: 440,
+                            damping: 30,
+                          }}
+                        />
+                      )}
                     </>
                   )}
                 </NavLink>
               ))}
-            </div>
+            </motion.div>
 
           </motion.div>
 
           {/* Centre Action & Navigation Hub FAB (Same 52px Circle Size in Both States) */}
           <motion.button
-            whileHover={{ y: -2 }}
-            whileTap={{ y: 1 }}
-            onClick={() => setIsHubOpen((prev) => !prev)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => {
+              triggerHaptic(10)
+              setIsHubOpen((prev) => !prev)
+            }}
             className="absolute left-1/2 -translate-x-1/2 z-40 flex items-center justify-center rounded-full cursor-pointer pointer-events-auto transition-all duration-200"
             style={{
               top: "-14px",
@@ -229,6 +281,20 @@ export default function BottomNav() {
             aria-label={isHubOpen ? "Close navigation hub" : "Open quick actions and navigation hub"}
             aria-expanded={isHubOpen}
           >
+            {/* Soft Ripple Halo on Hub Open */}
+            <AnimatePresence>
+              {isHubOpen && (
+                <motion.div
+                  key="fab-ripple"
+                  initial={{ scale: 0.8, opacity: 0.55 }}
+                  animate={{ scale: 1.35, opacity: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                  className="absolute inset-0 rounded-full bg-brand-500/25 pointer-events-none -z-10"
+                />
+              )}
+            </AnimatePresence>
+
             <motion.div
               animate={{ rotate: isHubOpen ? 135 : 0 }}
               transition={{ type: "spring", stiffness: 480, damping: 24 }}

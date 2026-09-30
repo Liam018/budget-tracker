@@ -23,7 +23,6 @@ export default function ConversionResultCard({
   convertedValue,
   singleUnitRate,
   inverseRate,
-  ratesData,
 }) {
   const [copied, setCopied] = useState(false)
 

@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { motion } from "motion/react"
-import { Plus, Bell, ChevronDown } from "lucide-react"
+import { Bell } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
 import { NEU } from "../../lib/neu"
 

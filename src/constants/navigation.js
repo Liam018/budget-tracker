@@ -14,8 +14,6 @@ import {
   TrendingUp as TrendingUpLucide,
   RefreshCcw,
   Repeat2,
-  Bell,
-  BellRing,
   Coins,
 } from "lucide"
 
@@ -27,7 +25,6 @@ import {
   Tag as TagIcon,
   BarChart2 as BarChart2Icon,
   RefreshCcw as RefreshCcwIcon,
-  Bell as BellIcon,
   User as UserIcon,
   Coins as CoinsIcon,
 } from "lucide-react"

@@ -1,6 +1,6 @@
 import { motion } from "motion/react"
 import { MorphIcon } from "morphicons/react"
-import { Lock, Shield, KeyRound } from "lucide"
+import { Shield, KeyRound } from "lucide"
 import { NEU } from "../../lib/neu"
 import { neuButtonHover, neuButtonTap } from "../../lib/animations"
 

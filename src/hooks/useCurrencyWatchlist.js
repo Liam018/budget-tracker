@@ -15,7 +15,9 @@ export default function useCurrencyWatchlist(fromCurrency = "PHP") {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) return JSON.parse(saved)
-    } catch {}
+    } catch {
+      // Ignore localStorage parse errors and fall back to default
+    }
     return DEFAULT_WATCHLIST
   })
 
@@ -25,7 +27,9 @@ export default function useCurrencyWatchlist(fromCurrency = "PHP") {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(pinnedCodes))
-    } catch {}
+    } catch {
+      // Ignore localStorage write failures
+    }
   }, [pinnedCodes])
 
   const togglePin = useCallback((code) => {
