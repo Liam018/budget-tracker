@@ -12,6 +12,8 @@ import {
   Landmark,
   Receipt,
   Archive,
+  Sparkles,
+  Plus,
 } from "lucide-react"
 
 import {
@@ -114,5 +116,13 @@ export const FILTER_TABS = [
   { id: "credit_card", label: "Credit Cards", icon: CreditCard },
   { id: "savings", label: "Savings", icon: PiggyBank },
   { id: "archived", label: "Archived", icon: Archive },
+]
+
+/**
+ * Modal segmented tabs for Philippine Presets vs Custom Details
+ */
+export const ACCOUNT_MODAL_TABS = [
+  { id: "presets", label: "Philippine Presets", icon: Sparkles },
+  { id: "custom", label: "Custom Details", icon: Plus },
 ]
 

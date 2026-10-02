@@ -50,7 +50,7 @@ export default function AppHeader() {
   const isProfileActive = pathname === "/profile"
 
   return (
-    <div className="sticky top-0 z-20 px-4 pt-4 shrink-0">
+    <div className="sticky top-0 z-30 px-4 pt-4 shrink-0">
       <header
         className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-15 rounded-2xl transition-all"
         style={{

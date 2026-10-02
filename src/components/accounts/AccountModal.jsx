@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, startTransition } from "react"
 import { motion, AnimatePresence, useDragControls } from "motion/react"
 import { useScrollLock } from "../../hooks/useScrollLock"
 import { useIsMobile } from "../../hooks/useIsMobile"
@@ -97,10 +97,13 @@ export default function AccountModal({
     e?.preventDefault()
     if (!name.trim()) return
 
+    const parsedBalance = balance === "" ? 0 : parseFloat(balance)
+    const finalBalance = isNaN(parsedBalance) || parsedBalance < 0 ? 0 : parsedBalance
+
     onSave({
       name: name.trim(),
       type,
-      balance: balance === "" ? 0 : parseFloat(balance),
+      balance: finalBalance,
       currency: "PHP",
       color,
       icon,
@@ -210,10 +213,12 @@ export default function AccountModal({
                   <AccountModalTabs
                     activeTab={activeTab}
                     onTabChange={(tab) => {
-                      setActiveTab(tab)
-                      if (tab === "custom") {
-                        setShowAppearanceOptions(true)
-                      }
+                      startTransition(() => {
+                        setActiveTab(tab)
+                        if (tab === "custom") {
+                          setShowAppearanceOptions(true)
+                        }
+                      })
                     }}
                   />
                 )}
@@ -274,9 +279,23 @@ export default function AccountModal({
                     <input
                       type="number"
                       step="any"
+                      min="0"
                       placeholder="0.00"
                       value={balance}
-                      onChange={(e) => setBalance(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        if (val === "") {
+                          setBalance("")
+                          return
+                        }
+                        if (val.includes("-") || parseFloat(val) < 0) return
+                        setBalance(val)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "-" || e.key === "e" || e.key === "E") {
+                          e.preventDefault()
+                        }
+                      }}
                       className="w-full bg-transparent text-sm font-extrabold text-neutral-800 outline-none"
                     />
                   </div>

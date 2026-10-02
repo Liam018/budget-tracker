@@ -28,7 +28,6 @@ export default function AccountCard({
   const canHover = useCanHover()
 
   const {
-    id,
     name,
     type = "bank",
     balance = 0,
@@ -161,10 +160,10 @@ export default function AccountCard({
           />
         </div>
 
-        {/* ── MIDFIELD: Account Number Pill or Asset Identifier ── */}
+        {/* ── MIDFIELD: Account Number Pill or Not Set ── */}
         <AccountNumberPill
           accountNumber={account_number}
-          accountId={id}
+          accountType={type}
         />
 
         {/* ── FOOTER: Tactile Neumorphic Motif & Balance ── */}

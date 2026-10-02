@@ -9,10 +9,19 @@ import { triggerHaptic } from "../../lib/haptics"
 
 /**
  * AccountNumberPill — Displays masked account number with interactive click-to-copy,
- * or fallback asset identifier pill when no account number is configured.
+ * or "Not Set" fallback when no account number is configured.
+ * Hides completely for Cash and Savings accounts.
  */
-export default function AccountNumberPill({ accountNumber, accountId }) {
+export default function AccountNumberPill({
+  accountNumber,
+  accountType = "bank",
+}) {
   const [copied, setCopied] = useState(false)
+
+  // Hide account number midfield row for Cash and Savings accounts
+  if (accountType === "cash" || accountType === "savings") {
+    return null
+  }
 
   const formattedNumber = accountNumber
     ? accountNumber.length > 4
@@ -94,16 +103,16 @@ export default function AccountNumberPill({ accountNumber, accountId }) {
       ) : (
         <div className="flex items-center justify-between gap-2 py-0.5">
           <span className="text-[9px] font-extrabold uppercase tracking-wider text-neutral-400">
-            Asset Identifier
+            Account Number
           </span>
           <span
-            className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-neutral-500 border border-neutral-300/30"
+            className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-neutral-400 border border-neutral-300/30"
             style={{
               background: NEU.bg,
               boxShadow: NEU.insetSm,
             }}
           >
-            #{accountId ? accountId.slice(-6).toUpperCase() : "WALLET"}
+            Not Set
           </span>
         </div>
       )}

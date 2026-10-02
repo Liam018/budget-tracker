@@ -97,7 +97,7 @@ export default function AccountFilterTabs({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -6 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 inset-y-0 z-20 flex items-center pl-1 sm:pl-1.5 pointer-events-none"
+            className="absolute left-0 inset-y-0 z-10 flex items-center pl-1 sm:pl-1.5 pointer-events-none"
           >
             {/* Gradient mask */}
             <div
