@@ -1,25 +1,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence, useDragControls } from "motion/react"
-import { MorphIcon } from "morphicons/react"
-import {
-  X,
-  Plus,
-  Check,
-  Wallet,
-  Banknote,
-  Building2,
-  Smartphone,
-  CreditCard,
-  PiggyBank,
-  ShoppingBag,
-  TrendingUp,
-  Coins,
-  Briefcase,
-  Landmark,
-  Receipt,
-  Sparkles,
-} from "lucide"
 import { useScrollLock } from "../../hooks/useScrollLock"
+import { useIsMobile } from "../../hooks/useIsMobile"
 import { NEU } from "../../lib/neu"
 import {
   neuButtonHover,
@@ -28,34 +10,11 @@ import {
   mobileSheetVariants,
   backdropVariants,
 } from "../../lib/animations"
-import {
-  PHILIPPINE_INSTITUTION_PRESETS,
-  PRESET_COLORS,
-  AVAILABLE_ICONS,
-} from "../../services/accountService"
-
-const ICON_MAP = {
-  Wallet,
-  Banknote,
-  Building2,
-  Smartphone,
-  CreditCard,
-  PiggyBank,
-  ShoppingBag,
-  TrendingUp,
-  Coins,
-  Briefcase,
-  Landmark,
-  Receipt,
-}
-
-const ACCOUNT_TYPE_OPTIONS = [
-  { id: "cash", label: "Cash" },
-  { id: "bank", label: "Bank" },
-  { id: "e_wallet", label: "E-Wallet" },
-  { id: "credit_card", label: "Credit Card" },
-  { id: "savings", label: "Savings / Jar" },
-]
+import AccountModalHeader from "./AccountModalHeader"
+import AccountModalTabs from "./AccountModalTabs"
+import AccountPresetGrid from "./AccountPresetGrid"
+import AccountTypeSelector from "./AccountTypeSelector"
+import AccountAppearancePicker from "./AccountAppearancePicker"
 
 /**
  * AccountModal — Adaptive modal (Bottom Sheet on mobile, Dialog on desktop)
@@ -69,6 +28,9 @@ export default function AccountModal({
   isSaving = false,
 }) {
   const isEditing = Boolean(accountToEdit)
+  const isMobile = useIsMobile(640)
+  const dragControls = useDragControls()
+  useScrollLock(isOpen)
 
   // Form State
   const [name, setName] = useState("")
@@ -81,29 +43,15 @@ export default function AccountModal({
   const [activeTab, setActiveTab] = useState("presets") // "presets" | "custom"
   const [showAppearanceOptions, setShowAppearanceOptions] = useState(false)
 
-  const dragControls = useDragControls()
-  useScrollLock(isOpen)
-
-  // Responsive state
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 640 : false
-  )
-
-  useEffect(() => {
-    function handleResize() {
-      setIsMobile(window.innerWidth < 640)
-    }
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
   // Sync state when opening or when accountToEdit changes
   useEffect(() => {
     const timer = setTimeout(() => {
       if (accountToEdit) {
         setName(accountToEdit.name || "")
         setType(accountToEdit.type || "cash")
-        setBalance(accountToEdit.balance !== undefined ? String(accountToEdit.balance) : "")
+        setBalance(
+          accountToEdit.balance !== undefined ? String(accountToEdit.balance) : ""
+        )
         setColor(accountToEdit.color || "#10b981")
         setIcon(accountToEdit.icon || "Wallet")
         setInstitution(accountToEdit.institution || "")
@@ -111,7 +59,6 @@ export default function AccountModal({
         setActiveTab("custom")
         setShowAppearanceOptions(true)
       } else {
-        // Default to Cash preset
         setName("")
         setType("cash")
         setBalance("")
@@ -242,48 +189,14 @@ export default function AccountModal({
               </div>
             )}
 
-            {/* Header (Pinned) */}
-            <div className="px-5 py-3.5 flex items-center justify-between border-b border-neutral-200/60 shrink-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-xs transition-colors"
-                  style={{ background: color }}
-                >
-                  <MorphIcon
-                    icon={ICON_MAP[icon] || Wallet}
-                    size={18}
-                    strokeWidth={2.4}
-                  />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-extrabold text-neutral-800 tracking-tight leading-tight truncate">
-                    {isEditing ? "Edit Account" : "Add New Account"}
-                  </h3>
-                  <p className="text-xs text-neutral-400 truncate">
-                    {isEditing
-                      ? "Update balance or account details"
-                      : activeTab === "presets"
-                      ? "Pick a Philippine institution or customize"
-                      : "Create a custom account"}
-                  </p>
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={neuButtonHover}
-                whileTap={neuButtonTap}
-                onClick={onClose}
-                type="button"
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer shrink-0 ml-2"
-                style={{
-                  background: NEU.bg,
-                  boxShadow: NEU.raisedSm,
-                }}
-                aria-label="Close"
-              >
-                <MorphIcon icon={X} size={15} strokeWidth={2.4} />
-              </motion.button>
-            </div>
+            {/* Pinned Header */}
+            <AccountModalHeader
+              color={color}
+              icon={icon}
+              isEditing={isEditing}
+              activeTab={activeTab}
+              onClose={onClose}
+            />
 
             {/* Form Container with Flex Column so Body scrolls and Footer stays Pinned */}
             <form
@@ -294,102 +207,24 @@ export default function AccountModal({
               <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 scrollbar-none">
                 {/* Presets vs Custom Segmented Switcher (Only when adding new) */}
                 {!isEditing && (
-                  <div
-                    className="p-1 rounded-2xl flex items-center gap-1"
-                    style={{
-                      background: NEU.bg,
-                      boxShadow: NEU.insetSm,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("presets")}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        activeTab === "presets"
-                          ? "text-brand-600"
-                          : "text-neutral-500 hover:text-neutral-800"
-                      }`}
-                      style={
-                        activeTab === "presets"
-                          ? { background: NEU.bg, boxShadow: NEU.raisedSm }
-                          : {}
-                      }
-                    >
-                      <MorphIcon icon={Sparkles} size={13} strokeWidth={2.4} />
-                      <span>Philippine Presets</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab("custom")
+                  <AccountModalTabs
+                    activeTab={activeTab}
+                    onTabChange={(tab) => {
+                      setActiveTab(tab)
+                      if (tab === "custom") {
                         setShowAppearanceOptions(true)
-                      }}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                        activeTab === "custom"
-                          ? "text-brand-600"
-                          : "text-neutral-500 hover:text-neutral-800"
-                      }`}
-                      style={
-                        activeTab === "custom"
-                          ? { background: NEU.bg, boxShadow: NEU.raisedSm }
-                          : {}
                       }
-                    >
-                      <MorphIcon icon={Plus} size={13} strokeWidth={2.4} />
-                      <span>Custom Details</span>
-                    </button>
-                  </div>
+                    }}
+                  />
                 )}
 
                 {/* Philippine Presets Selection Grid */}
                 {!isEditing && activeTab === "presets" && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
-                        Select Institution Preset
-                      </label>
-                      <span className="text-[10px] font-semibold text-neutral-400">
-                        {PHILIPPINE_INSTITUTION_PRESETS.length} available
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {PHILIPPINE_INSTITUTION_PRESETS.map((preset) => {
-                        const isSelected = institution === preset.name || name === preset.name
-                        const PresetIcon = ICON_MAP[preset.icon] || Wallet
-                        return (
-                          <button
-                            key={preset.id}
-                            type="button"
-                            onClick={() => handleSelectPreset(preset)}
-                            className={`flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all cursor-pointer ${
-                              isSelected
-                                ? "text-neutral-900 font-extrabold"
-                                : "text-neutral-600 hover:text-neutral-900"
-                            }`}
-                            style={{
-                              background: NEU.bg,
-                              boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
-                            }}
-                          >
-                            <div
-                              className="w-7 h-7 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs text-xs"
-                              style={{ background: preset.color }}
-                            >
-                              <MorphIcon icon={PresetIcon} size={14} strokeWidth={2.4} />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold truncate leading-tight">
-                                {preset.name}
-                              </p>
-                              <span className="text-[9px] text-neutral-400 block truncate">
-                                {preset.badge}
-                              </span>
-                            </div>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
+                  <AccountPresetGrid
+                    institution={institution}
+                    name={name}
+                    onSelectPreset={handleSelectPreset}
+                  />
                 )}
 
                 {/* Account Name */}
@@ -417,34 +252,10 @@ export default function AccountModal({
 
                 {/* Account Type (Always in Custom/Edit mode) */}
                 {(isEditing || activeTab === "custom") && (
-                  <div>
-                    <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-                      Account Type
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                      {ACCOUNT_TYPE_OPTIONS.map((opt) => {
-                        const isSelected = type === opt.id
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            onClick={() => setType(opt.id)}
-                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
-                              isSelected
-                                ? "text-brand-600"
-                                : "text-neutral-500 hover:text-neutral-800"
-                            }`}
-                            style={{
-                              background: NEU.bg,
-                              boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
-                            }}
-                          >
-                            {opt.label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
+                  <AccountTypeSelector
+                    type={type}
+                    onChangeType={setType}
+                  />
                 )}
 
                 {/* Current Balance */}
@@ -499,83 +310,16 @@ export default function AccountModal({
                 </div>
 
                 {/* Appearance: Color & Icon (Always in Custom/Edit, expandable in Presets) */}
-                {isEditing || activeTab === "custom" || showAppearanceOptions ? (
-                  <div className="space-y-4 pt-2 border-t border-neutral-200/50">
-                    {/* Color Picker */}
-                    <div>
-                      <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-                        Accent Color
-                      </label>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {PRESET_COLORS.map((c) => {
-                          const isSelected = color === c
-                          return (
-                            <button
-                              key={c}
-                              type="button"
-                              onClick={() => setColor(c)}
-                              className="w-7 h-7 rounded-full flex items-center justify-center transition-transform hover:scale-110 cursor-pointer shadow-xs"
-                              style={{ background: c }}
-                              aria-label={`Color ${c}`}
-                            >
-                              {isSelected && (
-                                <MorphIcon
-                                  icon={Check}
-                                  size={14}
-                                  strokeWidth={3}
-                                  className="text-white"
-                                />
-                              )}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Icon Selector */}
-                    <div>
-                      <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-                        Icon
-                      </label>
-                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                        {AVAILABLE_ICONS.map((ic) => {
-                          const isSelected = icon === ic
-                          const IcComponent = ICON_MAP[ic] || Wallet
-                          return (
-                            <button
-                              key={ic}
-                              type="button"
-                              onClick={() => setIcon(ic)}
-                              className={`h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-                                isSelected
-                                  ? "text-brand-600"
-                                  : "text-neutral-400 hover:text-neutral-700"
-                              }`}
-                              style={{
-                                background: NEU.bg,
-                                boxShadow: isSelected ? NEU.insetSm : NEU.raisedSm,
-                              }}
-                              aria-label={ic}
-                            >
-                              <MorphIcon icon={IcComponent} size={16} strokeWidth={2.4} />
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setShowAppearanceOptions(true)}
-                      className="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1.5 py-1 transition-colors cursor-pointer"
-                    >
-                      <MorphIcon icon={Sparkles} size={13} strokeWidth={2.4} />
-                      <span>Customize Icon & Color</span>
-                    </button>
-                  </div>
-                )}
+                <AccountAppearancePicker
+                  color={color}
+                  icon={icon}
+                  onChangeColor={setColor}
+                  onChangeIcon={setIcon}
+                  isExpanded={
+                    isEditing || activeTab === "custom" || showAppearanceOptions
+                  }
+                  onExpand={() => setShowAppearanceOptions(true)}
+                />
               </div>
 
               {/* Pinned Action Footer */}

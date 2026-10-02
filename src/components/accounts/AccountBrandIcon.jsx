@@ -1,4 +1,4 @@
-import { ICON_MAP } from "./accountConstants"
+import { ICON_MAP } from "../../constants/accountConstants"
 import { Wallet } from "lucide-react"
 
 /**
