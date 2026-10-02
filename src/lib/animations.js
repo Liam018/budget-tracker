@@ -37,7 +37,7 @@ export const neuChipTap = {
 
 
 /**
- * Bottom Sheet Variants — Container rises from the bottom with spring momentum
+ * Bottom Sheet Variants — Container rises from the bottom with smooth deceleration
  * and ripples down on exit.
  */
 export const sheetVariants = {
@@ -53,10 +53,8 @@ export const sheetVariants = {
     y: 0,
     transformOrigin: "bottom center",
     transition: {
-      type: "spring",
-      stiffness: 340,
-      damping: 28,
-      mass: 0.85,
+      duration: 0.28,
+      ease: [0.16, 1, 0.3, 1],
       staggerChildren: 0.025,
       delayChildren: 0.03,
     },
@@ -79,7 +77,7 @@ export const sheetVariants = {
  *
  * - Modest Y-rise: 12px → 0px
  * - Subtle Optical Expansion: 96% → 100%
- * - Critically Damped: No harsh bouncy wobble; smooth hydraulic lift.
+ * - Smooth deceleration without spring wobble or overshoot.
  */
 export const softElevationVariants = {
   hidden: {
@@ -92,10 +90,8 @@ export const softElevationVariants = {
     scale: 1,
     y: 0,
     transition: {
-      type: "spring",
-      stiffness: 360,
-      damping: 30,
-      mass: 0.8,
+      duration: 0.22,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
   exit: {
@@ -143,7 +139,7 @@ export const softFloatVariants = {
 }
 
 /**
- * Mobile Bottom Sheet Variants — Slides up from screen bottom with spring physics
+ * Mobile Bottom Sheet Variants — Smooth native iOS vertical glide without spring bounce
  */
 export const mobileSheetVariants = {
   hidden: {
@@ -152,19 +148,15 @@ export const mobileSheetVariants = {
   visible: {
     y: 0,
     transition: {
-      type: "spring",
-      stiffness: 420,
-      damping: 32,
-      mass: 0.8,
+      duration: 0.28,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
   exit: {
     y: "100%",
     transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 32,
-      mass: 0.8,
+      duration: 0.2,
+      ease: [0.7, 0, 0.84, 0],
     },
   },
 }
@@ -229,12 +221,12 @@ export const MORPH_CONFIG = {
 }
 
 /**
- * Child Item Reveal — Staggered child elements ride upward with soft spring
+ * Child Item Reveal — Staggered child elements ride upward with smooth deceleration
  */
 export const childItemVariants = {
   hidden: {
     opacity: 0,
-    y: 14,
+    y: 12,
     scale: 0.98,
   },
   visible: {
@@ -242,10 +234,8 @@ export const childItemVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: "spring",
-      stiffness: 420,
-      damping: 26,
-      mass: 0.7,
+      duration: 0.22,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 }
@@ -256,18 +246,16 @@ export const childItemVariants = {
 export const cardItemVariants = {
   hidden: {
     opacity: 0,
-    scale: 0.94,
-    y: 12,
+    scale: 0.95,
+    y: 10,
   },
   visible: {
     opacity: 1,
     scale: 1,
     y: 0,
     transition: {
-      type: "spring",
-      stiffness: 420,
-      damping: 30,
-      mass: 0.6,
+      duration: 0.22,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
   exit: {
