@@ -11,6 +11,7 @@ import {
   Briefcase,
   Landmark,
   Receipt,
+  Archive,
 } from "lucide-react"
 
 import {
@@ -101,3 +102,17 @@ export const ACCOUNT_TYPE_OPTIONS = [
   { id: "credit_card", label: "Credit Card" },
   { id: "savings", label: "Savings / Jar" },
 ]
+
+/**
+ * Filter tabs displayed on the Accounts page
+ */
+export const FILTER_TABS = [
+  { id: "all", label: "All", icon: Wallet },
+  { id: "cash", label: "Cash", icon: Banknote },
+  { id: "bank", label: "Banks", icon: Building2 },
+  { id: "e_wallet", label: "E-Wallets", icon: Smartphone },
+  { id: "credit_card", label: "Credit Cards", icon: CreditCard },
+  { id: "savings", label: "Savings", icon: PiggyBank },
+  { id: "archived", label: "Archived", icon: Archive },
+]
+
