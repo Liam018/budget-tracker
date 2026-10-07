@@ -60,16 +60,15 @@ export default function AccountGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-      <AnimatePresence mode="popLayout">
-        {filteredAccounts.map((account, index) => (
+    <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {filteredAccounts.map((account) => (
           <AccountCard
             key={account.id}
             account={account}
             onEdit={onEdit}
             onArchive={onArchive}
             onDelete={onDelete}
-            index={index}
           />
         ))}
       </AnimatePresence>

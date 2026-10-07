@@ -59,6 +59,13 @@ export default function WatchlistItemCard({
       initial="hidden"
       animate="visible"
       exit="exit"
+      transition={{
+        layout: {
+          type: "spring",
+          stiffness: 420,
+          damping: 32,
+        },
+      }}
       whileHover={neuButtonHover}
       whileTap={neuButtonTap}
       onClick={handleSelect}

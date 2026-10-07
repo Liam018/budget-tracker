@@ -34,36 +34,39 @@ export default function AccountModal({
 
   // Form State
   const [name, setName] = useState("")
-  const [type, setType] = useState("cash")
+  const [type, setType] = useState("bank")
   const [balance, setBalance] = useState("")
-  const [color, setColor] = useState("#10b981")
-  const [icon, setIcon] = useState("Banknote")
+  const [color, setColor] = useState("#007dfe")
+  const [icon, setIcon] = useState("Building2")
   const [institution, setInstitution] = useState("")
   const [accountNumber, setAccountNumber] = useState("")
   const [activeTab, setActiveTab] = useState("presets") // "presets" | "custom"
   const [showAppearanceOptions, setShowAppearanceOptions] = useState(false)
+
+  // Accounts without account/card numbers (Cash, Piggy Bank, Savings Jars)
+  const supportsAccountNumber = type !== "cash" && type !== "savings"
 
   // Sync state when opening or when accountToEdit changes
   useEffect(() => {
     const timer = setTimeout(() => {
       if (accountToEdit) {
         setName(accountToEdit.name || "")
-        setType(accountToEdit.type || "cash")
+        setType(accountToEdit.type || "bank")
         setBalance(
           accountToEdit.balance !== undefined ? String(accountToEdit.balance) : ""
         )
-        setColor(accountToEdit.color || "#10b981")
-        setIcon(accountToEdit.icon || "Wallet")
+        setColor(accountToEdit.color || "#007dfe")
+        setIcon(accountToEdit.icon || "Building2")
         setInstitution(accountToEdit.institution || "")
         setAccountNumber(accountToEdit.account_number || "")
         setActiveTab("custom")
         setShowAppearanceOptions(true)
       } else {
         setName("")
-        setType("cash")
+        setType("bank")
         setBalance("")
-        setColor("#10b981")
-        setIcon("Banknote")
+        setColor("#007dfe")
+        setIcon("Building2")
         setInstitution("")
         setAccountNumber("")
         setActiveTab("presets")
@@ -90,6 +93,18 @@ export default function AccountModal({
     setColor(preset.color)
     setIcon(preset.icon)
     setInstitution(preset.name)
+    // Clear account number if selected preset doesn't use one (e.g. Cash on Hand, Piggy Bank)
+    if (preset.type === "cash" || preset.type === "savings") {
+      setAccountNumber("")
+    }
+  }
+
+  // Handle manual Type change in Custom mode
+  const handleTypeChange = (newType) => {
+    setType(newType)
+    if (newType === "cash" || newType === "savings") {
+      setAccountNumber("")
+    }
   }
 
   // Handle Submit
@@ -108,7 +123,8 @@ export default function AccountModal({
       color,
       icon,
       institution: institution || null,
-      account_number: accountNumber.trim() || null,
+      account_number:
+        supportsAccountNumber && accountNumber.trim() ? accountNumber.trim() : null,
     })
   }
 
@@ -259,7 +275,7 @@ export default function AccountModal({
                 {(isEditing || activeTab === "custom") && (
                   <AccountTypeSelector
                     type={type}
-                    onChangeType={setType}
+                    onChangeType={handleTypeChange}
                   />
                 )}
 
@@ -306,27 +322,51 @@ export default function AccountModal({
                   )}
                 </div>
 
-                {/* Account Number (Optional) */}
-                <div>
-                  <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
-                    Account / Card Number <span className="text-neutral-400 font-normal">(Optional)</span>
-                  </label>
-                  <div
-                    className="flex items-center px-3.5 h-11 rounded-xl"
-                    style={{
-                      background: NEU.bg,
-                      boxShadow: NEU.insetSm,
-                    }}
-                  >
-                    <input
-                      type="text"
-                      placeholder="e.g. Last 4 digits or ref number"
-                      value={accountNumber}
-                      onChange={(e) => setAccountNumber(e.target.value)}
-                      className="w-full bg-transparent text-sm font-medium text-neutral-800 outline-none"
-                    />
-                  </div>
-                </div>
+                {/* Account Number (Optional) — Hidden for Cash & Savings accounts */}
+                <AnimatePresence initial={false}>
+                  {supportsAccountNumber && (
+                    <motion.div
+                      key="account-number-field"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pt-0.5 pb-0.5">
+                        <label className="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">
+                          {type === "credit_card"
+                            ? "Card Number"
+                            : type === "e_wallet"
+                            ? "Mobile / Account Number"
+                            : "Account / Card Number"}{" "}
+                          <span className="text-neutral-400 font-normal">(Optional)</span>
+                        </label>
+                        <div
+                          className="flex items-center px-3.5 h-11 rounded-xl"
+                          style={{
+                            background: NEU.bg,
+                            boxShadow: NEU.insetSm,
+                          }}
+                        >
+                          <input
+                            type="text"
+                            placeholder={
+                              type === "credit_card"
+                                ? "e.g. Last 4 digits or card ref"
+                                : type === "e_wallet"
+                                ? "e.g. 0917 ••• ••••"
+                                : "e.g. Last 4 digits or ref number"
+                            }
+                            value={accountNumber}
+                            onChange={(e) => setAccountNumber(e.target.value)}
+                            className="w-full bg-transparent text-sm font-medium text-neutral-800 outline-none"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Appearance: Color & Icon (Always in Custom/Edit, expandable in Presets) */}
                 <AccountAppearancePicker

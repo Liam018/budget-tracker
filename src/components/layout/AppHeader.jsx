@@ -90,7 +90,7 @@ export default function AppHeader() {
             whileHover={{ y: -1 }}
             whileTap={{ y: 1 }}
             onClick={() => navigate("/notifications")}
-            className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all cursor-pointer ${
+            className={`relative w-9 h-9 flex items-center justify-center rounded-full transition-all cursor-pointer ${
               isNotifActive
                 ? "text-brand-600"
                 : "text-neutral-500 hover:text-neutral-800 hover:bg-neutral-200/50"

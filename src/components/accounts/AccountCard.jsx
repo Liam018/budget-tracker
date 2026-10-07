@@ -41,7 +41,6 @@ export default function AccountCard({
 
   const isCredit = type === "credit_card"
 
-
   return (
     <motion.div
       layout="position"
@@ -49,9 +48,19 @@ export default function AccountCard({
       initial="hidden"
       animate="visible"
       exit="exit"
+      transition={{
+        layout: {
+          type: "spring",
+          stiffness: 420,
+          damping: 32,
+        },
+      }}
       style={{
         zIndex: menuOpen ? 40 : 1,
-        willChange: "transform",
+        transformOrigin: "center center",
+        WebkitBackfaceVisibility: "hidden",
+        backfaceVisibility: "hidden",
+        willChange: "transform, opacity",
       }}
       className="relative select-none transform-gpu"
     >
@@ -73,7 +82,7 @@ export default function AccountCard({
           background: NEU.bg,
           boxShadow: NEU.raised,
         }}
-        className="relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 min-h-50 sm:min-h-52.5 flex flex-col justify-between transition-[transform,box-shadow] duration-200 hover:shadow-(--neu-raised-hover)"
+        className="relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 min-h-50 sm:min-h-52.5 flex flex-col justify-between transition-shadow duration-200 hover:shadow-(--neu-raised-hover)"
       >
         {/* ── Internal Background Clip Layer (Watermarks & Color Wash) ── */}
         <div className="absolute inset-0 overflow-hidden rounded-2xl sm:rounded-3xl pointer-events-none z-0">

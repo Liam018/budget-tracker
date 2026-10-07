@@ -165,6 +165,15 @@ export const PHILIPPINE_INSTITUTION_PRESETS = [
     badge: "Savings",
     description: "Stash / Rainy Day",
   },
+  {
+    id: "piggy_bank",
+    name: "Piggy Bank",
+    type: "savings",
+    color: "#ec4899",
+    icon: "PiggyBank",
+    badge: "Savings",
+    description: "Physical Coin & Cash Jar",
+  },
 ]
 
 export const PRESET_COLORS = [

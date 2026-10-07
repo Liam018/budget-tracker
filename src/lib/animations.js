@@ -241,30 +241,31 @@ export const childItemVariants = {
 }
 
 /**
- * Card Item Reveal — For interactive grid items and dashboard cards
+ * Card Item Reveal — For interactive grid items and dashboard cards (Accounts, Watchlist).
+ * Tuned with the tactile spring physics from LiveRatesCarousel / LiveRateCard
+ * (stiffness: 420, damping: 32) so scale expansion and layout repositioning move in lockstep.
  */
 export const cardItemVariants = {
   hidden: {
     opacity: 0,
-    scale: 0.95,
-    y: 10,
+    scale: 0.88,
   },
   visible: {
     opacity: 1,
     scale: 1,
-    y: 0,
     transition: {
-      duration: 0.22,
-      ease: [0.16, 1, 0.3, 1],
+      opacity: { duration: 0.2, ease: "easeOut" },
+      scale: { type: "spring", stiffness: 420, damping: 32 },
+      layout: { type: "spring", stiffness: 420, damping: 32 },
     },
   },
   exit: {
     opacity: 0,
-    scale: 0.92,
-    y: -8,
+    scale: 0.88,
     transition: {
-      duration: 0.14,
-      ease: "easeOut",
+      opacity: { duration: 0.18, ease: "easeIn" },
+      scale: { type: "spring", stiffness: 420, damping: 32 },
+      layout: { type: "spring", stiffness: 420, damping: 32 },
     },
   },
 }
