@@ -19,6 +19,7 @@ import { KuriCanvas } from "../components/mascot"
 import { playTone } from "../components/mascot/vaultyEngine"
 import { triggerHaptic } from "../lib/haptics"
 import { toast } from "../components/ui"
+import kuriLogo from "../assets/kuri-logo-2.png"
 
 const SLIDE_DURATION = 4000 // 4 seconds per slide
 
@@ -188,7 +189,12 @@ export default function WelcomePage() {
             title="Click Kuri for a financial tip!"
             aria-label="Click Kuri for a financial tip"
           >
-            <KuriCanvas mood={slide.mascotMood || "wave"} size={36} animated={true} />
+            <img
+              src={kuriLogo}
+              alt="Kuri Logo"
+              className="w-full h-full object-contain select-none pointer-events-none"
+              draggable="false"
+            />
           </button>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5 sm:gap-2">

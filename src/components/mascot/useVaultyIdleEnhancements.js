@@ -221,7 +221,7 @@ export function useVaultyIdleEnhancements({
       isSubscribed = false
       if (radarTimerRef.current) clearTimeout(radarTimerRef.current)
     }
-  }, [isIdle, triggerRadarPing])
+  }, [isIdle, enableRadar, triggerRadarPing])
 
   const effectiveEye = isIdle ? eyeOverride : null
   const effectiveTilt = isIdle ? bodyTiltOffset : 0

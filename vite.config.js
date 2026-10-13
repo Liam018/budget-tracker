@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: [
         'favicon.svg',
-        'bloub-cercle-fier-violet.png',
+        'kuri-logo-2.png',
       ],
       manifest: {
         name: 'Kuri — Personal Expense Tracker',
@@ -27,8 +27,20 @@ export default defineConfig({
         categories: ['finance', 'productivity', 'utilities'],
         icons: [
           {
-            src: '/bloub-cercle-fier-violet.png',
-            sizes: '1024x1024',
+            src: '/kuri-logo-2.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/kuri-logo-2.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+          {
+            src: '/kuri-logo-2.png',
+            sizes: '1000x1000',
             type: 'image/png',
             purpose: 'any maskable',
           },

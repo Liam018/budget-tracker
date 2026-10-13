@@ -1,7 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, Navigate } from "react-router-dom"
 import { motion, AnimatePresence } from "motion/react"
-import { Mail, Lock, User, Wallet, CheckCircle, AlertCircle, Clock, ShieldAlert, ArrowLeft } from "lucide-react"
+import { Mail, Lock, User, AlertCircle, Clock, ShieldAlert, ArrowLeft, Volume2, VolumeX } from "lucide-react"
 import { MorphIcon } from "morphicons/react"
 import { UserPlus, Loader2 } from "lucide" // icon data for morphicons
 import MorphEyeIcon from "../components/ui/MorphEyeIcon"
@@ -19,6 +19,9 @@ import {
 } from "../lib/validators"
 import { sanitizeEmail, sanitizeName } from "../lib/sanitizer"
 import { useRateLimiter } from "../hooks/useRateLimiter"
+import { KuriCanvas, useVaultyIdleEnhancements } from "../components/mascot"
+import { playTone } from "../components/mascot/vaultyEngine"
+import { triggerHaptic } from "../lib/haptics"
 
 function FieldError({ message }) {
   return (
@@ -78,8 +81,17 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [passwordFocused, setPasswordFocused] = useState(false)
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false)
   const [success, setSuccess] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+
+  // ── Kuri Mascot State & Sound ──
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    return typeof window !== "undefined" && localStorage.getItem("kuri_sound") !== "false"
+  })
+  const [mascotMood, setMascotMood] = useState("wave")
+  const [mascotSpeech, setMascotSpeech] = useState("Kamusta! Ready to create your safe vault?")
+  const [pokePulse, setPokePulse] = useState(false)
 
   // Server-backed rate limiter for registration attempts (5 attempts -> 60s cooldown)
   const {
@@ -96,13 +108,88 @@ export default function RegisterPage() {
     debounceMs: 600,
   })
 
+  const isCoveringEyes = (passwordFocused || confirmPasswordFocused) && !submitting && !isLocked
+  const isPeeking = isCoveringEyes && (passwordFocused ? showPassword : showConfirm)
+
+  // Settle Kuri from greeting wave to idle after initial render
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMascotMood((current) => (current === "wave" ? "idle" : current))
+    }, 2400)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Reusing canonical useVaultyIdleEnhancements for blinking, head tilt, and spontaneous wave
+  const { getRenderOptions, bodyTiltOffset } = useVaultyIdleEnhancements({
+    isIdle: mascotMood === "idle" && !submitting && !isLocked && !isCoveringEyes,
+    soundEnabled,
+    enableRadar: false, // tilt and wave only
+    onWaveTrigger: (durationMs) => {
+      if (isCoveringEyes) return
+      setMascotMood("wave")
+      setTimeout(() => {
+        setMascotMood("idle")
+      }, durationMs)
+    },
+  })
+
+  const tiltDeg = bodyTiltOffset ? (bodyTiltOffset > 0 ? 5 : -5) : 0
+
+  // Reflect lockout on Kuri
+  useEffect(() => {
+    if (isLocked) {
+      const timer = setTimeout(() => {
+        setMascotMood("alert")
+        setMascotSpeech("Registration paused for safety! Cooldown active.")
+        playTone("alert", soundEnabled)
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+  }, [isLocked, soundEnabled])
+
   if (!loading && user) return <Navigate to="/" replace />
+
+  function toggleSound() {
+    setSoundEnabled((prev) => {
+      const next = !prev
+      localStorage.setItem("kuri_sound", String(next))
+      if (next) playTone("coin", true)
+      return next
+    })
+    triggerHaptic("light")
+  }
+
+  function handlePokeKuri() {
+    playTone("coin", soundEnabled)
+    triggerHaptic("medium")
+    setPokePulse(true)
+    setTimeout(() => setPokePulse(false), 500)
+
+    const greetings = [
+      "Smart, not kuripot!",
+      "Building a safe home for your pesos!",
+      "Pick a strong password!",
+      "Excited to start budgeting with you!",
+    ]
+    const chosen = greetings[Math.floor(Math.random() * greetings.length)]
+    setMascotSpeech(chosen)
+    setMascotMood("wave")
+    setTimeout(() => {
+      if (!isLocked) setMascotMood("idle")
+    }, 2000)
+  }
 
   function handleChange(e) {
     const { name, value } = e.target
     const newForm = { ...form, [name]: value }
     setForm(newForm)
-    setServerError("")
+    if (serverError) {
+      setServerError("")
+      if (mascotMood === "alert" && !isLocked) {
+        setMascotMood("idle")
+        setMascotSpeech("Fill in your details to get started")
+      }
+    }
     if (touched[name]) {
       const sanitizedVal =
         name === "email" ? sanitizeEmail(value) : name === "fullName" ? sanitizeName(value) : value
@@ -125,6 +212,83 @@ export default function RegisterPage() {
     const rules = fieldRules(form)[name] ?? []
     const error = validateField(sanitizedVal, ...rules)
     setErrors((prev) => ({ ...prev, [name]: error }))
+  }
+
+  // ── Password Peek-a-boo Mascot Interactions ──
+  function handlePasswordFocus() {
+    setPasswordFocused(true)
+    if (mascotMood !== "alert") {
+      setMascotMood("idle")
+    }
+    if (showPassword) {
+      setMascotSpeech("Peeking! Just making sure you typed it right ")
+      playTone("peek", soundEnabled)
+    } else {
+      setMascotSpeech("I'm looking away! Your password is safe ")
+      playTone("cover", soundEnabled)
+    }
+  }
+
+  function handlePasswordBlur(e) {
+    handleBlur(e)
+    setPasswordFocused(false)
+    if (!serverError && !isLocked && mascotMood !== "alert") {
+      setMascotSpeech("Creating your personal vault! Let's keep it safe.")
+    }
+  }
+
+  function handleTogglePassword() {
+    setShowPassword((prev) => {
+      const next = !prev
+      if (passwordFocused) {
+        if (next) {
+          setMascotSpeech("Peeking! Just making sure you typed it right ")
+          playTone("peek", soundEnabled)
+        } else {
+          setMascotSpeech("Looking away again!")
+          playTone("cover", soundEnabled)
+        }
+      }
+      return next
+    })
+  }
+
+  function handleConfirmPasswordFocus() {
+    setConfirmPasswordFocused(true)
+    if (mascotMood !== "alert") {
+      setMascotMood("idle")
+    }
+    if (showConfirm) {
+      setMascotSpeech("Peeking! Making sure they match ")
+      playTone("peek", soundEnabled)
+    } else {
+      setMascotSpeech("Eyes closed! Double-checking in secret ")
+      playTone("cover", soundEnabled)
+    }
+  }
+
+  function handleConfirmPasswordBlur(e) {
+    handleBlur(e)
+    setConfirmPasswordFocused(false)
+    if (!serverError && !isLocked && mascotMood !== "alert") {
+      setMascotSpeech("Almost there! Ready to build your vault.")
+    }
+  }
+
+  function handleToggleConfirm() {
+    setShowConfirm((prev) => {
+      const next = !prev
+      if (confirmPasswordFocused) {
+        if (next) {
+          setMascotSpeech("Peeking! Making sure they match ")
+          playTone("peek", soundEnabled)
+        } else {
+          setMascotSpeech("Looking away again!")
+          playTone("cover", soundEnabled)
+        }
+      }
+      return next
+    })
   }
 
   async function handleSubmit(e) {
@@ -152,14 +316,24 @@ export default function RegisterPage() {
 
     setSubmitting(true)
     setServerError("")
+    setMascotMood("thinking")
+    setMascotSpeech("Forging your secure vault...")
 
     try {
       await signUp(sanitizedData.email, sanitizedData.password, sanitizedData.fullName)
       await recordSuccess(sanitizedData.email)
+      setMascotMood("celebrate")
+      setMascotSpeech("Vault created! Welcome aboard.")
+      playTone("fanfare", soundEnabled)
+      triggerHaptic("success")
       setSuccess(true)
     } catch (err) {
       await recordFailure(sanitizedData.email)
+      setMascotMood("alert")
+      playTone("alert", soundEnabled)
+      triggerHaptic("medium")
       setServerError(err.message || "Could not create account. Please try again.")
+      setMascotSpeech("Oops! Could not create account.")
     } finally {
       setSubmitting(false)
     }
@@ -167,7 +341,7 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="auth-layout">
+      <div className="auth-layout flex-col">
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -175,14 +349,17 @@ export default function RegisterPage() {
           className="card-lg w-full max-w-100 p-8 text-center"
         >
           <div className="flex justify-center mb-5">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "#f0fdf4" }}>
-              <CheckCircle className="text-green-500" size={24} />
-            </div>
+            <KuriCanvas
+              mood="celebrate"
+              size={88}
+              animated={true}
+              showAura={true}
+            />
           </div>
-          <h2 className="text-lg font-semibold mb-2" style={{ color: "#2d3748" }}>Check your email</h2>
-          <p className="text-sm mb-6 text-balance" style={{ color: "#718096" }}>
+          <h2 className="text-lg font-semibold mb-2 text-neutral-800">Check your email</h2>
+          <p className="text-sm mb-6 text-balance text-neutral-500 font-medium">
             We sent a confirmation link to{" "}
-            <span className="font-medium" style={{ color: "#2d3748" }}>{sanitizeEmail(form.email)}</span>.
+            <span className="font-semibold text-neutral-800">{sanitizeEmail(form.email)}</span>.
             Click it to activate your account.
           </p>
           <Link to="/login" className="btn-primary inline-flex w-auto px-6">Go to Sign In</Link>
@@ -192,32 +369,82 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="auth-layout">
+    <div className="auth-layout flex-col">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="card-lg w-full max-w-100 p-5 sm:p-8"
+        className="card-lg w-full max-w-100 p-5 sm:p-7"
       >
-        <Link
-          to="/welcome"
-          className="btn-back mb-4"
-        >
-          <ArrowLeft size={13} />
-          <span>Back</span>
-        </Link>
+        {/* Top Controls: Back Navigation & Sound Toggle */}
+        <div className="flex items-center justify-between mb-3">
+          <Link
+            to="/welcome"
+            className="btn-back"
+          >
+            <ArrowLeft size={13} />
+            <span>Back</span>
+          </Link>
+          <button
+            type="button"
+            onClick={toggleSound}
+            className="btn-back h-8 w-8 p-0 rounded-xl flex items-center justify-center text-neutral-500 hover:text-neutral-700 cursor-pointer shrink-0"
+            title={soundEnabled ? "Mute Kuri sounds" : "Unmute Kuri sounds"}
+            aria-label={soundEnabled ? "Mute Kuri sounds" : "Unmute Kuri sounds"}
+          >
+            {soundEnabled ? (
+              <Volume2 size={14} className="text-indigo-600" />
+            ) : (
+              <VolumeX size={14} />
+            )}
+          </button>
+        </div>
 
-        {/* Header */}
-        <div className="flex flex-col items-center text-center mb-6 sm:mb-7">
-          <div className="logo-mark mb-3">
-            <Wallet className="text-white" size={22} strokeWidth={2.2} />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-800">
+        {/* Header with Interactive Kuri Ro-Vault */}
+        <div className="flex flex-col items-center text-center mb-5 sm:mb-6">
+          <motion.button
+            type="button"
+            onClick={handlePokeKuri}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.93 }}
+            animate={
+              pokePulse
+                ? { scale: [1, 1.15, 1], rotate: [0, -4, 4, 0] }
+                : { rotate: tiltDeg }
+            }
+            transition={{
+              type: "spring",
+              stiffness: 260,
+              damping: 18,
+            }}
+            className="cursor-pointer focus:outline-none select-none mb-1 flex items-center justify-center transform-gpu"
+            title="Tap Kuri for a greeting & sound!"
+            aria-label="Tap Kuri mascot for a greeting and sound"
+          >
+            <KuriCanvas
+              mood={mascotMood}
+              size={88}
+              animated={true}
+              showAura={false}
+              renderOptions={{
+                ...getRenderOptions(),
+                coverEyes: isCoveringEyes,
+                peek: isPeeking,
+              }}
+            />
+          </motion.button>
+
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-800 mt-1">
             Create an account
           </h1>
-          <p className="text-xs sm:text-sm text-neutral-500 mt-1 text-balance">
-            Start tracking your expenses and savings today
-          </p>
+          <motion.p
+            key={mascotSpeech}
+            initial={{ opacity: 0, y: 3 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-xs sm:text-sm text-neutral-500 mt-1 text-balance font-medium"
+          >
+            {mascotSpeech}
+          </motion.p>
         </div>
 
         {/* Lockout Banner */}
@@ -303,21 +530,18 @@ export default function RegisterPage() {
                 placeholder="At least 8 characters"
                 value={form.password}
                 onChange={handleChange}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={(e) => {
-                  setPasswordFocused(false)
-                  handleBlur(e)
-                }}
+                onFocus={handlePasswordFocus}
+                onBlur={handlePasswordBlur}
                 className={["form-input pl-9 pr-10", errors.password ? "form-input-error" : ""].join(" ")}
                 disabled={submitting || isLocked}
                 aria-invalid={!!errors.password}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                onClick={handleTogglePassword}
+                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors cursor-pointer"
                 style={{ color: "#a0aec0" }}
-                aria-label="Toggle password visibility"
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 disabled={isLocked}
               >
                 <MorphEyeIcon visible={showPassword} size={16} />
@@ -341,17 +565,18 @@ export default function RegisterPage() {
                 placeholder="Repeat your password"
                 value={form.confirmPassword}
                 onChange={handleChange}
-                onBlur={handleBlur}
+                onFocus={handleConfirmPasswordFocus}
+                onBlur={handleConfirmPasswordBlur}
                 className={["form-input pl-9 pr-10", errors.confirmPassword ? "form-input-error" : ""].join(" ")}
                 disabled={submitting || isLocked}
                 aria-invalid={!!errors.confirmPassword}
               />
               <button
                 type="button"
-                onClick={() => setShowConfirm((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                onClick={handleToggleConfirm}
+                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors cursor-pointer"
                 style={{ color: "#a0aec0" }}
-                aria-label="Toggle confirm password visibility"
+                aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
                 disabled={isLocked}
               >
                 <MorphEyeIcon visible={showConfirm} size={16} />

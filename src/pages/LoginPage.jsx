@@ -118,9 +118,12 @@ export default function LoginPage() {
   // Reflect lockout on Kuri
   useEffect(() => {
     if (isLocked) {
-      setMascotMood("alert")
-      setMascotSpeech("Vault locked for safety! Cooldown active.")
-      playTone("alert", soundEnabled)
+      const timer = setTimeout(() => {
+        setMascotMood("alert")
+        setMascotSpeech("Vault locked for safety! Cooldown active.")
+        playTone("alert", soundEnabled)
+      }, 0)
+      return () => clearTimeout(timer)
     }
   }, [isLocked, soundEnabled])
 
