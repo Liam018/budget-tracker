@@ -221,7 +221,7 @@ export default function ResetPasswordPage() {
           <div className="w-10 h-10 rounded-2xl bg-brand-600 flex items-center justify-center text-white shadow-md">
             <Wallet size={20} />
           </div>
-          <span className="font-extrabold text-xl tracking-tight">Budget Tracker</span>
+          <span className="font-extrabold text-xl tracking-tight">Kuri</span>
         </Link>
         <h2 className="mt-4 text-2xl font-black text-neutral-800 tracking-tight">
           Reset Your Password

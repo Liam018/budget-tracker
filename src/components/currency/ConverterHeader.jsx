@@ -57,7 +57,7 @@ export default function ConverterHeader({ marketStatus, isLoadingRates, onRefres
             </h3>
             {marketStatus?.isLive && (
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Live
               </span>
             )}

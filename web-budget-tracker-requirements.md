@@ -7,6 +7,16 @@
 **Primary Goal:**  
 Allow users to manage their income, expenses, budgets, and financial progress through a centralized web application.
 
+**Brand Name:** Kuri
+
+**Mascot Identity:** **Kuri the Ro-Vault** (The Pocket Vault-Keeper)
+
+**Product Category:** Personal Expense Tracker & Financial Companion
+
+**Platform Tagline:** **Kuri — Know your money. Own your choices.**
+
+**Mascot Slogan:** **"Smart, not kuripot."**
+
 **Tech Stack:** React + Vite + Tailwind CSS ✅
 
 **PWA Support:** Vite PWA (Service Worker, Web App Manifest, Standalone Mode, Android & iOS Home Screen) ✅
@@ -20,6 +30,80 @@ Allow users to manage their income, expenses, budgets, and financial progress th
 **Icon STYLE:** Morphicons with Lucide (npm package) ✅
 
 **Animation:** motion.dev ✅
+
+---
+
+### 1.1 Brand Identity & Mascot Specification — Kuri
+
+# Kuri
+
+### Personal Expense Tracker & Financial Companion
+
+**Kuri** is a short, friendly, and memorable name created for a personal expense tracking platform. The name is inspired by the personal identity behind the project while keeping a simple, modern sound that works naturally as both a **brand name and a mascot**.
+
+The name was intentionally designed to feel approachable rather than overly corporate. Instead of making financial management feel complicated or intimidating, **Kuri represents a friendly companion that helps users understand their spending, manage their budget, and develop better financial habits.**
+
+#### The Mascot Concept: "Kuri the Ro-Vault" (The Vault-Keeper)
+
+Rather than functioning as a generic corporate icon, Kuri is introduced as **Kuri the Ro-Vault** — a charming, purposeful vault-keeper character.
+
+The name possesses two deliberate, harmonious layers:
+1. **Kuri (Inspired by *Kuripot* → Mindful & Intentional Spending)**:  
+   Taps into the cultural value of protecting your money, encapsulated by the mascot's signature motto: ***"Smart, not kuripot."***
+2. **Ro-Vault (Robot + Vault → The Dedicated Safe-Keeper)**:  
+   A clever portmanteau of **"Robot"** and **"Vault"**. It directly honors the character’s physical form—a rounded indigo steel safe with glowing cyan digital eyes, an antenna with live alert pulses, and a golden belly combination dial—while establishing his role as your loyal personal vault-keeper who keeps your funds secure and your habits sharp.
+
+Together, **Kuri the Ro-Vault** is not just an expense tracker, but a protective, encouraging companion that celebrates your financial milestones and gently nudges you before you exceed your budget.
+
+#### Brand Meaning
+
+**Kuri represents clarity, companionship, and control over personal finances.**
+
+The idea behind the brand is simple:
+
+> **"Your money shouldn't be confusing. Kuri helps make it clear."**
+
+#### Tagline & Slogans
+
+* **Platform Tagline**:  
+  ## **Kuri — Know your money. Own your choices.**  
+  Reflects user autonomy and awareness: *"Know your money"* promotes clarity over cash flow, while *"Own your choices"* empowers confident, guilt-free financial decisions.
+
+* **Mascot Slogan**:  
+  ### **"Smart, not kuripot."**  
+  A snappy, culturally resonant reminder that financial discipline isn't about deprivation or cheapness—it's about intentional spending on what truly matters.
+
+#### Cultural Resonance: Reclaiming "Kuripot" into Mindful Financial Freedom
+
+An interesting cultural dimension to the name **Kuri** is its playful phonetic connection to the Filipino word **"Kuripot"**.
+
+While *"kuripot"* has traditionally carried a teasing or slightly negative connotation—often associated with excessive stinginess, tight-fistedness, or depriving oneself of enjoyment—**Kuri reclaims and reframes the concept into an empowering, positive modern philosophy:**
+
+1. **From Stinginess to Intentionality (*Masinop at Wais*)**:  
+   Caring about where your money goes isn't about being cheap or stingy; it is about **financial wisdom and respect for your hard work**. Every peso saved represents time and energy invested.
+2. **Freedom Over Deprivation**:  
+   Traditional "kuripot" often stems from fear or scarcity. **Kuri** transforms that instinct into **conscious spending**—closing wasteful leaks and impulse purchases so you have the freedom to spend comfortably and guilt-free on the goals, milestones, and experiences that genuinely matter.
+3. **Normalizing Financial Boundaries**:  
+   Saying no to peer pressure, lifestyle creep, and unneeded expenses isn't something to be embarrassed about; it is an act of self-discipline and long-term security. Kuri celebrates this as healthy self-respect.
+
+By giving a subtle, affectionate nod to *"kuripot"*, Kuri connects with local cultural roots while elevating the narrative from **"penny-pinching out of fear"** to **"mindful money mastery with pride."**
+
+#### Brand Personality
+
+- **Friendly** — approachable, warm, and easy to use
+- **Smart** — provides proactive, useful spending insights (*"Smart, not kuripot"*)
+- **Simple** — removes unnecessary friction and complexity from budgeting
+- **Encouraging** — supports better financial habits without guilt-tripping or being judgmental
+- **Personal** — designed around the user's individual financial journey
+
+#### Example Brand Presentation
+
+**Kuri**  
+*Know your money. Own your choices.*
+
+> *"Meet Kuri the Ro-Vault — your personal vault-keeper. Track your expenses, understand your spending, and stay smart, not kuripot."*
+
+---
 
 ### Core Objectives
 
@@ -52,6 +136,7 @@ The MVP should contain the following core modules:
 11. Recurring Transactions
 12. Notifications & Web Push (In-App Notification Center + PWA Web Push for Android & iOS 16.4+ via VAPID & Supabase Edge Functions)
 13. Security / Row Level Security / Rate Limiting (Auth Endpoints ✅)
+14. Interactive 2D Mascot Companion ("Kuri the Ro-Vault", formerly "Vaulty") — Procedural 20-frame spritesheet engine, Hybrid 60 FPS animation physics, Disney classic animation principles, synthesized audio & context-aware companion (Sandbox ready at `/mascot-preview`) ✅ *(Section 22)*
 
 ---
 
@@ -927,3 +1012,240 @@ The next PM deliverables should be:
 13. Final definition of done
 
 The project should be considered **requirements-first**. No major feature should be implemented until its purpose, data requirements, user flow, and acceptance criteria are understood.
+
+---
+
+# 22. Interactive 2D Mascot Companion ("Kuri the Ro-Vault") — Feature Specification (Post-MVP Roadmap)
+
+## Overview
+
+**Kuri the Ro-Vault** (working development title "Vaulty") is the platform's interactive brand mascot and personal financial companion. Conceived as a dedicated **vault-keeper** (Robot + Vault = Ro-Vault), Kuri embodies the brand promise: ***"Know your money. Own your choices."*** and lives by the motto ***"Smart, not kuripot."***
+
+Kuri adds personality, gentle gamification, emotional reinforcement, and context-aware financial guidance to the budget tracker—helping users understand their spending, stick to their budgets, and celebrate savings milestones without feeling judged.
+
+---
+
+## 22.1 Character Identity & Design ✅
+
+- **Character Concept**: **Kuri the Ro-Vault** — An approachable, chubby vault-keeper safe-robot guardian who protects user funds and encourages healthy, mindful money habits. ✅
+- **Color Palette & Visuals**:
+  - **Body**: Deep royal-indigo vault box (`#2e329d` / `#1d1f70`) with subtle rounded neumorphic beveling and rivet accents. ✅
+  - **Antenna**: Dark stem with a glowing golden orb (`#fbbf24`), featuring animated alert pulse waves during Thinking and Alert states. ✅
+  - **Face Visor**: Dark navy screen with expressive glowing cyan LED digital expressions (`#00f0ff`). ✅
+  - **Safe Combination Dial**: Central golden belly combination lock (`#f59e0b`) with crosshair markings and rotating center bolt. ✅
+  - **Hands**: Nubby periwinkle arms (`#bfdbfe`) capable of resting, enthusiastic waving, or celebrating. ✅
+  - **Ambient Aura**: Soft radial gradient glow matching state mood (`indigo` for Idle, `emerald` for Celebrate, `sky` for Thinking, `rose` for Alert, `purple` for Wave). ✅
+
+---
+
+## 22.2 Multi-Frame Spritesheet & Hybrid 60 FPS Animation Engine ✅
+
+- **Atlas Matrix Dimensions**: 512px wide × 640px high (4 columns × 5 rows). ✅
+- **Cell Frame Size**: 128px × 128px per cell (scalable to 96px for desktop widget, 64px for compact mobile/header). ✅
+- **Classic Disney Animation Principles Integrated into Engine**:
+  1. **Row 0: Idle (4 FPS / 0.9s duration) + 60 FPS Floating Breathing**: ✅
+     - **Multi-Stage Eyelid Blinking Arc**: Organic transition: *Wide Open* ➔ *Half-lid Anticipation Droop* (`ry = 2.6px`) ➔ *Closed Smile Arc* ➔ *Reopened with Specular Glint*.
+     - Dynamic drop shadow breathing in synchronization with chest bob.
+  2. **Row 1: Celebrate (6 FPS / 0.5s duration) + Hydraulic Piston Leap**: ✅
+     - **Solid Rigid Chassis (Zero Rubber Stretching)**: Metal safe body remains 100% solid (`scale = 1.0`), preventing oval dial distortion and warped corner rivets.
+     - **Pneumatic Compression & Launch (Frames 0-1)**: Clean vertical piston dip (`bobY = +4px`) followed by a snappy hydraulic vertical leap (`bobY = -12px`).
+     - **Rapid 360° Victory Dial Spin**: Belly combination dial spins energetically across frames (`0° ➔ 126° ➔ 270° ➔ 360°`).
+     - **Flexible Wire Antenna Whip**: Only the antenna rod flexes, trailing behind on launch (`antennaDipY = +4px`) and whipping forward on landing recoil (`+2.2px`).
+     - **Apex Hang-Time & Coin Ejection (Frame 2)**: Ascending gold coin (`₱`) pops crisp from top slot with star sparkle gleam and joyful carets (`^ ^`).
+  3. **Row 2: Thinking (5 FPS / 0.8s duration) + Inquisitive Pulse**: ✅
+     - 90° rotating combination dial lock (0°, 90°, 180°, 270°).
+     - Concentric cyan sonar radar ripple rings pulsing outward from his antenna orb.
+     - Rotating radar eye scanner.
+  4. **Row 3: Alert (8 FPS / 0.4s duration) + High-Frequency Tremor**: ✅
+     - Fast horizontal alarm shudder (`[-2.5px, +2.5px]` jitter), dropped defensive shield visor, and warning slanted red brow eyes.
+  5. **Row 4: Wave (5 FPS / 0.6s duration) + Rhythmic Counter-Sway**: ✅
+     - Friendly greeting arm wave accompanied by an organic **±2.3° torso counter-tilt** (`rotate(-0.04rad)` to `rotate(+0.035rad)`), antenna inertia lag, and playful wink (`^ •`).
+- **Hybrid 60 FPS CSS Keyframe Physics Layer (`vaulty.css`)**: ✅
+  - `@keyframes vaulty-smooth-float`: Buttery continuous hydraulic floating breathing loop over 2.8s.
+  - `@keyframes vaulty-smooth-bounce`: Solid hydraulic piston leap and mechanical landing shock (zero chassis scale deformation).
+  - `@keyframes vaulty-smooth-pulse`: Inquisitive micro-tilt without warping.
+  - `@keyframes vaulty-smooth-shudder`: Rapid urgent alarm tremor.
+  - `@keyframes vaulty-smooth-sway`: Synchronized body & shadow swaying.
+- **Snappy Mechanical Tactile Feedback on Hover & Tap**: ✅
+  - **Hover**: Crisp mechanical hover lift (`translateY(-4px)` with glowing drop shadow).
+  - **Active / Press**: Solid tactile compression click (`translateY(2px)`).
+- **Accessibility**: Reduced motion query `@media (prefers-reduced-motion: reduce)` to freeze animations. ✅
+
+---
+
+## 22.3 Dynamic Dialogue & Context-Aware Speech Bubble ✅
+
+- **Speech Bubble Styling**: Neumorphic white card with indigo shadow (`0 10px 25px -5px rgba(79, 70, 229, 0.15)`), 14px rounded corners, and downward pointer caret. ✅
+- **Smart Triggers**:
+  - **Interactive Poke / Tap**: Transitions to `Wave` state and shares financial tips (50/30/20 rule, emergency fund buffer, subscription audits, 48-hour delay rule). ✅
+  - **Deposit / Income Logged**: Transitions to `Celebrate` state with positive financial feedback. ✅
+  - **Account Sync / Recalculation**: Transitions to `Thinking` state with radar sweep. ✅
+  - **Savings Milestone Reached**: Transitions to `Celebrate` state + confetti + victory audio fanfare. ✅
+  - **Category Spending Exceeds Limit (>85%)**: Transitions to `Alert` state with gentle warning. ✅
+
+---
+
+## 22.4 Synthesized Audio & Haptic Feedback ✅
+
+- **Web Audio API Synthesizer (Zero External Audio Assets)**: ✅
+  - **Coin Chime**: Two-tone playful sine wave (987.77 Hz -> 1318.51 Hz) on transaction logs or pokes. ✅
+  - **Victory Fanfare**: 4-note ascending triangle flourish on goal milestones. ✅
+  - **Security Alert**: Double defensive sawtooth warning beep on budget breaches. ✅
+- **Mobile Micro-Haptics (`navigator.vibrate`)**: Gentle 15ms tap on button clicks, double pulse on alerts. ✅
+- **Sound Settings**: Global Sound On / Muted toggle persisted in state. ✅
+
+---
+
+## 22.5 User Agency & Accessibility ✅
+
+- **Focus / Snooze Mode (💤)**: Double-tap or snooze icon puts Vaulty into quiet sleep mode with a dim antenna and `"Zzz"`. ✅
+- **Screen Reader Support**: Speech bubble announcements tagged with `aria-live="polite"`. ✅
+- **Placement Flexibility**: Floating widget in lower-right corner or dockable in top navigation header. ✅
+
+---
+
+## 22.6 Implementation Status & Sandbox ✅
+
+- **Isolated Testing Sandbox**: Built and verified under `/mascot-preview` ✅
+  - Features real-time 128x128 animated canvas with 60 FPS hybrid physics, ambient state aura, live action simulators, and a full **Spritesheet Studio Modal** with matrix inspection, FPS speed control, audio testing, and 512×640 PNG export. ✅
+- **Ready for Full Integration**: Decoupled `useVaulty()` Context Hook and sprite assets ready for deployment into the live dashboard when scheduled. ✅
+
+
+---
+
+## 22.7 High-Impact Enhancement Roadmap (Future Releases)
+
+The following high-impact features are slated for subsequent releases to elevate Vaulty from a visual mascot into an indispensable, beloved personal financial companion:
+
+### 22.7.1 🌟 Personality & Visual Polish (The "Duolingo / Tamagotchi Effect")
+- **Cursor Eye-Tracking**:
+  - During the `Idle` state, Vaulty’s cyan LED eyes subtly tilt and track within a ±3px bounded offset toward the user's mouse cursor across the dashboard.
+  - Gives the mascot an organic, responsive presence without adding heavy computational load.
+- **Secondary Rare Idle Quirks**: ✅
+  - After 25–40 seconds of idle user inactivity, trigger a randomized micro-action:
+    - *Robotic Yawn*: Emits a tiny floating `"Zzz"` particle from his antenna orb.
+    - *Dial Buffing*: Plays a fast self-polish animation where Vaulty buffs his gold belly dial with his left arm.
+- **Unlockable Milestone Accessories & Skins (Gamification Rewards)**:
+  - Reward users directly for disciplined financial habits:
+    - **Hit ₱10,000 saved**: Unlocks a shiny gold monocle or miniature top hat.
+    - **30-Day logging streak**: Unlocks a golden key charm or warm flame aura for his antenna.
+    - **Under budget for 3 consecutive months**: Unlocks the legendary *Golden Sovereign Metallic Plating* skin.
+
+### 22.7.2 🧠 Financial Intelligence & Smart Nudges (Context-Aware Reasoning)
+Move beyond generic financial tips into personalized, context-aware suggestions tied to real user account data:
+- **Proactive Bill & Subscription Heads-Up**:
+  - Detect upcoming recurring obligations 24–48 hours in advance:
+    - *"Hey Liam! Your Netflix subscription is scheduled for tomorrow (₱549.00). Your GCash balance is ready!"*
+- **Positive Financial Reinforcement**:
+  - Calculate weekly or category progress and celebrate financial discipline:
+    - *"You spent 18% less on Dining Out this week compared to last week! Outstanding discipline! 🌟"*
+- **Mindful Spending Pause**:
+  - When the user opens the "Add Expense" form and enters a high amount (e.g., > ₱2,000 or > 25% of remaining category budget), Vaulty enters the `Thinking` state with a gentle reflection prompt:
+    - *"Before you log this: Is this an urgent need, or can it wait 48 hours?"*
+
+### 22.7.3 🎮 Gamification & Retention Mechanics
+- **Vaulty Safe Evolution Levels (XP & Progression System)**:
+  - An XP progression bar tied to positive financial actions (logging daily transactions, completing monthly reconciliations, funding savings goals):
+    - *Level 1*: **Tin Piggy** (Starter humble tin safe)
+    - *Level 5*: **Steel Strongbox** (Reinforced titanium rivets)
+    - *Level 10*: **Titanium Vault** (Neon cyan circuit trims)
+    - *Level 25*: **Gold Sovereign Citadel** (Gleaming gold body with diamond dial)
+- **Daily Logging Streak Counter**:
+  - A compact flame badge `🔥 7 Days` displayed adjacent to Vaulty that celebrates building consistent bookkeeping habits.
+
+### 22.7.4 🔊 Audio & Haptic Polish
+- **Mobile Micro-Haptic Feedback (`navigator.vibrate`)**:
+  - On supported touch devices, synchronize audio chimes with crisp vibration patterns:
+    - *Coin Chime*: Crisp single micro-tap (`[15]ms`).
+    - *Budget Alert Warning*: Double shudder warning (`[30, 40, 30]ms`).
+    - *Milestone Fanfare*: Rhythmic celebration pulse (`[20, 30, 20, 30, 50]ms`).
+- **User-Selectable Sound Themes**:
+  - Allow users to customize audio feedback in Settings:
+    1. *Arcade / 8-Bit*: Retro bleeps, chip-tune coin chimes, and 8-bit fanfares.
+    2. *Zen Marimba*: Soft acoustic woody chimes and mellow marimba chords.
+    3. *Mute / Visual Only*: Silent mode with full visual animations and confetti.
+
+### 22.7.5 🛡️ User Agency, Focus & Placement Controls
+- **"Sleep / Focus Mode" (💤)**:
+  - Double-clicking Vaulty or selecting the sleep toggle dims his antenna and displays a soft `"Zzz"`, pausing speech bubble popups so users can focus on deep financial analysis without distraction.
+- **Dock vs. Float Placement Preference**:
+  - Provide a user setting for mascot placement:
+    - *Floating Widget*: Lower-right corner overlay buddy.
+    - *Pinned Header*: Compact 48px avatar quietly embedded in the top navbar next to notifications.
+
+### 22.7.6 🏗️ Architectural Integration Contract (`useVaulty` Global Hook)
+Provide a global React context hook so any page, modal, or service can trigger Vaulty events cleanly:
+```jsx
+const { vaulty } = useVaulty();
+
+// In Transaction Service (upon logging income):
+vaulty.say({
+  mood: 'celebrate',
+  message: '₱1,500 deposited into GCash!',
+  sound: 'coin',
+  confetti: true
+});
+
+// In Budget Alert Watcher (when category hits warning threshold):
+vaulty.say({
+  mood: 'alert',
+  message: 'Dining category at 92%! Approaching monthly ceiling.',
+  sound: 'alert'
+});
+
+// In Habit Streak Tracker:
+vaulty.say({
+  mood: 'wave',
+  message: '🔥 7-Day logging streak! Great job keeping your ledger accurate.',
+  sound: 'fanfare'
+});
+```
+
+### 22.7.7 🎭 Extended Emotional & Financial State Matrix (Kuri Moods)
+To evolve Kuri beyond generic robot emotions into a true personal finance companion, expand the core state matrix with dedicated financial and situational postures:
+
+| State Key | Visual Pose & Micro-Animation | Synthesizer Tone | Primary App Trigger |
+| :--- | :--- | :--- | :--- |
+| **`coin_feed` / `deposit`** | Safe door unlatches slightly, gold ₱ coin slides into belly slot, dial clicks firmly, eyes smile `( ^ ‿ ^ )` | Crisp mechanical clink + ratchet tone | User adds an income record or deposits into a savings goal |
+| **`budget_pinch` / `sweat`** | Visor squints anxiously, single cyber-sweat drop particle drops, antenna trembles, hesitant dial jitter | Descending soft warning whir | Category spending reaches 80%–99% of monthly budget limit |
+| **`confused` / `searching`** | Visor projects a mini holographic `?` or radar dish pops up, head tilts left/right inquisitively | Two-tone curious robotic chirp | Empty ledger search, 0 transactions found, or filter yielding no data |
+| **`deep_sleep` / `low_power`** | Antenna orb breathes with slow sine-wave glow, horizontal eye slits `- -`, slow floating `Z z z` particles | Soft low ambient hum | Prolonged inactivity (>2–3 min) or late-night circadian mode (12 AM–5 AM) |
+| **`streak_fire` / `level_up`** | Golden aura pulses, antenna flare flashes, 360° victory dial spin, holographic star or mini crown projection | Arpeggiated victory fanfare | 7-day budget tracking streak or milestone goal completed |
+| **`poked` / `dizzy`** | Rapid chassis wobble, spiral eyes `@ @`, flustered antenna dip, blush cheeks | High-pitch squeak / spring bounce | User taps/pokes Kuri repeatedly within a short interval |
+
+### 22.7.8 📐 Vector (SVG) & Procedural Canvas Full Parity
+- **The Challenge**: `vaultyEngine.js` (Canvas) supports procedural frames including quirks (`yawn`, `dial_buff`), while `VaultyRobot.jsx` (SVG) historically focused on 5 primary moods (`idle`, `celebrate`, `thinking`, `alert`, `wave`).
+- **Architectural Requirement**:
+  - Bring 100% state parity to `VaultyRobot.jsx` so all moods (including `yawn`, `dial_buff`, `coin_feed`, `budget_pinch`, `deep_sleep`) render as crisp, ultra-lightweight SVG vectors.
+  - Guarantees zero pixelation across high-DPI Retina screens, mobile viewport scaling, and dark-mode CSS theme adaptation with zero bitmap bloat.
+
+### 22.7.9 🚪 Front-Door Authentication & Onboarding Guard (Welcome, Login & Register)
+Establish Kuri's identity at the very threshold of the application by integrating interactive mascot states into auth and onboarding:
+
+1. **Welcome Page (`/welcome`) — The Welcoming Guide & Co-Pilot**:
+   - Replace the generic wallet glyph in the hero header with an animated Kuri avatar (`mood="wave"`).
+   - In the slide deck, replace generic flat vectors with contextual Kuri feature illustrations:
+     - *Slide 1 (Smart Tracking)*: Kuri with a mini digital balance sheet, scanning GCash/Maya wallets.
+     - *Slide 2 (Vault Security)*: Kuri buffing his gold combination dial (`mood="dial_buff"`).
+     - *Slide 3 (Budget Progress)*: Kuri celebrating with floating ₱ coins (`mood="celebrate"`).
+   - Tapping Kuri triggers friendly Philippine financial tips (*"Smart, not kuripot!"*).
+
+2. **Login Page (`/login`) — The Interactive "Privacy Shield" Guard**:
+   - Position Kuri sitting neatly atop the login card (~72–80px height).
+   - **Email Focus**: Kuri tilts head with curious cyan eyes (`thinking`), subtly following user keystrokes.
+   - **Password Focus (Privacy Shield Mode)**: Kuri covers his eyes with his safe hands (or drops a protective security shutter over his visor): *"Shh! Password is safe with the vault!"*
+   - **Show Password Toggle**: Kuri peeks playfully through his fingers or opens one eye.
+   - **Form Submitting**: Antenna pulses with affirmative cyan/green light.
+   - **Account Lockout / Cooldown Active**: Kuri enters `alert` mode (amber/red visor, protective shield lowered) reinforcing security: *"Vault lockdown active to keep your account safe."*
+
+3. **Register Page (`/register`) — The Onboarding Coach**:
+   - **Password Strength Feedback**: Kuri reacts to password strength (slanted concerned brow for weak passwords ➔ energetic nod and green antenna glow for strong passwords).
+   - **Password Match**: Twinkle eye glint when passwords match.
+   - **Success State ("Check your email")**: Full celebratory hydraulic leap (`mood="celebrate"`) with star/confetti particles.
+
+4. **Performance & UX Constraints**:
+   - **Zero Latency**: Powered exclusively by lightweight SVG vector components (`VaultyRobot`), avoiding canvas loops on sensitive auth forms.
+   - **Unobstructed Autofill**: Must not interfere with browser password managers (1Password, Bitwarden, iCloud Keychain, Chrome).
+   - **Discreet Sound**: Audio synthesis remains muted by default on login/register to respect quiet environments.
+
+

@@ -15,9 +15,9 @@ export default defineConfig({
         'bloub-cercle-fier-violet.png',
       ],
       manifest: {
-        name: 'Budget Tracker — Smart Personal Finance',
-        short_name: 'Budget',
-        description: 'Track your income, expenses, wallets, and budgets with ease.',
+        name: 'Kuri — Personal Expense Tracker',
+        short_name: 'Kuri',
+        description: 'Know your money. Own your choices. Personal expense tracker and financial companion.',
         theme_color: '#f4f6fb',
         background_color: '#f4f6fb',
         display: 'standalone',

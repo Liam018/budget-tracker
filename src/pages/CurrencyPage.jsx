@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom"
-import { motion } from "motion/react"
 import { useAuth } from "../hooks/useAuth"
 import { useCurrencyConverter } from "../hooks/useCurrencyConverter"
 import {
@@ -8,9 +6,6 @@ import {
   CurrencyCheatsheetCard,
   CurrencyTrendCard,
 } from "../components/currency"
-import { CountryFlag } from "../components/ui"
-import { NEU } from "../lib/neu"
-import { neuButtonHover, neuButtonTap } from "../lib/animations"
 
 /**
  * CurrencyPage — Dedicated view for real-time forex conversions,
@@ -19,7 +14,6 @@ import { neuButtonHover, neuButtonTap } from "../lib/animations"
  */
 export default function CurrencyPage() {
   const { profile } = useAuth()
-  const navigate = useNavigate()
 
   const currentCurrencyCode = profile?.currency || "PHP"
 
@@ -28,25 +22,6 @@ export default function CurrencyPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6 md:pb-20 pb-6">
-      {/* ── Base Currency Quick Badge ── */}
-      <div className="flex items-center justify-end">
-        <motion.button
-          whileHover={neuButtonHover}
-          whileTap={neuButtonTap}
-          onClick={() => navigate("/profile")}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer select-none shrink-0"
-          style={{
-            background: NEU.bg,
-            boxShadow: NEU.raisedSm,
-          }}
-        >
-          <CountryFlag code={currentCurrencyCode} size="sm" />
-          <span>Base: {currentCurrencyCode}</span>
-          <span className="text-neutral-300">|</span>
-          <span className="text-brand-600">Change in Profile</span>
-        </motion.button>
-      </div>
-
       {/* ── Real-Time Currency Converter & Sliding Global Rates ── */}
       <CurrencyConverterCard
         ratesData={converter.ratesData}

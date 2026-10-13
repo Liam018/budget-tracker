@@ -13,7 +13,7 @@ import { toast } from "../components/ui"
 export function useCurrencyConverter(defaultBase = "PHP") {
   const [ratesData, setRatesData] = useState(null)
   const [isLoadingRates, setIsLoadingRates] = useState(true)
-  const [convertAmount, setConvertAmount] = useState("1")
+  const [convertAmount, setConvertAmountRaw] = useState("1")
   const [fromCurrency, setFromCurrency] = useState(defaultBase)
   const [toCurrency, setToCurrency] = useState("USD")
   const [isSwapped, setIsSwapped] = useState(false)
@@ -111,16 +111,40 @@ export function useCurrencyConverter(defaultBase = "PHP") {
     return convertCurrency(1, toCurrency, fromCurrency, ratesData)
   }, [ratesData, fromCurrency, toCurrency])
 
+  /**
+   * Validated amount setter — the single gatekeeper for convertAmount.
+   *
+   * Rules:
+   *  - Empty string is allowed (user is mid-typing / clearing).
+   *  - Any parsed value that is 0 or negative is rejected (reset to empty).
+   *  - Positive values are stored as-is (string, preserving decimal input).
+   */
+  const setConvertAmount = useCallback((value) => {
+    // Allow empty string so the field can be cleared naturally
+    if (value === "" || value === null || value === undefined) {
+      setConvertAmountRaw("")
+      return
+    }
+    const num = parseFloat(value)
+    // Reject 0, negative, and non-numeric input
+    if (!isNaN(num) && num <= 0) {
+      setConvertAmountRaw("")
+      return
+    }
+    setConvertAmountRaw(String(value))
+  }, [])
+
   const addAmount = useCallback((delta) => {
-    setConvertAmount((prev) => {
+    setConvertAmountRaw((prev) => {
       const current = parseFloat(prev) || 0
-      const next = Math.max(0, current + delta)
+      // Clamp so quick-add never produces 0 or negative
+      const next = Math.max(0.01, current + delta)
       return next.toString()
     })
   }, [])
 
   const clearAmount = useCallback(() => {
-    setConvertAmount("")
+    setConvertAmountRaw("")
   }, [])
 
   const marketStatus = useMemo(() => {

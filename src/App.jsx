@@ -23,6 +23,7 @@ import RecurringPage from "./pages/RecurringPage"
 import NotificationsPage from "./pages/NotificationsPage"
 import ProfilePage from "./pages/ProfilePage"
 import CurrencyPage from "./pages/CurrencyPage"
+import MascotPreviewPage from "./pages/MascotPreviewPage"
 import NotFoundPage from "./pages/NotFoundPage"
 
 export default function App() {
@@ -37,6 +38,9 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            {/* Isolated Mascot Playground route (not in dashboard) */}
+            <Route path="/mascot-preview" element={<MascotPreviewPage />} />
 
             {/* Protected routes — wrapped inside AppLayout (sidebar + header + bottom nav) */}
             <Route element={<ProtectedRoute />}>

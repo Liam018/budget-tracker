@@ -42,10 +42,23 @@ export default function ConverterInputs({
           {/* Numeric amount input */}
           <input
             type="number"
-            min="0"
+            min="0.01"
             step="any"
             value={convertAmount}
             onChange={(e) => setConvertAmount(e.target.value)}
+            onBlur={(e) => {
+              // If the user leaves the field empty or at 0, restore a valid default
+              const num = parseFloat(e.target.value)
+              if (!e.target.value || isNaN(num) || num <= 0) {
+                setConvertAmount("1")
+              }
+            }}
+            onKeyDown={(e) => {
+              // Block "-" and "e" which produce negative/scientific-notation values
+              if (e.key === "-" || e.key === "e" || e.key === "E") {
+                e.preventDefault()
+              }
+            }}
             className="w-full bg-transparent text-sm font-extrabold text-neutral-800 outline-none min-w-0"
             placeholder="0.00"
           />

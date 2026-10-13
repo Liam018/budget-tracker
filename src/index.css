@@ -317,6 +317,7 @@ textarea {
     user-select: none;
     cursor: pointer;
     text-decoration: none;
+    white-space: nowrap;
   }
 
   .btn-back:hover {

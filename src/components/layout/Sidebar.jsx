@@ -59,8 +59,8 @@ export default function Sidebar() {
           <div className="w-9 h-9 rounded-xl bg-linear-to-br from-brand-500 to-indigo-600 flex items-center justify-center shadow-xs shrink-0">
             <WalletIcon className="text-white" size={18} strokeWidth={2.4} />
           </div>
-          <span className="text-sm font-extrabold tracking-tight text-neutral-800 uppercase leading-none">
-            Budget Tracker
+          <span className="text-base font-extrabold tracking-tight text-neutral-800 leading-none">
+            Kuri
           </span>
         </div>
 

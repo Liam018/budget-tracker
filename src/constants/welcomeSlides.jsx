@@ -1,31 +1,60 @@
-import financeSvg from "../assets/animation/Finance.svg"
-import moneySvg from "../assets/animation/Money.svg"
-import analyticsSvg from "../assets/animation/Business_Analytics.svg"
-import revenueSvg from "../assets/animation/Revenue.svg"
-
 export const welcomeSlides = [
   {
     id: "tracking",
-    badge: "Expense & Income Tracking",
+    badge: "Multi-Account Ledger",
     shortTitle: "Tracking",
-    title: "Track Every Expense with Ease",
+    title: "Track Every Peso with Zero Friction",
     description:
-      "Log your daily cash flow instantly across Cash, Digital Wallets, and Bank accounts with zero friction.",
-    illustration: financeSvg,
+      "Log your daily cash flow instantly across Cash, Maya, and GCash with smart categorization and live balances.",
+    mascotMood: "wave",
+    mascotSpeech: "Kamusta! I'm Kuri the Ro-Vault. Feed me your cash, Maya, and GCash records so no peso slips away!",
+    mascotBadge: "Your Pocket Ro-Vault",
+    cardA: {
+      tag: "Maya Savings",
+      amount: "+₱3,500.00",
+      isPositive: true,
+      note: "Salary allowance added",
+      icon: "wallet",
+    },
+    cardB: {
+      tag: "GCash Wallet",
+      amount: "-₱160.00",
+      isPositive: false,
+      note: "Lunch & Milk Tea",
+      icon: "coffee",
+    },
     bulletPoints: [
       "Multi-account ledger (Cash, Wallets, Cards & Banks)",
       "Instant income & expense categorization",
-      "Multi-currency support (₱ PHP, $ USD, € EUR & more)",
+      "Native Philippine Peso (₱ PHP) & multi-currency",
     ],
   },
   {
     id: "budgets",
     badge: "Smart Budgets",
     shortTitle: "Budgets",
-    title: "Set Spending Limits & Save",
+    title: "Smart Spending Caps, Not Deprivation",
     description:
-      "Create monthly category budgets with real-time visual progress and warnings before you overspend.",
-    illustration: moneySvg,
+      "Create monthly category budgets with real-time visual progress bars and warnings before you overspend.",
+    mascotMood: "thinking",
+    mascotSpeech: "Smart, not kuripot! I'll stand guard at the safe door and alert you before your dining budget leaks.",
+    mascotBadge: "Safe-Lock Discipline",
+    cardA: {
+      tag: "Dining & Food",
+      progress: 72,
+      spent: "₱3,600",
+      total: "₱5,000",
+      status: "Healthy buffer remaining",
+      isPositive: true,
+      icon: "pie",
+    },
+    cardB: {
+      tag: "Safe Lock Alert",
+      note: "Warning sent at 80% ceiling",
+      highlight: "Overspending prevented",
+      isPositive: true,
+      icon: "shield",
+    },
     bulletPoints: [
       "Custom limits for Food, Transport, Utilities & more",
       "Color-coded warning thresholds at 80% & 100%",
@@ -36,10 +65,26 @@ export const welcomeSlides = [
     id: "analytics",
     badge: "Visual Reports",
     shortTitle: "Reports",
-    title: "Clear Insights into Your Habits",
+    title: "Clear Insights Into Your Money Habits",
     description:
       "Understand where your money goes with interactive breakdown charts, cash flow metrics, and monthly reports.",
-    illustration: analyticsSvg,
+    mascotMood: "celebrate",
+    mascotSpeech: "Woohoo! Look at that savings rate climb! Small disciplined habits compound into massive wealth.",
+    mascotBadge: "Milestone Progress",
+    cardA: {
+      tag: "Monthly Savings Rate",
+      amount: "34.8%",
+      isPositive: true,
+      note: "+6.4% higher than last month",
+      icon: "trending",
+    },
+    cardB: {
+      tag: "Habit Streak",
+      amount: "🔥 7 Days",
+      isPositive: true,
+      note: "Ledger logged daily",
+      icon: "flame",
+    },
     bulletPoints: [
       "Category expense breakdowns and trend charts",
       "Monthly savings rate and net cash flow metrics",
@@ -50,10 +95,26 @@ export const welcomeSlides = [
     id: "recurring",
     badge: "Automation & Security",
     shortTitle: "Automation",
-    title: "Automate Bills & Stay Protected",
+    title: "Automate Bills & Protect Your Wealth",
     description:
       "Schedule recurring subscriptions, avoid late fees, and manage finances with data encryption and privacy.",
-    illustration: revenueSvg,
+    mascotMood: "dial_buff",
+    mascotSpeech: "All vaults locked and protected! Never get hit with late fees on your subscriptions and bills.",
+    mascotBadge: "Automated & Protected",
+    cardA: {
+      tag: "Netflix HD",
+      amount: "₱549.00 / mo",
+      isPositive: false,
+      note: "Due tomorrow • Auto-reminder active",
+      icon: "calendar",
+    },
+    cardB: {
+      tag: "Vault Encryption",
+      note: "100% Private local data safety",
+      highlight: "Bank-grade protection",
+      isPositive: true,
+      icon: "lock",
+    },
     bulletPoints: [
       "Automated bill logs for recurring subscriptions",
       "Smart due date reminders before billing cycles",
@@ -61,3 +122,5 @@ export const welcomeSlides = [
     ],
   },
 ]
+
+

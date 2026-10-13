@@ -1,0 +1,294 @@
+/* ==========================================================================
+   vaulty.css — Exact Design & Spritesheet Animation for Vaulty Mascot
+   Sprite Specs:
+   - 96px × 96px frame size
+   - 4 columns (384px) × 5 rows (480px)
+   - Per-state animation durations:
+       idle: 0.9s | celebrate: 0.5s | thinking: 0.8s | alert: 0.4s | wave: 0.6s
+   ========================================================================== */
+
+/* Container & Widget Layout */
+.vaulty-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 999;
+  user-select: none;
+}
+
+/* Optional helper when rendered inline inside a stage/preview */
+.vaulty-container.vaulty-inline {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  z-index: 10;
+}
+
+/* Dynamic Speech Bubble */
+.vaulty-bubble {
+  max-width: 220px;
+  background: #ffffff;
+  color: #1e1b4b;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 10px 14px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e7ff;
+  margin-bottom: 10px;
+  text-align: center;
+  position: relative;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: auto;
+  /* clickable if it has close button or interactive tips */
+}
+
+/* Speech bubble bottom pointer */
+.vaulty-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #ffffff;
+}
+
+/* 2D Sprite Character Element */
+.vaulty-avatar {
+  width: 96px;
+  height: 96px;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  /* Total sprite sheet size: 4 columns (384px) x 5 rows (480px) scaled to 96px frames */
+  background-size: 384px 480px;
+  /* 4 frames horizontally via CSS steps */
+  animation: vaulty-play 0.7s steps(4) infinite;
+  /* Smooth GPU-accelerated spring transitions */
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transform-origin: center bottom;
+}
+
+/* Mechanical Tactile Feedback on Hover & Tap (Rigid Chassis) */
+.vaulty-avatar:hover {
+  transform: translateY(-4px);
+  filter: drop-shadow(0 8px 14px rgba(79, 70, 229, 0.28));
+}
+
+.vaulty-avatar:active {
+  transform: translateY(2px);
+  transition: transform 0.06s ease-in;
+}
+
+/* Horizontal Frame Stepper */
+@keyframes vaulty-play {
+  from {
+    background-position-x: 0px;
+  }
+
+  to {
+    background-position-x: -384px;
+  }
+}
+
+/* ── 60 FPS Smooth Keyframe Physics (Rigid Mechanical Layer) ─────── */
+
+/* 1. Idle: Continuous gentle hydraulic floating breathing */
+@keyframes vaulty-smooth-float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* 2. Celebrate: Solid hydraulic piston leap, hang time, and mechanical landing shock */
+@keyframes vaulty-smooth-bounce {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  20% {
+    transform: translateY(3px);
+    /* Pneumatic piston compression */
+  }
+
+  55% {
+    transform: translateY(-12px);
+    /* High hydraulic liftoff */
+  }
+
+  75% {
+    transform: translateY(-13px);
+    /* Apex hang time */
+  }
+
+  90% {
+    transform: translateY(2px);
+    /* Solid mechanical landing shock */
+  }
+}
+
+/* 3. Thinking: Inquisitive micro-tilt without warping */
+@keyframes vaulty-smooth-pulse {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-3px) rotate(2.5deg);
+  }
+}
+
+/* 4. Alert: High-frequency alarm shudder */
+@keyframes vaulty-smooth-shudder {
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  20% {
+    transform: translate(-2px, 1px);
+  }
+
+  40% {
+    transform: translate(2px, -1px);
+  }
+
+  60% {
+    transform: translate(-1.5px, -1px);
+  }
+
+  80% {
+    transform: translate(1.5px, 1px);
+  }
+}
+
+/* 5. Wave: Playful rhythmic counter-sway */
+@keyframes vaulty-smooth-sway {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-2px) rotate(-3.5deg);
+  }
+
+  75% {
+    transform: translateY(-2px) rotate(3deg);
+  }
+}
+
+/* State Rows for CSS Spritesheet: Stepped Sprite + 60 FPS Hybrid Physics */
+.vaulty-container[data-state="idle"] .vaulty-avatar {
+  background-position-y: 0px;
+  /* Row 0 */
+  animation: vaulty-play 0.9s steps(4) infinite, vaulty-smooth-float 2.8s ease-in-out infinite;
+}
+
+.vaulty-container[data-state="celebrate"] .vaulty-avatar {
+  background-position-y: -96px;
+  /* Row 1 */
+  animation: vaulty-play 0.5s steps(4) infinite, vaulty-smooth-bounce 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+.vaulty-container[data-state="thinking"] .vaulty-avatar {
+  background-position-y: -192px;
+  /* Row 2 */
+  animation: vaulty-play 0.8s steps(4) infinite, vaulty-smooth-pulse 2.2s ease-in-out infinite;
+}
+
+.vaulty-container[data-state="alert"] .vaulty-avatar {
+  background-position-y: -288px;
+  /* Row 3 */
+  animation: vaulty-play 0.4s steps(4) infinite, vaulty-smooth-shudder 0.3s ease-in-out infinite;
+}
+
+.vaulty-container[data-state="wave"] .vaulty-avatar {
+  background-position-y: -384px;
+  /* Row 4 */
+  animation: vaulty-play 0.6s steps(4) infinite, vaulty-smooth-sway 1.1s ease-in-out infinite;
+}
+
+/* Standalone 60 FPS Physics Classes (for Canvas / Containers) */
+.vaulty-physics-idle {
+  animation: vaulty-smooth-float 2.8s ease-in-out infinite;
+}
+
+.vaulty-physics-celebrate {
+  animation: vaulty-smooth-bounce 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+.vaulty-physics-thinking {
+  animation: vaulty-smooth-pulse 2.2s ease-in-out infinite;
+}
+
+.vaulty-physics-alert {
+  animation: vaulty-smooth-shudder 0.3s ease-in-out infinite;
+}
+
+.vaulty-physics-wave {
+  animation: vaulty-smooth-sway 1.1s ease-in-out infinite;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+  .vaulty-avatar,
+  .vaulty-physics-idle,
+  .vaulty-physics-celebrate,
+  .vaulty-physics-thinking,
+  .vaulty-physics-alert,
+  .vaulty-physics-wave {
+    animation: none !important;
+    background-position-x: 0px !important;
+    transform: none !important;
+  }
+}
+
+/* Mascot Aura Ambient Glow */
+.mascot-ambient {
+  position: absolute;
+  inset: -14px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, rgba(238, 242, 247, 0) 70%);
+  pointer-events: none;
+  transition: all 0.4s ease;
+}
+
+.mascot-ambient.celebrate {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, rgba(238, 242, 247, 0) 70%);
+}
+
+.mascot-ambient.thinking {
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.4) 0%, rgba(238, 242, 247, 0) 70%);
+}
+
+.mascot-ambient.alert {
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.4) 0%, rgba(238, 242, 247, 0) 70%);
+}
+
+.mascot-ambient.wave {
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(238, 242, 247, 0) 70%);
+}
