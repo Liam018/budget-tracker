@@ -44,13 +44,13 @@ export const KURI_TIPS = [
     id: "tip-small-leaks",
     category: "habits",
     mood: "alert",
-    message: "Beware of tiny leaks! A daily ₱150 milk tea adds up to over ₱54,000 a year.",
+    message: "Beware of tiny leaks! That $3 to $5 daily impulse buy compounds to over $1,500 every year.",
   },
   {
     id: "tip-smart-not-kuripot",
     category: "mindset",
     mood: "celebrate",
-    message: "Smart, not kuripot! Spend guilt-free on what truly matters by plugging the leaks that don't.",
+    message: "Smart, intentional spending: spend guilt-free on what truly matters by plugging the leaks that don't.",
   },
   {
     id: "tip-vault-secure",

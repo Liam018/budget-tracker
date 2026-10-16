@@ -8,18 +8,18 @@ import {
 import "./vaulty.css"
 
 /**
- * KuriCanvas — Pixel-perfect Procedural 2D Animated Mascot Display
+ * KuriCanvas — High-DPI Retina-Ready Procedural 2D Animated Mascot Display
  *
- * Renders the exact procedural canvas animation engine featured in MascotPreviewPage:
+ * Renders the procedural canvas animation engine with full anti-aliasing & Retina support:
+ * - High-DPI scaling via window.devicePixelRatio (at least 2x resolution buffer)
+ * - Anti-aliased vector rendering (no pixelation or blurriness)
  * - 4-frame procedural micro-animations from vaultyEngine.js
- * - Solid indigo steel body, soft lilac safe corner rivets, gold combination dial
- * - Visor with glowing digital cyber eyes & antenna with inertia physics
  * - Standalone 60 FPS CSS keyframe physics (vaulty-physics-{mood})
  * - Optional radial aura ambient glow (.mascot-ambient)
  *
  * @param {Object} props
  * @param {"idle"|"celebrate"|"thinking"|"alert"|"wave"|"yawn"|"dial_buff"} [props.mood="idle"]
- * @param {number} [props.size=96] - Render size in px (canvas is 128x128 internally and scales crisply)
+ * @param {number} [props.size=96] - Render size in CSS px
  * @param {boolean} [props.animated=true]
  * @param {boolean} [props.showAura=false]
  * @param {Object} [props.renderOptions=null] - Dynamic idle enhancements (eyeOverride, tilt, etc.)
@@ -55,18 +55,36 @@ export default function KuriCanvas({
   const config = ANIM_CONFIGS[mood] || ANIM_CONFIGS.idle
   const fps = config.speed || 4
 
+  // Calculate High-DPI pixel dimensions (at least 2x for Retina screens)
+  const dpr = typeof window !== "undefined" ? Math.max(window.devicePixelRatio || 1, 2) : 2
+  const pixelWidth = Math.round(size * dpr)
+  const pixelHeight = Math.round(size * dpr)
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
+    if (!ctx) return
 
     let isMounted = true
 
+    // Scaling ratio from 128 virtual units to full physical pixel buffer
+    const scale = (size * dpr) / FRAME_SIZE
+
+    const drawFrame = (colIdx, rIdx) => {
+      ctx.save()
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = "high"
+      ctx.scale(scale, scale)
+      renderVaultyFrame(ctx, colIdx, rIdx, 0, 0, renderOptionsRef.current || {})
+      ctx.restore()
+    }
+
     // Static frame if animation is disabled
     if (!animated) {
-      ctx.clearRect(0, 0, FRAME_SIZE, FRAME_SIZE)
       const rIdx = (ANIM_CONFIGS[moodRef.current] || ANIM_CONFIGS.idle).rowIndex
-      renderVaultyFrame(ctx, 0, rIdx, 0, 0, renderOptionsRef.current || {})
+      drawFrame(0, rIdx)
       return
     }
 
@@ -83,16 +101,7 @@ export default function KuriCanvas({
 
         const currentMood = moodRef.current
         const rIdx = (ANIM_CONFIGS[currentMood] || ANIM_CONFIGS.idle).rowIndex
-
-        ctx.clearRect(0, 0, FRAME_SIZE, FRAME_SIZE)
-        renderVaultyFrame(
-          ctx,
-          frameIdxRef.current,
-          rIdx,
-          0,
-          0,
-          renderOptionsRef.current || {}
-        )
+        drawFrame(frameIdxRef.current, rIdx)
       }
 
       animFrameIdRef.current = requestAnimationFrame(loop)
@@ -100,8 +109,7 @@ export default function KuriCanvas({
 
     // Initial first frame draw immediately
     const rIdx = (ANIM_CONFIGS[moodRef.current] || ANIM_CONFIGS.idle).rowIndex
-    ctx.clearRect(0, 0, FRAME_SIZE, FRAME_SIZE)
-    renderVaultyFrame(ctx, 0, rIdx, 0, 0, renderOptionsRef.current || {})
+    drawFrame(0, rIdx)
 
     animFrameIdRef.current = requestAnimationFrame(loop)
 
@@ -111,7 +119,7 @@ export default function KuriCanvas({
         cancelAnimationFrame(animFrameIdRef.current)
       }
     }
-  }, [mood, fps, animated])
+  }, [mood, fps, animated, size, dpr])
 
   return (
     <div
@@ -130,15 +138,14 @@ export default function KuriCanvas({
         <div className={`mascot-ambient ${config.aura || "idle"}`} />
       )}
 
-      {/* Procedural 128x128 Canvas with 60 FPS physics */}
+      {/* High-DPI Anti-Aliased Canvas with 60 FPS CSS physics */}
       <canvas
         ref={canvasRef}
-        width={FRAME_SIZE}
-        height={FRAME_SIZE}
+        width={pixelWidth}
+        height={pixelHeight}
         style={{
           width: "100%",
           height: "100%",
-          imageRendering: "pixelated",
         }}
         className={`w-full h-full vaulty-physics-${mood} transition-transform duration-300 pointer-events-none`}
       />
