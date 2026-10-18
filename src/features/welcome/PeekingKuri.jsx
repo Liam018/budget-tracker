@@ -11,6 +11,13 @@ const KURI_QUOTES = [
   "Tracking every peso with intention.",
 ]
 
+const KURI_RAPID_QUOTES = [
+  "Haha, that tickles the combination dial!",
+  "Whoa—rapid-fire audit! Still zero leaks!",
+  "Easy on the vault! Your pesos are 100% safe.",
+  "Maximum security mode: ACTIVATED!",
+]
+
 export function PeekingKuri({ onPoke, pokePulse = false }) {
   const containerRef = useRef(null)
   const visorRef = useRef(null)
@@ -20,75 +27,106 @@ export function PeekingKuri({ onPoke, pokePulse = false }) {
   const [antennaWiggle, setAntennaWiggle] = useState(0)
   const [eyeState, setEyeState] = useState("normal") // "normal" | "blink" | "happy"
   const [isDucking, setIsDucking] = useState(false)
+  const [dialRotation, setDialRotation] = useState(0)
   const [bubbleText, setBubbleText] = useState(null)
+  const [pokeCount, setPokeCount] = useState(0)
   const [isInteracting, setIsInteracting] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
 
+  // Refs to prevent stale closures, parent re-render loops, & timer collisions
+  const onPokeRef = useRef(onPoke)
+  useEffect(() => {
+    onPokeRef.current = onPoke
+  }, [onPoke])
+
+  const isDuckingRef = useRef(false)
+  const eyeStateRef = useRef("normal")
   const idleTimerRef = useRef(null)
   const blinkTimerRef = useRef(null)
   const bubbleTimerRef = useRef(null)
-  const quoteIndexRef = useRef(0)
+  const duckTimerRef = useRef(null)
+  const reDuckTimerRef = useRef(null)
+  const happyTimerRef = useRef(null)
 
-  // Detect mobile
-  useEffect(() => {
-    function checkMobile() {
-      setIsMobile(window.innerWidth < 768 || "ontouchstart" in window)
-    }
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
+  const quoteIndexRef = useRef(0)
+  const rapidQuoteIndexRef = useRef(0)
+  const lastTapTimeRef = useRef(0)
+  const comboStreakRef = useRef(0)
+
+  const updateEyeState = useCallback((nextState) => {
+    eyeStateRef.current = nextState
+    setEyeState(nextState)
   }, [])
 
+  const updateDucking = useCallback((nextDucking) => {
+    isDuckingRef.current = nextDucking
+    setIsDucking(nextDucking)
+  }, [])
+
+  // Helper to set attentive idle glance based on viewport
+  const applyIdleGlance = useCallback(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      // On mobile, CTAs are directly above Kuri: look up attentively
+      setLookOffset({ x: 0, y: -4 })
+      setHeadTilt(0)
+      setAntennaWiggle(0)
+    } else {
+      // On desktop, look towards CTA "Start Tracking Free" on the left
+      setLookOffset({ x: -4.8, y: 2.8 })
+      setHeadTilt(-2)
+      setAntennaWiggle(2)
+    }
+  }, [])
+
+  // Set initial attentive glance on mount
+  useEffect(() => {
+    applyIdleGlance()
+  }, [applyIdleGlance])
+
   // ── 1. Pointer & Touch Tracking ──────────────────────────────────────────
-  const handlePointer = useCallback((clientX, clientY) => {
-    if (isDucking) return
+  const handlePointer = useCallback(
+    (clientX, clientY) => {
+      if (isDuckingRef.current) return
 
-    setIsInteracting(true)
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+      setIsInteracting(true)
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
 
-    const rect = visorRef.current?.getBoundingClientRect() || containerRef.current?.getBoundingClientRect()
-    if (!rect) return
+      const rect =
+        visorRef.current?.getBoundingClientRect() ||
+        containerRef.current?.getBoundingClientRect()
+      if (!rect) return
 
-    const centerX = rect.left + rect.width / 2
-    const centerY = rect.top + rect.height / 2
+      const centerX = rect.left + rect.width / 2
+      const centerY = rect.top + rect.height / 2
 
-    const dx = clientX - centerX
-    const dy = clientY - centerY
+      const dx = clientX - centerX
+      const dy = clientY - centerY
 
-    const dist = Math.hypot(dx, dy)
-    const angle = Math.atan2(dy, dx)
+      const dist = Math.hypot(dx, dy)
+      const angle = Math.atan2(dy, dx)
 
-    // Clamped eye range inside the canonical visor
-    const maxHorizontal = 6.5
-    const maxVertical = 4.2
+      // Clamped eye range inside the canonical visor
+      const maxHorizontal = 6.5
+      const maxVertical = 4.2
 
-    const norm = Math.min(1, dist / 260)
-    const targetX = Math.cos(angle) * maxHorizontal * norm
-    const targetY = Math.sin(angle) * maxVertical * norm
+      const norm = Math.min(1, dist / 260)
+      const targetX = Math.cos(angle) * maxHorizontal * norm
+      const targetY = Math.sin(angle) * maxVertical * norm
 
-    // Subtle head tilt towards cursor
-    const targetTilt = Math.max(-3.5, Math.min(3.5, (dx / 320) * 3))
+      // Subtle head tilt towards cursor
+      const targetTilt = Math.max(-3.5, Math.min(3.5, (dx / 320) * 3))
 
-    setLookOffset({ x: targetX, y: targetY })
-    setHeadTilt(targetTilt)
-    setAntennaWiggle(Math.max(-5, Math.min(5, (dx / 300) * -4)))
+      setLookOffset({ x: targetX, y: targetY })
+      setHeadTilt(targetTilt)
+      setAntennaWiggle(Math.max(-5, Math.min(5, (dx / 300) * -4)))
 
-    // Reset to idle glance after 2.6s
-    idleTimerRef.current = setTimeout(() => {
-      setIsInteracting(false)
-      if (typeof window !== "undefined" && window.innerWidth < 1024) {
-        // On mobile, CTAs are directly above Kuri: look up attentively!
-        setLookOffset({ x: 0, y: -4 })
-        setHeadTilt(0)
-        setAntennaWiggle(0)
-      } else {
-        // On desktop, look towards CTA "Start Tracking Free" on the left
-        setLookOffset({ x: -4.8, y: 2.8 })
-        setHeadTilt(-2)
-        setAntennaWiggle(2)
-      }
-    }, 2600)
-  }, [isDucking])
+      // Reset to idle glance after 2.6s
+      idleTimerRef.current = setTimeout(() => {
+        setIsInteracting(false)
+        applyIdleGlance()
+      }, 2600)
+    },
+    [applyIdleGlance]
+  )
 
   useEffect(() => {
     function onMouseMove(e) {
@@ -119,21 +157,34 @@ export function PeekingKuri({ onPoke, pokePulse = false }) {
     }
   }, [handlePointer])
 
-  // ── 2. Natural Organic Blinking ──────────────────────────────────────────
+  // ── 2. Natural Organic Blinking (Safe from overwriting "happy" eyes) ─────
   useEffect(() => {
-    let timeoutId = null
+    function scheduleBlink(delay = Math.random() * 3200 + 2600) {
+      if (blinkTimerRef.current) clearTimeout(blinkTimerRef.current)
 
-    function scheduleBlink() {
-      const delay = Math.random() * 3200 + 2600
-      timeoutId = setTimeout(() => {
-        setEyeState("blink")
-        setTimeout(() => {
-          setEyeState("normal")
-          if (Math.random() < 0.25) {
-            setTimeout(() => {
-              setEyeState("blink")
-              setTimeout(() => {
-                setEyeState("normal")
+      blinkTimerRef.current = setTimeout(() => {
+        // Don't interrupt happy eyes or active ducking
+        if (eyeStateRef.current === "happy" || isDuckingRef.current) {
+          scheduleBlink(1500)
+          return
+        }
+
+        updateEyeState("blink")
+        blinkTimerRef.current = setTimeout(() => {
+          if (eyeStateRef.current !== "happy") {
+            updateEyeState("normal")
+          }
+
+          // 25% chance of a natural double-blink
+          if (Math.random() < 0.25 && eyeStateRef.current !== "happy") {
+            blinkTimerRef.current = setTimeout(() => {
+              if (eyeStateRef.current !== "happy") {
+                updateEyeState("blink")
+              }
+              blinkTimerRef.current = setTimeout(() => {
+                if (eyeStateRef.current !== "happy") {
+                  updateEyeState("normal")
+                }
                 scheduleBlink()
               }, 110)
             }, 120)
@@ -146,40 +197,120 @@ export function PeekingKuri({ onPoke, pokePulse = false }) {
 
     scheduleBlink()
     return () => {
-      if (timeoutId) clearTimeout(timeoutId)
       if (blinkTimerRef.current) clearTimeout(blinkTimerRef.current)
     }
-  }, [])
+  }, [updateEyeState])
 
-  // ── 3. Tap / Poke Interaction ────────────────────────────────────────────
-  function handlePokeKuri() {
-    if (onPoke) onPoke()
+  // ── 3. Tap / Poke Interaction (Protected Against Double-Firing) ──────────
+  const triggerPoke = useCallback(
+    (notifyParent = true) => {
+      const now = Date.now()
+      const elapsed = now - lastTapTimeRef.current
 
-    setIsDucking(true)
-    setEyeState("happy")
+      // Guard: Ignore accidental echo triggers or ghost clicks (< 80ms apart)
+      if (elapsed < 80) return
 
-    const quote = KURI_QUOTES[quoteIndexRef.current % KURI_QUOTES.length]
-    quoteIndexRef.current += 1
-    setBubbleText(quote)
+      const isRapid = elapsed < 850
+      lastTapTimeRef.current = now
+      comboStreakRef.current = isRapid ? comboStreakRef.current + 1 : 1
 
-    if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current)
-    bubbleTimerRef.current = setTimeout(() => {
-      setBubbleText(null)
-    }, 4200)
+      // Only notify parent when directly clicked inside PeekingKuri
+      if (notifyParent && onPokeRef.current) {
+        onPokeRef.current()
+      }
 
-    setTimeout(() => {
-      setIsDucking(false)
-      setTimeout(() => {
-        setEyeState("normal")
-      }, 1400)
-    }, 240)
-  }
+      // Light haptic feedback on supported mobile devices
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(10)
+      }
 
+      const isCombo = comboStreakRef.current >= 3
+
+      // Clear any in-flight poke timers so rapid taps never collide
+      if (duckTimerRef.current) clearTimeout(duckTimerRef.current)
+      if (reDuckTimerRef.current) clearTimeout(reDuckTimerRef.current)
+      if (happyTimerRef.current) clearTimeout(happyTimerRef.current)
+      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current)
+
+      updateEyeState("happy")
+      setPokeCount((prev) => prev + 1)
+
+      // Spin the vault dial on each poke (spins further on rapid combos)
+      setDialRotation((prev) => prev + (isCombo ? 180 : 90))
+
+      // Expressive antenna & head reaction on rapid taps
+      if (isCombo) {
+        const direction = comboStreakRef.current % 2 === 0 ? 1 : -1
+        setAntennaWiggle(9 * direction)
+        setHeadTilt(3.5 * direction)
+      }
+
+      // Choose regular quote vs. rapid-tap easter egg quote
+      if (isCombo) {
+        const rapidQuote =
+          KURI_RAPID_QUOTES[
+            rapidQuoteIndexRef.current % KURI_RAPID_QUOTES.length
+          ]
+        rapidQuoteIndexRef.current += 1
+        setBubbleText(rapidQuote)
+      } else {
+        const quote = KURI_QUOTES[quoteIndexRef.current % KURI_QUOTES.length]
+        quoteIndexRef.current += 1
+        setBubbleText(quote)
+      }
+
+      // If already ducking from a recent tap, briefly pop up then re-duck
+      if (isDuckingRef.current) {
+        updateDucking(false)
+        reDuckTimerRef.current = setTimeout(() => {
+          updateDucking(true)
+          duckTimerRef.current = setTimeout(() => {
+            updateDucking(false)
+          }, 210)
+        }, 55)
+      } else {
+        updateDucking(true)
+        duckTimerRef.current = setTimeout(() => {
+          updateDucking(false)
+        }, 240)
+      }
+
+      // Keep happy eyes for 1.6s after the latest tap finishes
+      happyTimerRef.current = setTimeout(() => {
+        updateEyeState("normal")
+        setAntennaWiggle(0)
+        setHeadTilt(0)
+      }, 1600)
+
+      // Hide speech bubble 4.2s after the latest tap
+      bubbleTimerRef.current = setTimeout(() => {
+        setBubbleText(null)
+      }, 4200)
+    },
+    [updateDucking, updateEyeState]
+  )
+
+  // Direct click handler on Kuri
+  const handlePokeKuri = useCallback(() => {
+    triggerPoke(true)
+  }, [triggerPoke])
+
+  // External pokePulse trigger (does not call onPoke back to avoid loops)
   useEffect(() => {
     if (pokePulse) {
-      handlePokeKuri()
+      triggerPoke(false)
     }
-  }, [pokePulse])
+  }, [pokePulse, triggerPoke])
+
+  // Cleanup all poke timers on unmount
+  useEffect(() => {
+    return () => {
+      if (duckTimerRef.current) clearTimeout(duckTimerRef.current)
+      if (reDuckTimerRef.current) clearTimeout(reDuckTimerRef.current)
+      if (happyTimerRef.current) clearTimeout(happyTimerRef.current)
+      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current)
+    }
+  }, [])
 
   return (
     <div
@@ -191,11 +322,11 @@ export function PeekingKuri({ onPoke, pokePulse = false }) {
         <AnimatePresence mode="wait">
           {bubbleText && (
             <motion.div
-              key="bubble"
-              initial={{ opacity: 0, y: 8, scale: 0.94 }}
+              key={pokeCount}
+              initial={{ opacity: 0, y: 6, scale: 0.94 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.95 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, y: -4, scale: 0.96 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               className="pointer-events-auto relative bg-white/95 backdrop-blur-md text-neutral-800 border border-slate-200/90 shadow-[0_12px_32px_rgba(45,46,126,0.14),0_2px_8px_rgba(0,0,0,0.04)] rounded-2xl px-4 py-2 sm:px-5 sm:py-2.5 max-w-xs sm:max-w-sm text-center"
             >
               <p className="text-xs sm:text-[13px] font-semibold tracking-tight text-neutral-800 leading-snug">
@@ -229,7 +360,7 @@ export function PeekingKuri({ onPoke, pokePulse = false }) {
 
       {/* ── Mascot Stage (Clean floating shelf, no card box) ── */}
       <div
-        className="relative w-full max-w-70 xs:max-w-[320px] sm:max-w-95 lg:max-w-115 xl:max-w-120 h-45 xs:h-[205px] sm:h-62.5 lg:h-75 xl:h-80 flex items-end justify-center cursor-pointer group"
+        className="relative w-full max-w-70 xs:max-w-[320px] sm:max-w-95 lg:max-w-115 xl:max-w-120 h-45 xs:h-[205px] sm:h-62.5 lg:h-75 xl:h-80 flex items-end justify-center cursor-pointer touch-manipulation group focus:outline-none"
         onClick={handlePokeKuri}
         role="button"
         tabIndex={0}
@@ -434,7 +565,7 @@ export function PeekingKuri({ onPoke, pokePulse = false }) {
                   )}
                 </g>
               </g>
-https://127.0.0.1:51190/static/artifacts/080768f0-4f78-47b7-bdb6-4f0acc76b318/.user_uploaded/media_1792113877336.png?csrf=497ab5c5-b6f4-43e3-90a1-02d64ab9091c
+
               {/* ── 6. Safe Center Dial (vaultyEngine lines 312-342: goldAccent: #fbbf24) ── */}
               <g transform="translate(130, 139)">
                 {/* Outer dial circle */}
@@ -447,19 +578,27 @@ https://127.0.0.1:51190/static/artifacts/080768f0-4f78-47b7-bdb6-4f0acc76b318/.u
                   strokeWidth="4.8"
                 />
 
-                {/* Gold dial center handle */}
-                <circle
-                  cx="0"
-                  cy="0"
-                  r="9.6"
-                  fill="#fbbf24"
-                />
+                {/* Rotating dial spokes & center handle on poke */}
+                <g
+                  style={{
+                    transform: `rotate(${dialRotation}deg)`,
+                    transition: "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                >
+                  {/* Gold dial center handle */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="9.6"
+                    fill="#fbbf24"
+                  />
 
-                {/* 4 White dial spokes */}
-                <line x1="0" y1="-26.4" x2="0" y2="-16.8" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
-                <line x1="0" y1="16.8" x2="0" y2="26.4" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
-                <line x1="-26.4" y1="0" x2="-16.8" y2="0" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
-                <line x1="16.8" y1="0" x2="26.4" y2="0" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
+                  {/* 4 White dial spokes */}
+                  <line x1="0" y1="-26.4" x2="0" y2="-16.8" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
+                  <line x1="0" y1="16.8" x2="0" y2="26.4" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
+                  <line x1="-26.4" y1="0" x2="-16.8" y2="0" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
+                  <line x1="16.8" y1="0" x2="26.4" y2="0" stroke="#ffffff" strokeWidth="3.8" strokeLinecap="round" />
+                </g>
               </g>
             </g>
           </g>

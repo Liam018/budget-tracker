@@ -248,7 +248,7 @@ export default function VaultyRobot({
             />
           </g>
         ) : (
-          /* Resting side arms */
+          /* Resting side arms with dark indigo stroke & white blend highlight */
           <g>
             <ellipse
               cx="15"
@@ -256,8 +256,17 @@ export default function VaultyRobot({
               rx="4.2"
               ry="6.5"
               fill="#bfdbfe"
-              stroke="#93c5fd"
-              strokeWidth="1"
+              stroke="#1d1f70"
+              strokeWidth="1.2"
+            />
+            {/* White blend highlight matching PeekingKuri.jsx paws */}
+            <ellipse
+              cx="13.8"
+              cy="50.5"
+              rx="2.4"
+              ry="1.4"
+              fill="#ffffff"
+              opacity="0.6"
             />
             <ellipse
               cx="81"
@@ -265,8 +274,17 @@ export default function VaultyRobot({
               rx="4.2"
               ry="6.5"
               fill="#bfdbfe"
-              stroke="#93c5fd"
-              strokeWidth="1"
+              stroke="#1d1f70"
+              strokeWidth="1.2"
+            />
+            {/* White blend highlight matching PeekingKuri.jsx paws */}
+            <ellipse
+              cx="79.8"
+              cy="50.5"
+              rx="2.4"
+              ry="1.4"
+              fill="#ffffff"
+              opacity="0.6"
             />
           </g>
         )}
@@ -361,10 +379,16 @@ export default function VaultyRobot({
               <ellipse cx="48" cy="38" rx="2" ry="2.8" fill="#00f0ff" />
             </g>
           ) : (
-            /* Idle Horizontal Pill Eyes (= =) */
-            <g fill="#00f0ff">
-              <rect x="33" y="34.5" width="8.5" height="4.2" rx="2.1" />
-              <rect x="54.5" y="34.5" width="8.5" height="4.2" rx="2.1" />
+            /* Idle Horizontal Pill Eyes with white blend & specular glints */
+            <g>
+              <rect x="33" y="34.5" width="8.5" height="4.2" rx="2.1" fill="#00f0ff" />
+              <rect x="54.5" y="34.5" width="8.5" height="4.2" rx="2.1" fill="#00f0ff" />
+              {/* White blend highlight (matching PeekingKuri.jsx) */}
+              <ellipse cx="35.5" cy="35.5" rx="2" ry="0.9" fill="#ffffff" opacity="0.6" />
+              <ellipse cx="57" cy="35.5" rx="2" ry="0.9" fill="#ffffff" opacity="0.6" />
+              {/* Specular glints */}
+              <circle cx="35" cy="35.5" r="0.9" fill="#ffffff" />
+              <circle cx="56.5" cy="35.5" r="0.9" fill="#ffffff" />
             </g>
           )}
         </g>

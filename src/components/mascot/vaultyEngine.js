@@ -409,6 +409,12 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
   ctx.fillStyle = antennaColor;
   ctx.fill();
 
+  // Specular white highlight on antenna tip orb (matching PeekingKuri.jsx line 474)
+  ctx.beginPath();
+  ctx.arc(antennaTipX - 1.1, antennaTipY - 1.1, 1.2, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.fill();
+
   // 22.7.1 Floating "Zzz" particles rising from antenna orb during Robotic Yawn (kept safely within frame boundaries)
   if (zzzLevel > 0) {
     ctx.save();
@@ -433,25 +439,67 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
     ctx.restore();
   }
 
-  // 7. Render Eyes based on micro-state (with multi-stage eyelid arc)
+  // Look offset support (dynamic cursor tracking or attentive glance)
+  const lookX = (options && options.lookOffset && typeof options.lookOffset.x === 'number') ? options.lookOffset.x : 0;
+  const lookY = (options && options.lookOffset && typeof options.lookOffset.y === 'number') ? options.lookOffset.y : 0;
+  const leftEyeX = -10 + lookX;
+  const rightEyeX = 10 + lookX;
+  const eyeCenterY = visorY + visorH / 2 + lookY;
+
+  // 7. Render Eyes based on micro-state (with white blend & specular glints matching PeekingKuri.jsx)
   if (eyeType === 'normal') {
-    // Normal cyan pill eyes
+    // Normal cyan pill eyes with subtle cyan digital glow
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 240, 255, 0.65)';
+    ctx.shadowBlur = 3.5;
     ctx.fillStyle = eyeCyan;
     ctx.beginPath();
-    ctx.ellipse(-10, visorY + visorH / 2, 4, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(leftEyeX, eyeCenterY, 4, 5, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(10, visorY + visorH / 2, 4, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(rightEyeX, eyeCenterY, 4, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Soft white blend highlight (matching PeekingKuri.jsx paws & eyes)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(leftEyeX - 0.8, eyeCenterY - 1.2, 2.2, 1.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(rightEyeX - 0.8, eyeCenterY - 1.2, 2.2, 1.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Specular white glints (matching PeekingKuri.jsx lines 561-564 & vaultyEngine lines 480-486)
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(leftEyeX - 1.5, eyeCenterY - 1.8, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(rightEyeX - 1.5, eyeCenterY - 1.8, 1.2, 0, Math.PI * 2);
     ctx.fill();
   }
   else if (eyeType === 'halflid') {
     // Anticipation half-lid eyelid droop
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 240, 255, 0.6)';
+    ctx.shadowBlur = 3;
     ctx.fillStyle = eyeCyan;
     ctx.beginPath();
-    ctx.ellipse(-10, visorY + visorH / 2 + 1, 4.2, 2.6, 0, 0, Math.PI * 2);
+    ctx.ellipse(leftEyeX, eyeCenterY + 1, 4.2, 2.6, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(10, visorY + visorH / 2 + 1, 4.2, 2.6, 0, 0, Math.PI * 2);
+    ctx.ellipse(rightEyeX, eyeCenterY + 1, 4.2, 2.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Subtle white blend glints
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.beginPath();
+    ctx.arc(leftEyeX - 1.2, eyeCenterY + 0.3, 0.9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(rightEyeX - 1.2, eyeCenterY + 0.3, 0.9, 0, Math.PI * 2);
     ctx.fill();
   }
   else if (eyeType === 'blink') {
@@ -460,29 +508,50 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
     ctx.lineWidth = 2.4;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.arc(-10, visorY + visorH / 2 + 1, 4.2, 0.1 * Math.PI, 0.9 * Math.PI, false);
+    ctx.arc(leftEyeX, eyeCenterY + 1, 4.2, 0.1 * Math.PI, 0.9 * Math.PI, false);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(10, visorY + visorH / 2 + 1, 4.2, 0.1 * Math.PI, 0.9 * Math.PI, false);
+    ctx.arc(rightEyeX, eyeCenterY + 1, 4.2, 0.1 * Math.PI, 0.9 * Math.PI, false);
     ctx.stroke();
   }
   else if (eyeType === 'glimmer') {
-    // Wide open with bright specular glint
+    // Wide open with bright specular glint & white blend highlight
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 240, 255, 0.65)';
+    ctx.shadowBlur = 4;
     ctx.fillStyle = eyeCyan;
     ctx.beginPath();
-    ctx.ellipse(-10, visorY + visorH / 2, 4, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(leftEyeX, eyeCenterY, 4, 5, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(10, visorY + visorH / 2, 4, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(rightEyeX, eyeCenterY, 4, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Soft white blend highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(leftEyeX - 0.8, eyeCenterY - 1.2, 2.2, 1.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(rightEyeX - 0.8, eyeCenterY - 1.2, 2.2, 1.5, -0.2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Specular glint
+    // Primary specular glint
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(-11.5, visorY + visorH / 2 - 1.8, 1.2, 0, Math.PI * 2);
+    ctx.arc(leftEyeX - 1.5, eyeCenterY - 1.8, 1.3, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.arc(8.5, visorY + visorH / 2 - 1.8, 1.2, 0, Math.PI * 2);
+    ctx.arc(rightEyeX - 1.5, eyeCenterY - 1.8, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Secondary sparkle glint
+    ctx.beginPath();
+    ctx.arc(leftEyeX + 1.2, eyeCenterY + 1.5, 0.7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(rightEyeX + 1.2, eyeCenterY + 1.5, 0.7, 0, Math.PI * 2);
     ctx.fill();
   }
   else if (eyeType === 'happy') {
@@ -491,15 +560,15 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
     ctx.lineWidth = 2.6;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(-14, visorY + 12);
-    ctx.lineTo(-10, visorY + 6);
-    ctx.lineTo(-6, visorY + 12);
+    ctx.moveTo(leftEyeX - 4, eyeCenterY + 3);
+    ctx.lineTo(leftEyeX, eyeCenterY - 3);
+    ctx.lineTo(leftEyeX + 4, eyeCenterY + 3);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(6, visorY + 12);
-    ctx.lineTo(10, visorY + 6);
-    ctx.lineTo(14, visorY + 12);
+    ctx.moveTo(rightEyeX - 4, eyeCenterY + 3);
+    ctx.lineTo(rightEyeX, eyeCenterY - 3);
+    ctx.lineTo(rightEyeX + 4, eyeCenterY + 3);
     ctx.stroke();
   }
   else if (eyeType === 'radar') {
@@ -540,18 +609,30 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
     ctx.lineWidth = 2.6;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(-14, visorY + 12);
-    ctx.lineTo(-10, visorY + 7);
-    ctx.lineTo(-6, visorY + 12);
+    ctx.moveTo(leftEyeX - 4, eyeCenterY + 3);
+    ctx.lineTo(leftEyeX, eyeCenterY - 2);
+    ctx.lineTo(leftEyeX + 4, eyeCenterY + 3);
     ctx.stroke();
 
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 240, 255, 0.65)';
+    ctx.shadowBlur = 4;
     ctx.fillStyle = eyeCyan;
     ctx.beginPath();
-    ctx.ellipse(10, visorY + visorH / 2, 4, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(rightEyeX, eyeCenterY, 4, 5, 0, 0, Math.PI * 2);
     ctx.fill();
+    ctx.restore();
+
+    // Soft white blend highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(rightEyeX - 0.8, eyeCenterY - 1.2, 2.2, 1.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Specular glint
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(8.8, visorY + visorH / 2 - 1.5, 1.2, 0, Math.PI * 2);
+    ctx.arc(rightEyeX - 1.2, eyeCenterY - 1.5, 1.2, 0, Math.PI * 2);
     ctx.fill();
   }
   else if (eyeType === 'sleepy') {
@@ -560,10 +641,10 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
     ctx.lineWidth = 2.4;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.arc(-10, visorY + visorH / 2 + 1, 4.2, 0.15 * Math.PI, 0.85 * Math.PI, false);
+    ctx.arc(leftEyeX, eyeCenterY + 1, 4.2, 0.15 * Math.PI, 0.85 * Math.PI, false);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(10, visorY + visorH / 2 + 1, 4.2, 0.15 * Math.PI, 0.85 * Math.PI, false);
+    ctx.arc(rightEyeX, eyeCenterY + 1, 4.2, 0.15 * Math.PI, 0.85 * Math.PI, false);
     ctx.stroke();
 
     // Cute tiny open yawn mouth
@@ -573,7 +654,7 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
     ctx.fill();
   }
 
-  // 8. Hands & Gestures
+  // 8. Hands & Gestures (Soft Lilac with Dark Indigo Outline & White Blend Highlights matching PeekingKuri.jsx)
   ctx.fillStyle = softLilac;
 
   if (options && options.coverEyes) {
@@ -599,24 +680,46 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
     const leftTargetY = visorY + visorH / 2;
 
     ctx.save();
-    ctx.strokeStyle = softLilac;
-    ctx.lineWidth = 6.5;
+    // Arm limb dark indigo outline
+    ctx.strokeStyle = darkIndigo;
+    ctx.lineWidth = 7.5;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(shoulderLeftX, shoulderLeftY);
     ctx.lineTo(leftTargetX - 2, leftTargetY + 4);
     ctx.stroke();
 
-    // Left mitten hand covering left visor eye
+    // Arm limb soft lilac core
+    ctx.strokeStyle = softLilac;
+    ctx.lineWidth = 5.2;
+    ctx.beginPath();
+    ctx.moveTo(shoulderLeftX, shoulderLeftY);
+    ctx.lineTo(leftTargetX - 2, leftTargetY + 4);
+    ctx.stroke();
+
+    // Subtle white blend highlight along arm limb
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(shoulderLeftX, shoulderLeftY);
+    ctx.lineTo(leftTargetX - 2, leftTargetY + 4);
+    ctx.stroke();
+
+    // Left hand covering left visor eye
     ctx.translate(leftTargetX, leftTargetY);
     ctx.rotate(0.25);
     ctx.fillStyle = softLilac;
     ctx.beginPath();
-    ctx.ellipse(0, 0, 8, 6.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 7.5, 6.2, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Cute mitten thumb tucked slightly inwards
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = darkIndigo;
+    ctx.stroke();
+
+    // White blend highlight on left hand (matching PeekingKuri paws: opacity 0.6)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.beginPath();
-    ctx.arc(3.5, -2, 2.8, 0, Math.PI * 2);
+    ctx.ellipse(-0.8, -1.2, 3.8, 2, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
@@ -626,9 +729,26 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
       const peekHandX = 22;
       const peekHandY = visorY + visorH + 4; // clearly below the eye so right eye is exposed
       ctx.save();
-      ctx.strokeStyle = softLilac;
-      ctx.lineWidth = 6.5;
+      // Arm limb dark indigo outline
+      ctx.strokeStyle = darkIndigo;
+      ctx.lineWidth = 7.5;
       ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(shoulderRightX, shoulderRightY);
+      ctx.lineTo(peekHandX, peekHandY);
+      ctx.stroke();
+
+      // Arm limb soft lilac core
+      ctx.strokeStyle = softLilac;
+      ctx.lineWidth = 5.2;
+      ctx.beginPath();
+      ctx.moveTo(shoulderRightX, shoulderRightY);
+      ctx.lineTo(peekHandX, peekHandY);
+      ctx.stroke();
+
+      // Subtle white blend highlight along arm limb
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.moveTo(shoulderRightX, shoulderRightY);
       ctx.lineTo(peekHandX, peekHandY);
@@ -638,11 +758,16 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
       ctx.rotate(0.4);
       ctx.fillStyle = softLilac;
       ctx.beginPath();
-      ctx.ellipse(0, 0, 8, 6.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 7.5, 6.2, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Little peek thumb pointing up
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = darkIndigo;
+      ctx.stroke();
+
+      // White blend highlight on right hand (matching PeekingKuri paws: opacity 0.6)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.beginPath();
-      ctx.arc(-3.5, -2, 2.8, 0, Math.PI * 2);
+      ctx.ellipse(-0.8, -1.2, 3.8, 2, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     } else {
@@ -650,32 +775,67 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
       const rightTargetX = 10;
       const rightTargetY = visorY + visorH / 2;
       ctx.save();
-      ctx.strokeStyle = softLilac;
-      ctx.lineWidth = 6.5;
+      // Arm limb dark indigo outline
+      ctx.strokeStyle = darkIndigo;
+      ctx.lineWidth = 7.5;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(shoulderRightX, shoulderRightY);
       ctx.lineTo(rightTargetX + 2, rightTargetY + 4);
       ctx.stroke();
 
-      // Right mitten hand covering right visor eye
+      // Arm limb soft lilac core
+      ctx.strokeStyle = softLilac;
+      ctx.lineWidth = 5.2;
+      ctx.beginPath();
+      ctx.moveTo(shoulderRightX, shoulderRightY);
+      ctx.lineTo(rightTargetX + 2, rightTargetY + 4);
+      ctx.stroke();
+
+      // Subtle white blend highlight along arm limb
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(shoulderRightX, shoulderRightY);
+      ctx.lineTo(rightTargetX + 2, rightTargetY + 4);
+      ctx.stroke();
+
+      // Right hand covering right visor eye
       ctx.translate(rightTargetX, rightTargetY);
       ctx.rotate(-0.25);
       ctx.fillStyle = softLilac;
       ctx.beginPath();
-      ctx.ellipse(0, 0, 8, 6.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 7.5, 6.2, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Cute mitten thumb
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = darkIndigo;
+      ctx.stroke();
+
+      // White blend highlight on right hand (matching PeekingKuri paws: opacity 0.6)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.beginPath();
-      ctx.arc(-3.5, -2, 2.8, 0, Math.PI * 2);
+      ctx.ellipse(-0.8, -1.2, 3.8, 2, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
   } else {
-    // Left Hand (supports articulating over safe dial during Dial Buffing)
+    // Left Arm / Hand (supports articulating over safe dial during Dial Buffing)
+    ctx.save();
+    ctx.translate(leftHandX, 6 + leftHandY);
+    ctx.fillStyle = softLilac;
     ctx.beginPath();
-    ctx.arc(leftHandX, 6 + leftHandY, 6, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, 5.8, 6.2, 0, 0, Math.PI * 2);
     ctx.fill();
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = darkIndigo;
+    ctx.stroke();
+
+    // White blend highlight on left arm/paw (matching PeekingKuri.jsx lines 666-673: opacity 0.6)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.beginPath();
+    ctx.ellipse(-0.7, -1, 3.4, 1.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 
     // Right Hand & Arm (supports dynamic waving gesture in Row 4)
     if (rowIdx === 4) {
@@ -687,33 +847,64 @@ export function renderVaultyFrame(ctx, colIdx, rowIdx, targetX, targetY, options
       const shoulderY = 4;
 
       ctx.save();
-      // Arm limb connecting shoulder to hand
-      ctx.strokeStyle = softLilac;
-      ctx.lineWidth = 7;
+      // Arm limb outline (dark indigo #1d1f70)
+      ctx.strokeStyle = darkIndigo;
+      ctx.lineWidth = 7.5;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(shoulderX, shoulderY);
       ctx.lineTo(waveHandX, waveHandY);
       ctx.stroke();
 
-      // Waving mitten hand
+      // Arm limb core (soft lilac #bfdbfe)
+      ctx.strokeStyle = softLilac;
+      ctx.lineWidth = 5.2;
+      ctx.beginPath();
+      ctx.moveTo(shoulderX, shoulderY);
+      ctx.lineTo(waveHandX, waveHandY);
+      ctx.stroke();
+
+      // Subtle white blend highlight along the top edge of arm limb
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(shoulderX - 0.4, shoulderY - 0.7);
+      ctx.lineTo(waveHandX - 0.4, waveHandY - 0.7);
+      ctx.stroke();
+
+      // Waving hand (matching left arm/paw pill shape with dark indigo border and white blend)
       ctx.translate(waveHandX, waveHandY);
       ctx.rotate(waveAngle);
       ctx.fillStyle = softLilac;
       ctx.beginPath();
-      ctx.ellipse(0, 0, 7, 5.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 5.8, 6.2, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Cute thumb
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = darkIndigo;
+      ctx.stroke();
+
+      // White blend highlight on waving hand (matching PeekingKuri paws: opacity 0.6)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.beginPath();
-      ctx.arc(-3.5, 2, 2.5, 0, Math.PI * 2);
+      ctx.ellipse(-0.7, -1, 3.4, 1.8, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     } else {
       ctx.save();
       ctx.translate(bX + bW + 4, 6 + rightHandY);
       ctx.rotate(rightHandAngle);
+      ctx.fillStyle = softLilac;
       ctx.beginPath();
-      ctx.arc(0, 0, 6, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 5.8, 6.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = darkIndigo;
+      ctx.stroke();
+
+      // White blend highlight on right arm/paw (matching PeekingKuri.jsx lines 685-692: opacity 0.6)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.beginPath();
+      ctx.ellipse(-0.7, -1, 3.4, 1.8, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
